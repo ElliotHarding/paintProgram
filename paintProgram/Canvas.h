@@ -26,7 +26,7 @@ private:
     QPoint getLocationFromMouseEvent(QMouseEvent* event);
     bool m_bMouseDown = false;
 
-    void paintEvent(uint posX, uint posY);
+    void updatePixel(uint posX, uint posY);
 
     std::vector<std::vector<Pixel>> m_pixels;
     std::mutex m_pixelsMutex;
@@ -35,7 +35,6 @@ private:
     const float m_cZoomIncrement = 0.1;
 
     MainWindow* m_pParent;
-
 };
 
 #endif // CANVAS_H
