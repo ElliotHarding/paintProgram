@@ -8,8 +8,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    Canvas* c = new Canvas(this, 100, 100);
     ui->c_tabWidget->clear();
+
+    //Will move this code eventually..
+    Canvas* c = new Canvas(this, 100, 100);
     ui->c_tabWidget->addTab(c, "My first tab");
 
     m_colorPicker = new QColorDialog(this);
