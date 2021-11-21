@@ -3,11 +3,9 @@
 
 #include <QTabWidget>
 #include <mutex>
-
 #include <vector>
 
 #include "mainwindow.h"
-#include "Pixel.h"
 
 class Canvas: public QTabWidget
 {
