@@ -12,6 +12,7 @@
 class Canvas: public QTabWidget
 {
     Q_OBJECT
+
 public:
     Canvas(MainWindow* parent, uint width, uint height);
 
@@ -26,10 +27,10 @@ private:
     QPoint getLocationFromMouseEvent(QMouseEvent* event);
     bool m_bMouseDown = false;
 
+    //Drawing
     void updatePixel(uint posX, uint posY);
-
-    std::vector<std::vector<Pixel>> m_pixels;
-    std::mutex m_pixelsMutex;
+    QImage m_canvasImage;
+    std::mutex m_canvasMutex;
 
     float m_zoomFactor = 1;
     const float m_cZoomIncrement = 0.1;

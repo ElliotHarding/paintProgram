@@ -7,52 +7,21 @@ Canvas::Canvas(MainWindow* parent, uint width, uint height) :
     m_pParent(parent),
     QTabWidget()
 {
-    // Initalize memory for pixel data
-    for (uint x = 0; x < width; x++)
-    {
-        m_pixels.push_back(std::vector<Pixel>());
-        for(uint y = 0; y < height; y++)
-        {
-            m_pixels[x].push_back(Pixel{0,0,0}); // 0,0,0 is black,  255,255,255 is white
-        }
-    }
-
-    // Set half the canvas to the color red
-    for (uint x = 0; x < width; x++)
-    {
-        for (uint y = 0; y < height/2; y++)
-        {
-            m_pixels[x][y].red = 255;
-        }
-    }
+    m_canvasImage = QImage(QSize(width, height), QImage::Format_RGB32);
 
     setMouseTracking(true);
 }
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
-    std::lock_guard<std::mutex> lock(m_pixelsMutex);
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-
     painter.scale(m_zoomFactor, m_zoomFactor);
 
-    qDebug() << paintEvent->region().boundingRect().x();
-    qDebug() << paintEvent->region().boundingRect().y();
-    qDebug() << paintEvent->region().boundingRect().width();
-
-    for (size_t x = 0; x < m_pixels.size(); x++)
-    {
-        for(size_t y = 0; y < m_pixels[x].size(); y++)
-        {
-            QPen pen = QPen();
-            //todo
-
-            QRect rect = QRect(x, y, 1, 1);
-            painter.fillRect(rect, QColor(m_pixels[x][y].red,m_pixels[x][y].green,m_pixels[x][y].blue));
-        }
-    }
+    QRect rect = QRect(0, 0, m_canvasImage.width(), m_canvasImage.height());
+    painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)
@@ -100,22 +69,16 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 
 void Canvas::updatePixel(uint posX, uint posY)
 {
-    std::lock_guard<std::mutex> lock(m_pixelsMutex);
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
 
     //Check positions are in bounds of vector
-    if(posX <= m_pixels.size() && posY <= m_pixels[0].size())
+    if(posX <= m_canvasImage.width() && posY <= m_canvasImage.height())
     {
-        //Get color from color picker dialog in MainWindow
-        QColor col = m_pParent->getSelectedColor();
-
-        Pixel newPixel;
-        newPixel.blue = col.blue();
-        newPixel.red = col.red();
-        newPixel.green = col.green();
-
-        m_pixels[posX][posY] = newPixel;
+        QPainter painter(&m_canvasImage);
+        QRect rect = QRect(posX, posY, 1, 1);
+        painter.fillRect(rect, m_pParent->getSelectedColor());
 
         //Call to redraw
-        update(posX, posY, 1, 1);
+        update(/*posX, posY, 1, 1*/);
     }
 }
