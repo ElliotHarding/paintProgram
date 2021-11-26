@@ -17,6 +17,7 @@ public:
     ~Canvas();
 
     void setCurrentTool(Tool t);
+    void deleteKeyPressed();
 
 private:
     void paintEvent(QPaintEvent* paintEvent) override;

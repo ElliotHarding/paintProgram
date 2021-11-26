@@ -23,6 +23,20 @@ void Canvas::setCurrentTool(Tool t)
     m_tool = t;
 }
 
+void Canvas::deleteKeyPressed()
+{
+    if(m_selectionTool && m_tool == TOOL_SELECT)
+    {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+        QPainter painter(&m_canvasImage);
+        painter.fillRect(m_selectionTool->geometry(), QColor(0,0,0,255));
+
+        //Call to redraw
+        update(/*posX, posY, 1, 1*/);
+    }
+}
+
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
@@ -60,9 +74,7 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
-    m_bMouseDown = true;
-
-    //todo ~ check if we can take the mouseLocation init out of the two if statements
+     //todo ~ check if we can take the mouseLocation init out of the two if statements
 
     if(m_tool == TOOL_PAINT)
     {
@@ -75,17 +87,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         selectionClick(mouseLocation.x(), mouseLocation.y());
     }
 
+    m_bMouseDown = true;
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
     m_bMouseDown = false;
-
-    if(m_selectionTool != nullptr && m_tool == TOOL_SELECT)
-    {
-        delete m_selectionTool;
-        m_selectionTool = nullptr;
-    }
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
@@ -114,7 +121,7 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 void Canvas::selectionClick(int clickX, int clickY)
 {
     //If start of new selection
-    if(m_selectionTool == nullptr)
+    if(m_selectionTool == nullptr || !m_bMouseDown)
     {
         m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
         m_selectionToolOrigin = QPoint(clickX,clickY);

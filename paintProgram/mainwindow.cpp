@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include "Canvas.h"
 
+#include <QKeyEvent>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -31,6 +33,18 @@ MainWindow::~MainWindow()
 QColor MainWindow::getSelectedColor()
 {
     return m_colorPicker->currentColor();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete)
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->deleteKeyPressed();
+        }
+    }
 }
 
 void MainWindow::on_open_color_picker()
