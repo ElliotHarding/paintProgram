@@ -42,7 +42,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
-    if(m_pressedKeys.find((int)Qt::Key_C) != m_pressedKeys.end() && m_pressedKeys.find((int)Qt::Key_Control) != m_pressedKeys.end())
+    if(m_pressedKeys.find(Qt::Key_C) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
     {
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
