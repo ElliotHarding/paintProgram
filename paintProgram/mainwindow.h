@@ -11,7 +11,8 @@ QT_END_NAMESPACE
 enum Tool
 {
     TOOL_PAINT,
-    TOOL_SELECT
+    TOOL_SELECT,
+    TOOL_SPREAD_ON_SIMILAR
 };
 
 class MainWindow : public QMainWindow

@@ -4,8 +4,8 @@
 #include <QDebug>
 
 Canvas::Canvas(MainWindow* parent, uint width, uint height) :
-    m_pParent(parent),
-    QTabWidget()
+    QTabWidget(),
+    m_pParent(parent)
 {
     m_canvasImage = QImage(QSize(width, height), QImage::Format_RGB32);
 
@@ -33,7 +33,7 @@ void Canvas::deleteKeyPressed()
         painter.fillRect(m_selectionTool->geometry(), QColor(0,0,0,255));
 
         //Call to redraw
-        update(/*posX, posY, 1, 1*/);
+        update();
     }
 }
 
@@ -85,6 +85,10 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
         selectionClick(mouseLocation.x(), mouseLocation.y());
+    }
+    else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
+    {
+
     }
 
     m_bMouseDown = true;
