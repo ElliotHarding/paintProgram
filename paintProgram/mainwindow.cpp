@@ -37,7 +37,21 @@ QColor MainWindow::getSelectedColor()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Delete)
+    m_pressedKeys.insert(event->key());
+
+    /*if(event->key() == Qt::Key_Delete)
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->deleteKeyPressed();
+        }
+    }*/
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    if(m_pressedKeys.find((int)Qt::Key_C) != m_pressedKeys.end() && m_pressedKeys.find((int)Qt::Key_Control) != m_pressedKeys.end())
     {
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
@@ -45,13 +59,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             c->deleteKeyPressed();
         }
     }
+
+    m_pressedKeys.remove(event->key());
 }
 
 void MainWindow::on_open_color_picker()
 {
     m_colorPicker->show();
 }
-
 
 void MainWindow::on_btn_selectTool_clicked()
 {

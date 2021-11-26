@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QColorDialog>
+#include <QSet>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,6 +28,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
     void on_open_color_picker();
@@ -42,5 +44,7 @@ private:
 
     Tool m_currentTool = TOOL_PAINT;
     void setCurrentTool(Tool t);
+
+    QSet<int> m_pressedKeys;
 };
 #endif // MAINWINDOW_H
