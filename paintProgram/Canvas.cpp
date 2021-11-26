@@ -30,11 +30,17 @@ void Canvas::deleteKeyPressed()
         std::lock_guard<std::mutex> lock(m_canvasMutex);
 
         QPainter painter(&m_canvasImage);
-        painter.fillRect(m_selectionTool->geometry(), QColor(0,0,0,255));
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
+        painter.fillRect(m_selectionTool->geometry(), QColor(0,0,0,0));
 
         //Call to redraw
         update();
     }
+}
+
+void Canvas::copyKeysPressed()
+{
+
 }
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)

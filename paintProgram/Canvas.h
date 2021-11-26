@@ -18,6 +18,7 @@ public:
 
     void setCurrentTool(Tool t);
     void deleteKeyPressed();
+    void copyKeysPressed();
 
 private:
     void paintEvent(QPaintEvent* paintEvent) override;
