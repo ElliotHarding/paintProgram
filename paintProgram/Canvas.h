@@ -32,11 +32,8 @@ private:
     void selectionClick(int clickX, int clickY);
     bool m_bMouseDown = false;
 
-    void spreadSelectArea(int x, int y);
-    QList<QPoint> m_spreadSelectedPixels;
-
     //Drawing
-    void updatePixel(uint posX, uint posY);
+    void paintPixel(uint posX, uint posY);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;
 
@@ -45,10 +42,12 @@ private:
     const float m_cZoomIncrement = 0.1;
 
     //Selecting
+    void spreadSelectArea(int x, int y);
+    QList<QPoint> m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
-    QPoint m_selectionToolOrigin;
-    QColor m_c_selectionBorderColor = Qt::blue; //todo ~ not const because future cahnges planned (if highlight color and background color are the same)
-    QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
+    QPoint m_selectionToolOrigin = QPoint(0,0);
+    const QColor m_c_selectionBorderColor = Qt::blue; //todo ~ not const because future cahnges planned (if highlight color and background color are the same)
+    const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
     Tool m_tool = TOOL_PAINT;
 

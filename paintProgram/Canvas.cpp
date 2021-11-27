@@ -11,6 +11,7 @@ Canvas::Canvas(MainWindow* parent, uint width, uint height) :
     m_canvasImage = QImage(QSize(width, height), QImage::Format_RGB32);
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
+    m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
     setMouseTracking(true);
 }
@@ -24,6 +25,16 @@ Canvas::~Canvas()
 void Canvas::setCurrentTool(Tool t)
 {
     m_tool = t;
+
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    m_selectedPixels.clear();
+
+    if(m_tool != TOOL_SELECT)
+    {
+        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
+    }
+
+    update();
 }
 
 void Canvas::deleteKeyPressed()
@@ -57,20 +68,17 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     QRect rect = QRect(0, 0, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
+    for(QPoint p : m_selectedPixels)
+    {
+        //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
+        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
+    }
+
     if(m_tool == TOOL_SELECT)
     {
         //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
         painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
         painter.drawRect(m_selectionTool->geometry());
-        painter.fillRect(m_selectionTool->geometry(), m_c_selectionAreaColor);
-    }
-    else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
-    {
-        for(QPoint p : m_spreadSelectedPixels)
-        {
-            //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-            painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
-        }
     }
 }
 
@@ -91,30 +99,52 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
-     //todo ~ check if we can take the mouseLocation init out of the two if statements
+    m_bMouseDown = true;
+
+    //todo ~ check if we can take the mouseLocation init out of the two if statements
 
     if(m_tool == TOOL_PAINT)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-        updatePixel(mouseLocation.x(), mouseLocation.y());
+        paintPixel(mouseLocation.x(), mouseLocation.y());
     }
     else if(m_tool == TOOL_SELECT)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-        selectionClick(mouseLocation.x(), mouseLocation.y());
+
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        m_selectionToolOrigin = QPoint(mouseLocation.x(), mouseLocation.y());
+        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
         spreadSelectArea(mouseLocation.x(), mouseLocation.y());
     }
-
-    m_bMouseDown = true;
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
     m_bMouseDown = false;
+
+    if(m_tool == TOOL_SELECT)
+    {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+        const QRect geometry = m_selectionTool->geometry();
+        for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+        {
+            for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+            {
+                if(m_selectedPixels.indexOf(QPoint(x,y)) == -1)
+                {
+                    m_selectedPixels.push_back(QPoint(x,y));
+                }
+            }
+        }
+
+        update();
+    }
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
@@ -124,11 +154,15 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         QPoint mouseLocation = getLocationFromMouseEvent(event);
         if(m_tool == TOOL_PAINT)
         {
-            updatePixel(mouseLocation.x(), mouseLocation.y());
+            paintPixel(mouseLocation.x(), mouseLocation.y());
         }
         else if(m_tool == TOOL_SELECT)
         {
-            selectionClick(mouseLocation.x(), mouseLocation.y());
+            std::lock_guard<std::mutex> lock(m_canvasMutex);
+            m_selectionTool->setGeometry(
+                        QRect(m_selectionToolOrigin, QPoint(mouseLocation.x(), mouseLocation.y())).normalized()
+                        );
+            update();
         }
     }
 }
@@ -142,21 +176,6 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 
 void Canvas::selectionClick(int clickX, int clickY)
 {
-    //If start of new selection
-    if(!m_bMouseDown)
-    {
-        m_selectionToolOrigin = QPoint(clickX,clickY);
-        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
-    }
-
-    else
-    {
-        m_selectionTool->setGeometry(
-                    QRect(m_selectionToolOrigin, QPoint(clickX,clickY)).normalized()
-                    );
-    }
-
-    update();
 
 }
 
@@ -182,19 +201,19 @@ void Canvas::spreadSelectArea(int x, int y)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
-    m_spreadSelectedPixels.clear();
+    m_selectedPixels.clear();
 
     if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
     {
         QColor initalPixel = m_canvasImage.pixel(x,y);
-        spreadSelectRecursive(m_canvasImage, m_spreadSelectedPixels, initalPixel, x, y);
+        spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, x, y);
 
         //Call to redraw
         update();
     }
 }
 
-void Canvas::updatePixel(uint posX, uint posY)
+void Canvas::paintPixel(uint posX, uint posY)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
