@@ -174,14 +174,9 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
     return transform.inverted().map(QPoint(event->x(), event->y()));
 }
 
-void Canvas::selectionClick(int clickX, int clickY)
-{
-
-}
-
 void spreadSelectRecursive(QImage image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int x, int y)
 {
-    if(x <= image.width() && x > -1 && y <= image.height() && y > -1)
+    if(x < image.width() && x > -1 && y < image.height() && y > -1)
     {
         if(QColor(image.pixel(x,y)) == colorToSpreadOver)
         {

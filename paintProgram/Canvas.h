@@ -29,7 +29,6 @@ private:
     void mouseReleaseEvent(QMouseEvent *releaseEvent) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     QPoint getLocationFromMouseEvent(QMouseEvent* event);
-    void selectionClick(int clickX, int clickY);
     bool m_bMouseDown = false;
 
     //Drawing
