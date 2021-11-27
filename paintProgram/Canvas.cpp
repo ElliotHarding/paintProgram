@@ -64,6 +64,14 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
         painter.drawRect(m_selectionTool->geometry());
         painter.fillRect(m_selectionTool->geometry(), m_c_selectionAreaColor);
     }
+    else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
+    {
+        for(QPoint p : m_spreadSelectedPixels)
+        {
+            //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
+            painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
+        }
+    }
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)
@@ -180,9 +188,10 @@ void Canvas::spreadSelectArea(int x, int y)
     {
         QColor initalPixel = m_canvasImage.pixel(x,y);
         spreadSelectRecursive(m_canvasImage, m_spreadSelectedPixels, initalPixel, x, y);
-    }
 
-    qDebug() << m_spreadSelectedPixels;
+        //Call to redraw
+        update();
+    }
 }
 
 void Canvas::updatePixel(uint posX, uint posY)
@@ -197,6 +206,6 @@ void Canvas::updatePixel(uint posX, uint posY)
         painter.fillRect(rect, m_pParent->getSelectedColor());
 
         //Call to redraw
-        update(/*posX, posY, 1, 1*/);
+        update();
     }
 }
