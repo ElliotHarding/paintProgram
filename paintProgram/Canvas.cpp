@@ -9,6 +9,8 @@ Canvas::Canvas(MainWindow* parent, uint width, uint height) :
 {
     m_canvasImage = QImage(QSize(width, height), QImage::Format_RGB32);
 
+    m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
+
     setMouseTracking(true);
 }
 
@@ -25,7 +27,7 @@ void Canvas::setCurrentTool(Tool t)
 
 void Canvas::deleteKeyPressed()
 {
-    if(m_selectionTool && m_tool == TOOL_SELECT)
+    if(m_tool == TOOL_SELECT)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
 
@@ -54,7 +56,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     QRect rect = QRect(0, 0, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
-    if(m_tool == TOOL_SELECT && m_selectionTool)
+    if(m_tool == TOOL_SELECT)
     {
         //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
         painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
@@ -131,9 +133,8 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 void Canvas::selectionClick(int clickX, int clickY)
 {
     //If start of new selection
-    if(m_selectionTool == nullptr || !m_bMouseDown)
+    if(!m_bMouseDown)
     {
-        m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
         m_selectionToolOrigin = QPoint(clickX,clickY);
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
     }
