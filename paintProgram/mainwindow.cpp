@@ -35,6 +35,11 @@ QColor MainWindow::getSelectedColor()
     return m_colorPicker->currentColor();
 }
 
+int MainWindow::getBrushSize()
+{
+    return ui->spin_brushSize->value();
+}
+
 bool MainWindow::isCtrlPressed()
 {
     return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();

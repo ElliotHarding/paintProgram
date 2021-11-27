@@ -25,6 +25,7 @@ public:
     ~MainWindow();
 
     QColor getSelectedColor();
+    int getBrushSize();
 
     bool isCtrlPressed();
 

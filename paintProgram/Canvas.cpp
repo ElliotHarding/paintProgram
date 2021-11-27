@@ -228,7 +228,7 @@ void Canvas::paintPixel(uint posX, uint posY)
     if(posX <= m_canvasImage.width() && posY <= m_canvasImage.height())
     {
         QPainter painter(&m_canvasImage);
-        QRect rect = QRect(posX, posY, 1, 1);
+        QRect rect = QRect(posX - m_pParent->getBrushSize()/2, posY - m_pParent->getBrushSize()/2, m_pParent->getBrushSize(), m_pParent->getBrushSize());
         painter.fillRect(rect, m_pParent->getSelectedColor());
 
         //Call to redraw
