@@ -26,12 +26,15 @@ void Canvas::setCurrentTool(Tool t)
 {
     m_tool = t;
 
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
-    m_selectedPixels.clear();
-
     if(m_tool != TOOL_SELECT)
     {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
+
+        if(m_tool != TOOL_SPREAD_ON_SIMILAR)
+        {
+            m_selectedPixels.clear();
+        }
     }
 
     update();
@@ -202,7 +205,10 @@ void Canvas::spreadSelectArea(int x, int y)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
-    m_selectedPixels.clear();
+    if(!m_pParent->isCtrlPressed())
+    {
+        m_selectedPixels.clear();
+    }
 
     if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
     {
