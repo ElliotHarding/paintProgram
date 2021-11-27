@@ -37,6 +37,8 @@ private slots:
     void on_btn_addTab_clicked();
     void on_btn_removeTab_clicked();
 
+    void on_btn_selectSpreadTool_clicked();
+
 private:
     Ui::MainWindow *ui;
 

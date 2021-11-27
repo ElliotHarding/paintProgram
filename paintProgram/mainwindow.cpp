@@ -101,3 +101,8 @@ void MainWindow::on_btn_removeTab_clicked()
 {
     ui->c_tabWidget->removeTab(ui->c_tabWidget->currentIndex());
 }
+
+void MainWindow::on_btn_selectSpreadTool_clicked()
+{
+    setCurrentTool(TOOL_SPREAD_ON_SIMILAR);
+}
