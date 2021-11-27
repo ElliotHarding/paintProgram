@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QWheelEvent>
 #include <QDebug>
+#include <QSet>
 
 Canvas::Canvas(MainWindow* parent, uint width, uint height) :
     QTabWidget(),
@@ -96,7 +97,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
-
+        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+        spreadSelectArea(mouseLocation.x(), mouseLocation.y());
     }
 
     m_bMouseDown = true;
@@ -148,6 +150,39 @@ void Canvas::selectionClick(int clickX, int clickY)
 
     update();
 
+}
+
+void spreadSelectRecursive(QImage image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int x, int y)
+{
+    if(x <= image.width() && x > -1 && y <= image.height() && y > -1)
+    {
+        if(QColor(image.pixel(x,y)) == colorToSpreadOver)
+        {
+            if(selectedPixels.indexOf(QPoint(x,y)) == -1)
+            {
+                selectedPixels.push_back(QPoint(x,y));
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x + 1, y);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x - 1, y);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x, y + 1);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x, y - 1);
+            }
+        }
+    }
+}
+
+void Canvas::spreadSelectArea(int x, int y)
+{
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+    m_spreadSelectedPixels.clear();
+
+    if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
+    {
+        QColor initalPixel = m_canvasImage.pixel(x,y);
+        spreadSelectRecursive(m_canvasImage, m_spreadSelectedPixels, initalPixel, x, y);
+    }
+
+    qDebug() << m_spreadSelectedPixels;
 }
 
 void Canvas::updatePixel(uint posX, uint posY)

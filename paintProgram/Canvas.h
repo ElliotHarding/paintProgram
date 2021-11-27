@@ -32,6 +32,9 @@ private:
     void selectionClick(int clickX, int clickY);
     bool m_bMouseDown = false;
 
+    void spreadSelectArea(int x, int y);
+    QList<QPoint> m_spreadSelectedPixels;
+
     //Drawing
     void updatePixel(uint posX, uint posY);
     QImage m_canvasImage;
