@@ -110,9 +110,15 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SELECT)
     {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
 
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        if(!m_pParent->isCtrlPressed())
+        {
+            m_selectedPixels.clear();
+        }
+
         m_selectionToolOrigin = QPoint(mouseLocation.x(), mouseLocation.y());
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
     }

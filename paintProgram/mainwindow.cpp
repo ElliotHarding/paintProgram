@@ -35,6 +35,11 @@ QColor MainWindow::getSelectedColor()
     return m_colorPicker->currentColor();
 }
 
+bool MainWindow::isCtrlPressed()
+{
+    return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());
