@@ -74,7 +74,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     {
         for(int y = 0; y < m_canvasImage.height(); y++)
         {
-            if(m_canvasImage.pixelColor(x,y).red() == 0 && m_canvasImage.pixelColor(x,y).green() == 0 && m_canvasImage.pixelColor(x,y).blue() == 0 && m_canvasImage.pixelColor(x,y).alpha() <= 1)
+            if(m_canvasImage.pixelColor(x,y) == Qt::transparent)
             {
                 QColor col;
 
