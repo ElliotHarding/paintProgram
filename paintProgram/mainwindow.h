@@ -13,7 +13,8 @@ enum Tool
 {
     TOOL_PAINT,
     TOOL_SELECT,
-    TOOL_SPREAD_ON_SIMILAR
+    TOOL_SPREAD_ON_SIMILAR,
+    TOOL_ERASER
 };
 
 class MainWindow : public QMainWindow
@@ -41,6 +42,8 @@ private slots:
     void on_btn_removeTab_clicked();
 
     void on_btn_selectSpreadTool_clicked();
+
+    void on_btn_eraserTool_clicked();
 
 private:
     Ui::MainWindow *ui;

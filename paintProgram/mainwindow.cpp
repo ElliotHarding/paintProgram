@@ -116,3 +116,8 @@ void MainWindow::on_btn_selectSpreadTool_clicked()
 {
     setCurrentTool(TOOL_SPREAD_ON_SIMILAR);
 }
+
+void MainWindow::on_btn_eraserTool_clicked()
+{
+    setCurrentTool(TOOL_ERASER);
+}

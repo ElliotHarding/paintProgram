@@ -5,6 +5,7 @@
 #include <QRubberBand>
 #include <mutex>
 #include <vector>
+#include <QPainter>
 
 #include "mainwindow.h"
 
@@ -32,7 +33,7 @@ private:
     bool m_bMouseDown = false;
 
     //Drawing
-    void paintPixel(uint posX, uint posY);
+    void paintPixel(uint posX, uint posY, QColor col);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;
 

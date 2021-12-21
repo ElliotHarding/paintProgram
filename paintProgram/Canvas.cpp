@@ -1,5 +1,4 @@
 #include "canvas.h"
-#include <QPainter>
 #include <QWheelEvent>
 #include <QDebug>
 #include <QSet>
@@ -8,7 +7,7 @@ Canvas::Canvas(MainWindow* parent, uint width, uint height) :
     QTabWidget(),
     m_pParent(parent)
 {
-    m_canvasImage = QImage(QSize(width, height), QImage::Format_RGB32);
+    m_canvasImage = QImage(QSize(width, height), QImage::Format_ARGB32);
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
@@ -47,8 +46,8 @@ void Canvas::deleteKeyPressed()
         std::lock_guard<std::mutex> lock(m_canvasMutex);
 
         QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_Source);
-        painter.fillRect(m_selectionTool->geometry(), QColor(0,0,0,0));
+        painter.setCompositionMode (QPainter::CompositionMode_Clear);
+        painter.fillRect(m_selectionTool->geometry(), Qt::transparent);
 
         //Call to redraw
         update();
@@ -70,6 +69,42 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 
     QRect rect = QRect(0, 0, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
+
+    for(int x = 0; x < m_canvasImage.width(); x++)
+    {
+        for(int y = 0; y < m_canvasImage.height(); y++)
+        {
+            if(m_canvasImage.pixelColor(x,y).red() == 0 && m_canvasImage.pixelColor(x,y).green() == 0 && m_canvasImage.pixelColor(x,y).blue() == 0 && m_canvasImage.pixelColor(x,y).alpha() <= 1)
+            {
+                QColor col;
+
+                if(x % 2 == 0)
+                {
+                    if(y % 2 == 0)
+                    {
+                        col = QColor(255,255,255,255);
+                    }
+                    else
+                    {
+                        col = QColor(190,190,190,255);
+                    }
+                }
+                else
+                {
+                    if(y % 2 == 0)
+                    {
+                        col = QColor(190,190,190,255);
+                    }
+                    else
+                    {
+                        col = QColor(255,255,255,255);
+                    }
+                }
+
+                painter.fillRect(QRect(x,y,1,1), col);
+            }
+        }
+    }
 
     for(QPoint p : m_selectedPixels)
     {
@@ -109,7 +144,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     if(m_tool == TOOL_PAINT)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-        paintPixel(mouseLocation.x(), mouseLocation.y());
+        paintPixel(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
+    }
+    else if(m_tool == TOOL_ERASER)
+    {
+        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+        paintPixel(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
     }
     else if(m_tool == TOOL_SELECT)
     {
@@ -163,7 +203,11 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         QPoint mouseLocation = getLocationFromMouseEvent(event);
         if(m_tool == TOOL_PAINT)
         {
-            paintPixel(mouseLocation.x(), mouseLocation.y());
+            paintPixel(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
+        }
+        else if(m_tool == TOOL_ERASER)
+        {
+            paintPixel(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
         }
         else if(m_tool == TOOL_SELECT)
         {
@@ -220,7 +264,7 @@ void Canvas::spreadSelectArea(int x, int y)
     }
 }
 
-void Canvas::paintPixel(uint posX, uint posY)
+void Canvas::paintPixel(uint posX, uint posY, QColor col)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
@@ -228,8 +272,9 @@ void Canvas::paintPixel(uint posX, uint posY)
     if(posX <= m_canvasImage.width() && posY <= m_canvasImage.height())
     {
         QPainter painter(&m_canvasImage);
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
         QRect rect = QRect(posX - m_pParent->getBrushSize()/2, posY - m_pParent->getBrushSize()/2, m_pParent->getBrushSize(), m_pParent->getBrushSize());
-        painter.fillRect(rect, m_pParent->getSelectedColor());
+        painter.fillRect(rect, col);
 
         //Call to redraw
         update();
