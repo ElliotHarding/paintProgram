@@ -63,13 +63,38 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
+    //Setup painter
     QPainter painter(this);
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+
+    //Zoom painter
     painter.scale(m_zoomFactor, m_zoomFactor);
 
+    //Draw current image
     QRect rect = QRect(0, 0, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
+    //Switch out transparent pixels for grey-white pattern
+    drawTransparentPixels(painter);
+
+    //Draw highlighed pixels
+    for(QPoint p : m_selectedPixels)
+    {
+        //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
+        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
+    }
+
+    //Draw selection tool
+    if(m_tool == TOOL_SELECT)
+    {
+        //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
+        painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
+        painter.drawRect(m_selectionTool->geometry());
+    }
+}
+
+void Canvas::drawTransparentPixels(QPainter& painter)
+{
     for(int x = 0; x < m_canvasImage.width(); x++)
     {
         for(int y = 0; y < m_canvasImage.height(); y++)
@@ -104,19 +129,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
                 painter.fillRect(QRect(x,y,1,1), col);
             }
         }
-    }
-
-    for(QPoint p : m_selectedPixels)
-    {
-        //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
-    }
-
-    if(m_tool == TOOL_SELECT)
-    {
-        //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-        painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
-        painter.drawRect(m_selectionTool->geometry());
     }
 }
 

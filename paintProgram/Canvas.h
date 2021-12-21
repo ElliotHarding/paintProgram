@@ -34,6 +34,7 @@ private:
 
     //Drawing
     void paintPixel(uint posX, uint posY, QColor col);
+    void drawTransparentPixels(QPainter& painter);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;
 
