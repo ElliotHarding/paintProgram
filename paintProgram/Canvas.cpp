@@ -2,6 +2,7 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <QSet>
+#include <stack>
 
 Canvas::Canvas(MainWindow* parent, uint width, uint height) :
     QTabWidget(),
@@ -371,78 +372,6 @@ void spreadSelectRecursive(QImage& image, QList<QPoint>& selectedPixels, QColor 
     }
 }
 
-#include <queue>
-void spreadSelectAlgorithm(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int x, int y)
-{
-    std::queue<QPoint> analyze_queue;
-    analyze_queue.push(QPoint(x,y));
-
-    while (!analyze_queue.empty())
-    {
-        if (QColor(image.pixel(analyze_queue.front().x(), analyze_queue.front().y()))  != colorToSpreadOver)
-        {
-            analyze_queue.pop();
-            continue;
-        }
-
-        QPoint leftmost_pt = analyze_queue.front();
-        leftmost_pt = QPoint(leftmost_pt.x() -1, leftmost_pt.y());
-        analyze_queue.pop();
-        QPoint rightmost_pt = leftmost_pt;
-        rightmost_pt = QPoint(rightmost_pt.x() + 2, rightmost_pt.y());
-
-        while (QColor(image.pixel(leftmost_pt.x(), leftmost_pt.y())) == colorToSpreadOver)
-            leftmost_pt = QPoint(leftmost_pt.x() - 1, leftmost_pt.y());
-
-        while (QColor(image.pixel(rightmost_pt.x(), rightmost_pt.y())) == colorToSpreadOver)
-            rightmost_pt = QPoint(rightmost_pt.x() + 1, rightmost_pt.y());
-
-        bool check_above = true;
-        bool check_below = true;
-
-        QPoint pt = leftmost_pt;
-        pt = QPoint(pt.x() + 1, pt.y());
-
-        for (; pt.x() < rightmost_pt.x(); pt = QPoint(pt.x() + 1, pt.y()))
-        {
-            selectedPixels.push_back(pt);
-
-            QPoint pt_above = pt;
-            pt_above = QPoint(pt_above.x(), pt_above.y() - 1);
-
-            if (check_above)
-            {
-                if (QColor(image.pixel(pt_above.x(), pt_above.y())) == colorToSpreadOver)
-                {
-                    analyze_queue.push(pt_above);
-                    check_above = false;
-                }
-            }
-            else // !check_above
-            {
-                check_above = QColor(image.pixel(pt_above.x(), pt_above.y())) != colorToSpreadOver;
-            }
-
-            QPoint pt_below = pt;
-            pt_below = QPoint(pt_below.x(), pt_below.y() + 1);
-
-            if (check_below)
-            {
-                if (QColor(image.pixel(pt_below.x(), pt_below.y())) == colorToSpreadOver)
-                {
-                    analyze_queue.push(pt_below);
-                    check_below = false;
-                }
-            }
-            else // !check_below
-            {
-                check_below = QColor(image.pixel(pt_below.x(), pt_below.y())) != colorToSpreadOver;
-            }
-        } // for
-    } // while queue not empty
-}
-
-#include <stack>
 void spreadSelectFunction(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int startX, int startY)
 {
     if(startX < image.width() && startX > -1 && startY < image.height() && startY > -1)
@@ -459,7 +388,11 @@ void spreadSelectFunction(QImage& image, QList<QPoint>& selectedPixels, QColor c
             if (y < 0 || y > image.height() || x < 0 || x > image.width())
                 continue;
 
-            if (QColor(image.pixel(x, y)) == colorToSpreadOver && selectedPixels.indexOf(QPoint(x,y)) == -1)
+            const QColor pixelColor = QColor(image.pixel(x,y));
+            if (pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
+                pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
+                pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty &&
+                selectedPixels.indexOf(QPoint(x,y)) == -1)
             {
                 selectedPixels.push_back(QPoint(x,y));
                 stack.push(QPoint(x + 1, y));
