@@ -20,6 +20,7 @@ public:
     void setCurrentTool(Tool t);
     void deleteKeyPressed();
     void copyKeysPressed();
+    void pasteKeysPressed();
     void undoPressed();
     void redoPressed();
 
@@ -65,6 +66,10 @@ private:
     QPoint m_selectionToolOrigin = QPoint(0,0);
     const QColor m_c_selectionBorderColor = Qt::blue; //todo ~ not const because future cahnges planned (if highlight color and background color are the same)
     const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
+
+    //Copy/paste
+    struct CopyPixel{QPoint position; QColor color;};
+    QList<CopyPixel> m_copyBuffer;
 
     Tool m_tool = TOOL_PAINT;
 

@@ -69,7 +69,34 @@ void Canvas::deleteKeyPressed()
 
 void Canvas::copyKeysPressed()
 {
+    if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
+    {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
 
+        m_copyBuffer.clear();
+
+        for(QPoint p : m_selectedPixels)
+        {
+            m_copyBuffer.push_back({p, m_canvasImage.pixelColor(p.x(), p.y())});
+        }
+
+        update();
+    }
+}
+
+void Canvas::pasteKeysPressed()
+{
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+    QPainter painter(&m_canvasImage);
+    painter.setCompositionMode (QPainter::CompositionMode_Source);
+
+    for(CopyPixel pixel : m_copyBuffer)
+    {
+        painter.fillRect(QRect(pixel.position.x(), pixel.position.y(), 1, 1), pixel.color);
+    }
+
+    update();
 }
 
 void Canvas::undoPressed()

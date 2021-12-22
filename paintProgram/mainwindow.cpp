@@ -70,6 +70,15 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         }
     }
 
+    if(m_pressedKeys.find(Qt::Key_V) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->pasteKeysPressed();
+        }
+    }
+
     m_pressedKeys.remove(event->key());
 }
 
