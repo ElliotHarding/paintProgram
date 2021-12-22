@@ -21,6 +21,7 @@ public:
     void deleteKeyPressed();
     void copyKeysPressed();
     void undoPressed();
+    void redoPressed();
 
 private:
     void paintEvent(QPaintEvent* paintEvent) override;

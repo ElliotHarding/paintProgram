@@ -135,3 +135,12 @@ void MainWindow::on_btn_undo_clicked()
         c->undoPressed();
     }
 }
+
+void MainWindow::on_btn_redo_clicked()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->redoPressed();
+    }
+}

@@ -9,6 +9,8 @@ Canvas::Canvas(MainWindow* parent, uint width, uint height) :
 {
     m_canvasImage = QImage(QSize(width, height), QImage::Format_ARGB32);
 
+    recordImageHistory();
+
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
@@ -46,14 +48,14 @@ void Canvas::deleteKeyPressed()
         std::lock_guard<std::mutex> lock(m_canvasMutex);
         std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
 
-        recordImageHistory();
-
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
         QRect rect = m_selectionTool->geometry();
         rect.setX(rect.x() + m_panOffsetX);
         rect.setY(rect.y() + m_panOffsetY);
         painter.fillRect(rect, Qt::transparent);
+
+        recordImageHistory();
 
         //Call to redraw
         update();
@@ -67,14 +69,39 @@ void Canvas::copyKeysPressed()
 
 void Canvas::undoPressed()
 {
-    if(m_imageHistoryIndex > -1)
+    if(m_imageHistoryIndex > 0)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
 
-        m_canvasImage = m_imageHistory[size_t(m_imageHistoryIndex--)];
+        m_canvasImage = m_imageHistory[size_t(--m_imageHistoryIndex)];
 
         update();
     }
+}
+
+void Canvas::redoPressed()
+{
+    if(m_imageHistoryIndex < int(m_imageHistory.size() - 1))
+    {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+        m_canvasImage = m_imageHistory[size_t(++m_imageHistoryIndex)];
+
+        update();
+    }
+}
+
+//Function called when m_canvasMutex is locked
+void Canvas::recordImageHistory()
+{
+    m_imageHistory.push_back(m_canvasImage);
+
+    if(m_c_maxHistory < m_imageHistory.size())
+    {
+        m_imageHistory.erase(m_imageHistory.begin());
+    }
+
+    m_imageHistoryIndex = m_imageHistory.size() - 1;
 }
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
@@ -149,19 +176,6 @@ void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offse
             }
         }
     }
-}
-
-//Function called when m_canvasMutex is locked
-void Canvas::recordImageHistory()
-{
-    m_imageHistory.push_back(m_canvasImage);
-
-    if(m_c_maxHistory < m_imageHistory.size())
-    {
-        m_imageHistory.erase(m_imageHistory.begin());
-    }
-
-    m_imageHistoryIndex = m_imageHistory.size() - 1;
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)
@@ -336,12 +350,12 @@ void Canvas::paintPixel(uint posX, uint posY, QColor col)
     //Check positions are in bounds of vector
     if(posX <= m_canvasImage.width() && posY <= m_canvasImage.height())
     {
-        recordImageHistory();
-
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Source);
         QRect rect = QRect(posX - m_pParent->getBrushSize()/2, posY - m_pParent->getBrushSize()/2, m_pParent->getBrushSize(), m_pParent->getBrushSize());
         painter.fillRect(rect, col);
+
+        recordImageHistory();
 
         //Call to redraw
         update();
