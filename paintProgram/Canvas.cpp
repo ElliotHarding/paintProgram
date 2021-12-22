@@ -349,6 +349,7 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
     return transform.inverted().map(QPoint(event->x(), event->y()));
 }
 
+/*
 void spreadSelectRecursive(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int x, int y)
 {
     if(x < image.width() && x > -1 && y < image.height() && y > -1)
@@ -370,7 +371,7 @@ void spreadSelectRecursive(QImage& image, QList<QPoint>& selectedPixels, QColor 
             }
         }
     }
-}
+}*/
 
 void spreadSelectFunction(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int startX, int startY)
 {
