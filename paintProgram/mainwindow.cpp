@@ -121,3 +121,8 @@ void MainWindow::on_btn_eraserTool_clicked()
 {
     setCurrentTool(TOOL_ERASER);
 }
+
+void MainWindow::on_btn_panTool_clicked()
+{
+    setCurrentTool(TOOL_PAN);
+}

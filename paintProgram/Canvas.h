@@ -34,13 +34,21 @@ private:
 
     //Drawing
     void paintPixel(uint posX, uint posY, QColor col);
-    void drawTransparentPixels(QPainter& painter);
+    void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;
 
     //Zooming
     float m_zoomFactor = 1;
     const float m_cZoomIncrement = 0.1;
+
+    //Panning
+    const QPoint m_c_nullPanPos = QPoint(-1,-1);
+    QPoint m_previousPanPos = m_c_nullPanPos;
+    const float m_c_panSpeed = 2;
+    float m_panOffsetX = 0;
+    float m_panOffsetY = 0;
+    std::mutex m_panOffsetMutex;
 
     //Selecting
     void spreadSelectArea(int x, int y);

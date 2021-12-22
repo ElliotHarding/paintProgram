@@ -44,10 +44,14 @@ void Canvas::deleteKeyPressed()
     if(m_tool == TOOL_SELECT)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
+        std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
 
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
-        painter.fillRect(m_selectionTool->geometry(), Qt::transparent);
+        QRect rect = m_selectionTool->geometry();
+        rect.setX(rect.x() + m_panOffsetX);
+        rect.setY(rect.y() + m_panOffsetY);
+        painter.fillRect(rect, Qt::transparent);
 
         //Call to redraw
         update();
@@ -62,6 +66,7 @@ void Canvas::copyKeysPressed()
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
+    std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
 
     //Setup painter
     QPainter painter(this);
@@ -71,11 +76,11 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.scale(m_zoomFactor, m_zoomFactor);
 
     //Draw current image
-    QRect rect = QRect(0, 0, m_canvasImage.width(), m_canvasImage.height());
+    QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
     //Switch out transparent pixels for grey-white pattern
-    drawTransparentPixels(painter);
+    drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
 
     //Draw highlighed pixels
     for(QPoint p : m_selectedPixels)
@@ -93,7 +98,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     }
 }
 
-void Canvas::drawTransparentPixels(QPainter& painter)
+void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offsetY)
 {
     for(int x = 0; x < m_canvasImage.width(); x++)
     {
@@ -126,7 +131,7 @@ void Canvas::drawTransparentPixels(QPainter& painter)
                     }
                 }
 
-                painter.fillRect(QRect(x,y,1,1), col);
+                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
             }
         }
     }
@@ -206,6 +211,10 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
         update();
     }
+    if(m_tool == TOOL_PAN)
+    {
+        m_previousPanPos = m_c_nullPanPos;
+    }
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
@@ -228,6 +237,23 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         QRect(m_selectionToolOrigin, QPoint(mouseLocation.x(), mouseLocation.y())).normalized()
                         );
             update();
+        }
+        else if(m_tool == TOOL_PAN)
+        {
+            if(m_previousPanPos == m_c_nullPanPos)
+            {
+                m_previousPanPos = mouseLocation;
+            }
+            else
+            {
+                std::lock_guard<std::mutex> lock(m_panOffsetMutex);
+                m_panOffsetX += m_c_panSpeed * (mouseLocation.x() - m_previousPanPos.x());
+                m_panOffsetY += m_c_panSpeed * (mouseLocation.y() - m_previousPanPos.y());
+
+                update();
+
+                m_previousPanPos = mouseLocation;
+            }
         }
     }
 }
