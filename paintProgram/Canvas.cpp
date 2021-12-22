@@ -440,7 +440,35 @@ void spreadSelectAlgorithm(QImage& image, QList<QPoint>& selectedPixels, QColor 
             }
         } // for
     } // while queue not empty
+}
 
+#include <stack>
+void spreadSelectFunction(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int startX, int startY)
+{
+    if(startX < image.width() && startX > -1 && startY < image.height() && startY > -1)
+    {
+        std::stack<QPoint> stack;
+        stack.push(QPoint(startX,startY));
+
+        while (stack.size() > 0)
+        {
+            QPoint p = stack.top();
+            stack.pop();
+            const int x = p.x();
+            const int y = p.y();
+            if (y < 0 || y > image.height() || x < 0 || x > image.width())
+                continue;
+
+            if (QColor(image.pixel(x, y)) == colorToSpreadOver && selectedPixels.indexOf(QPoint(x,y)) == -1)
+            {
+                selectedPixels.push_back(QPoint(x,y));
+                stack.push(QPoint(x + 1, y));
+                stack.push(QPoint(x - 1, y));
+                stack.push(QPoint(x, y + 1));
+                stack.push(QPoint(x, y - 1));
+            }
+        }
+    }
 }
 
 void Canvas::spreadSelectArea(int x, int y)
@@ -457,7 +485,8 @@ void Canvas::spreadSelectArea(int x, int y)
         QColor initalPixel = m_canvasImage.pixel(x,y);
         //m_selectedPixels.reserve(40000);
         //spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
-        spreadSelectAlgorithm(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
+        //spreadSelectAlgorithm(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
+        spreadSelectFunction(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
 
         //Call to redraw
         update();
