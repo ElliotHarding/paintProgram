@@ -47,21 +47,22 @@ void Canvas::setCurrentTool(Tool t)
 
 void Canvas::deleteKeyPressed()
 {
-    if(m_tool == TOOL_SELECT)
+    if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
-        std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
 
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
-        QRect rect = m_selectionTool->geometry();
-        rect.setX(rect.x() + m_panOffsetX);
-        rect.setY(rect.y() + m_panOffsetY);
-        painter.fillRect(rect, Qt::transparent);
+
+        for(QPoint p : m_selectedPixels)
+        {
+            painter.fillRect(QRect(p.x(), p.y(), 1, 1), Qt::transparent);
+        }
+
+        m_selectedPixels.clear();
 
         recordImageHistory();
 
-        //Call to redraw
         update();
     }
 }
