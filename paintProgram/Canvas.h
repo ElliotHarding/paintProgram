@@ -40,6 +40,8 @@ private:
     void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;
+    const QColor m_c_transparentGrey = QColor(190,190,190,255);
+    const QColor m_c_transparentWhite = QColor(255,255,255,255);
 
     //Undo/redo
     void recordImageHistory();

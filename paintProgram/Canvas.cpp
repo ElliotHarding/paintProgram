@@ -200,30 +200,10 @@ void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offse
         {
             if(m_canvasImage.pixelColor(x,y) == Qt::transparent)
             {
-                QColor col;
-
-                if(x % 2 == 0)
-                {
-                    if(y % 2 == 0)
-                    {
-                        col = QColor(255,255,255,255);
-                    }
-                    else
-                    {
-                        col = QColor(190,190,190,255);
-                    }
-                }
-                else
-                {
-                    if(y % 2 == 0)
-                    {
-                        col = QColor(190,190,190,255);
-                    }
-                    else
-                    {
-                        col = QColor(255,255,255,255);
-                    }
-                }
+                const QColor col = (x % 2 == 0) ?
+                            (y % 2 == 0) ? m_c_transparentWhite : m_c_transparentGrey
+                                         :
+                            (y % 2 == 0) ? m_c_transparentGrey : m_c_transparentWhite;
 
                 painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
             }
