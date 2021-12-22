@@ -31,8 +31,11 @@ void Canvas::setCurrentTool(Tool t)
 {
     m_tool = t;
 
+    bool doUpdate = false;
+
     if(m_tool != TOOL_SELECT)
     {
+        //Reset selection rectangle tool
         std::lock_guard<std::mutex> lock(m_canvasMutex);
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
@@ -40,9 +43,30 @@ void Canvas::setCurrentTool(Tool t)
         {
             m_selectedPixels.clear();
         }
+
+        doUpdate = true;
     }
 
-    update();
+    if(m_tool != TOOL_DRAG)
+    {
+        //Dump dragged contents onto m_canvasImage
+        QPainter painter(&m_canvasImage);
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
+        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_draggingPixelsImage.width(), m_draggingPixelsImage.height()), m_draggingPixelsImage);
+
+        recordImageHistory();
+
+        //Reset
+        m_draggingPixelsImage = QImage();
+        m_previousDragPos = m_c_nullDragPos;
+        m_dragOffsetX = 0;
+        m_dragOffsetY = 0;
+
+        doUpdate = true;
+    }
+
+    if (doUpdate)
+        update();
 }
 
 void Canvas::deleteKeyPressed()
@@ -294,24 +318,10 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         m_previousPanPos = m_c_nullPanPos;
     }
-    else if(m_tool == TOOL_DRAG)
-    {
-        m_previousDragPos = m_c_nullDragPos;
-    }
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
         recordImageHistory();
-    }
-    else if(m_tool == TOOL_DRAG)
-    {
-        //todo : fix this, it dosent need to be this compliated
-        //m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-        QPainter painter(&m_draggingPixelsImage);
-        painter.setCompositionMode (QPainter::CompositionMode_Source);
-        painter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
-
-        update();
     }
 }
 
@@ -382,6 +392,9 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
                     }
                 }
+
+                m_dragOffsetX = 0;
+                m_dragOffsetY = 0;
             }
             else
             {
