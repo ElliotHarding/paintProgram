@@ -91,9 +91,12 @@ void Canvas::pasteKeysPressed()
     QPainter painter(&m_canvasImage);
     painter.setCompositionMode (QPainter::CompositionMode_Source);
 
+    m_selectedPixels.clear();
+
     for(CopyPixel pixel : m_copyBuffer)
     {
         painter.fillRect(QRect(pixel.position.x(), pixel.position.y(), 1, 1), pixel.color);
+        m_selectedPixels.push_back(QPoint(pixel.position.x(), pixel.position.y()));
     }
 
     update();
