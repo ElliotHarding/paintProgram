@@ -51,7 +51,7 @@ void Canvas::setCurrentTool(Tool t)
     {
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_Source);
+        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
         painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_draggingPixelsImage.width(), m_draggingPixelsImage.height()), m_draggingPixelsImage);
 
         recordImageHistory();
