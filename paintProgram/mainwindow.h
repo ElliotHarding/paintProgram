@@ -5,6 +5,8 @@
 #include <QColorDialog>
 #include <QSet>
 
+#include "dlg_size.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -42,6 +44,8 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
+    void newCanvas(int width, int height);
+
     void on_open_color_picker();
 
     void on_btn_selectTool_clicked();
@@ -59,6 +63,8 @@ private:
     Ui::MainWindow *ui;
 
     QColorDialog* m_colorPicker;
+
+    DLG_Size* m_dlg_size;
 
     Tool m_currentTool = TOOL_PAINT;
     void setCurrentTool(Tool t);

@@ -19,7 +19,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_colorPicker = new QColorDialog(this);
     m_colorPicker->show();
 
+    m_dlg_size = new DLG_Size();
+
     //Connections
+    connect(m_dlg_size, SIGNAL(confirmedSize(int,int)), this, SLOT(newCanvas(int,int)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
 }
 
@@ -97,6 +100,12 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     m_pressedKeys.remove(event->key());
 }
 
+void MainWindow::newCanvas(int width, int height)
+{
+    Canvas* c = new Canvas(this, width, height);
+    ui->c_tabWidget->addTab(c, "todo");
+}
+
 void MainWindow::on_open_color_picker()
 {
     m_colorPicker->show();
@@ -104,8 +113,7 @@ void MainWindow::on_open_color_picker()
 
 void MainWindow::on_btn_addTab_clicked()
 {
-    Canvas* c = new Canvas(this, 100, 100); //todo set to dynamic size
-    ui->c_tabWidget->addTab(c, "todo");
+    m_dlg_size->show();
 }
 
 void MainWindow::on_btn_removeTab_clicked()

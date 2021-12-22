@@ -10,14 +10,17 @@ CONFIG += c++11
 
 SOURCES += \
     Canvas.cpp \
+    dlg_size.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     Canvas.h \
+    dlg_size.h \
     mainwindow.h
 
 FORMS += \
+    dlg_size.ui \
     mainwindow.ui
 
 # Default rules for deployment.
