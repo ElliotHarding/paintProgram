@@ -371,6 +371,78 @@ void spreadSelectRecursive(QImage& image, QList<QPoint>& selectedPixels, QColor 
     }
 }
 
+#include <queue>
+void spreadSelectAlgorithm(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int x, int y)
+{
+    std::queue<QPoint> analyze_queue;
+    analyze_queue.push(QPoint(x,y));
+
+    while (!analyze_queue.empty())
+    {
+        if (QColor(image.pixel(analyze_queue.front().x(), analyze_queue.front().y()))  != colorToSpreadOver)
+        {
+            analyze_queue.pop();
+            continue;
+        }
+
+        QPoint leftmost_pt = analyze_queue.front();
+        leftmost_pt = QPoint(leftmost_pt.x() -1, leftmost_pt.y());
+        analyze_queue.pop();
+        QPoint rightmost_pt = leftmost_pt;
+        rightmost_pt = QPoint(rightmost_pt.x() + 2, rightmost_pt.y());
+
+        while (QColor(image.pixel(leftmost_pt.x(), leftmost_pt.y())) == colorToSpreadOver)
+            leftmost_pt = QPoint(leftmost_pt.x() - 1, leftmost_pt.y());
+
+        while (QColor(image.pixel(rightmost_pt.x(), rightmost_pt.y())) == colorToSpreadOver)
+            rightmost_pt = QPoint(rightmost_pt.x() + 1, rightmost_pt.y());
+
+        bool check_above = true;
+        bool check_below = true;
+
+        QPoint pt = leftmost_pt;
+        pt = QPoint(pt.x() + 1, pt.y());
+
+        for (; pt.x() < rightmost_pt.x(); pt = QPoint(pt.x() + 1, pt.y()))
+        {
+            selectedPixels.push_back(pt);
+
+            QPoint pt_above = pt;
+            pt_above = QPoint(pt_above.x(), pt_above.y() - 1);
+
+            if (check_above)
+            {
+                if (QColor(image.pixel(pt_above.x(), pt_above.y())) == colorToSpreadOver)
+                {
+                    analyze_queue.push(pt_above);
+                    check_above = false;
+                }
+            }
+            else // !check_above
+            {
+                check_above = QColor(image.pixel(pt_above.x(), pt_above.y())) != colorToSpreadOver;
+            }
+
+            QPoint pt_below = pt;
+            pt_below = QPoint(pt_below.x(), pt_below.y() + 1);
+
+            if (check_below)
+            {
+                if (QColor(image.pixel(pt_below.x(), pt_below.y())) == colorToSpreadOver)
+                {
+                    analyze_queue.push(pt_below);
+                    check_below = false;
+                }
+            }
+            else // !check_below
+            {
+                check_below = QColor(image.pixel(pt_below.x(), pt_below.y())) != colorToSpreadOver;
+            }
+        } // for
+    } // while queue not empty
+
+}
+
 void Canvas::spreadSelectArea(int x, int y)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
@@ -383,8 +455,9 @@ void Canvas::spreadSelectArea(int x, int y)
     if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
     {
         QColor initalPixel = m_canvasImage.pixel(x,y);
-        m_selectedPixels.reserve(40000);
-        spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
+        //m_selectedPixels.reserve(40000);
+        //spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
+        spreadSelectAlgorithm(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
 
         //Call to redraw
         update();
