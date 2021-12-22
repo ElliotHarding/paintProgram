@@ -126,3 +126,12 @@ void MainWindow::on_btn_panTool_clicked()
 {
     setCurrentTool(TOOL_PAN);
 }
+
+void MainWindow::on_btn_undo_clicked()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->undoPressed();
+    }
+}

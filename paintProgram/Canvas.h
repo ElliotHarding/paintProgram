@@ -20,6 +20,7 @@ public:
     void setCurrentTool(Tool t);
     void deleteKeyPressed();
     void copyKeysPressed();
+    void undoPressed();
 
 private:
     void paintEvent(QPaintEvent* paintEvent) override;
@@ -37,6 +38,12 @@ private:
     void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;
+
+    //Undo/redo
+    void recordImageHistory();
+    std::vector<QImage> m_imageHistory;
+    int m_imageHistoryIndex = 0;
+    const int m_c_maxHistory = 20;
 
     //Zooming
     float m_zoomFactor = 1;

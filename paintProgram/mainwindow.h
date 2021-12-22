@@ -48,6 +48,8 @@ private slots:
 
     void on_btn_panTool_clicked();
 
+    void on_btn_undo_clicked();
+
 private:
     Ui::MainWindow *ui;
 
