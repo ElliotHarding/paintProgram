@@ -70,6 +70,7 @@ private:
 
     //Dragging - copy/paste
     void prepSelectedPixelsForDragging();
+    void dragPixels(QPoint mousePosition);
     const QPoint m_c_nullDragPos = QPoint(0,0);
     QPoint m_previousDragPos = m_c_nullDragPos;
     QImage m_draggingPixelsImage;

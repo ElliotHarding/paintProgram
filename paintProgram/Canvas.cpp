@@ -336,46 +336,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            if(m_previousDragPos == m_c_nullDragPos)
-            {
-                //check if mouse is over selection area
-                bool draggingSelected = false;
-                for(QPoint p : m_selectedPixels)
-                {
-                    if(p.x() == mouseLocation.x() && p.y() == mouseLocation.y())
-                    {
-                        draggingSelected = true;
-                        break;
-                    }
-                }
-
-                if(draggingSelected)
-                {
-                    prepSelectedPixelsForDragging();
-
-                    m_previousDragPos = mouseLocation;
-                    m_dragOffsetX = 0;
-                    m_dragOffsetY = 0;
-                }
-            }
-            else
-            {
-                const int offsetX = (mouseLocation.x() - m_previousDragPos.x());
-                const int offsetY = (mouseLocation.y() - m_previousDragPos.y());
-
-                m_dragOffsetX += offsetX;
-                m_dragOffsetY += offsetY;
-
-                for(QPoint& p : m_selectedPixels)
-                {
-                    p.setX(p.x() + offsetX);
-                    p.setY(p.y() + offsetY);
-                }
-
-                update();
-
-                m_previousDragPos = mouseLocation;
-            }
+            dragPixels(mouseLocation);
         }
     }
 }
@@ -437,6 +398,51 @@ void Canvas::prepSelectedPixelsForDragging()
     for(QPoint p : m_selectedPixels)
     {
         dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
+    }
+}
+
+void Canvas::dragPixels(QPoint mouseLocation)
+{
+    //If starting dragging
+    if(m_previousDragPos == m_c_nullDragPos)
+    {
+        //check if mouse is over selection area
+        bool draggingSelected = false;
+        for(QPoint p : m_selectedPixels)
+        {
+            if(p.x() == mouseLocation.x() && p.y() == mouseLocation.y())
+            {
+                draggingSelected = true;
+                break;
+            }
+        }
+
+        if(draggingSelected)
+        {
+            prepSelectedPixelsForDragging();
+
+            m_previousDragPos = mouseLocation;
+            m_dragOffsetX = 0;
+            m_dragOffsetY = 0;
+        }
+    }
+    else //If currently dragging
+    {
+        const int offsetX = (mouseLocation.x() - m_previousDragPos.x());
+        const int offsetY = (mouseLocation.y() - m_previousDragPos.y());
+
+        m_dragOffsetX += offsetX;
+        m_dragOffsetY += offsetY;
+
+        for(QPoint& p : m_selectedPixels)
+        {
+            p.setX(p.x() + offsetX);
+            p.setY(p.y() + offsetY);
+        }
+
+        update();
+
+        m_previousDragPos = mouseLocation;
     }
 }
 
