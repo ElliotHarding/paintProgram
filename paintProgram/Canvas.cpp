@@ -97,11 +97,15 @@ void Canvas::copyKeysPressed()
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
 
-        m_copyBuffer.clear();
+        //Prep copied pixels for dragging
+        m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+        QPainter dragPainter(&m_draggingPixelsImage);
+        dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+        dragPainter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
 
         for(QPoint p : m_selectedPixels)
         {
-            m_copyBuffer.push_back({p, m_canvasImage.pixelColor(p.x(), p.y())});
+            dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
         }
 
         update();
@@ -110,20 +114,6 @@ void Canvas::copyKeysPressed()
 
 void Canvas::pasteKeysPressed()
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
-
-    QPainter painter(&m_canvasImage);
-    painter.setCompositionMode (QPainter::CompositionMode_Source);
-
-    m_selectedPixels.clear();
-
-    for(CopyPixel pixel : m_copyBuffer)
-    {
-        painter.fillRect(QRect(pixel.position.x(), pixel.position.y(), 1, 1), pixel.color);
-        m_selectedPixels.push_back(QPoint(pixel.position.x(), pixel.position.y()));
-    }
-
-    update();
 }
 
 void Canvas::undoPressed()
@@ -380,17 +370,18 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
                 if(draggingSelected)
                 {
-                    m_previousDragPos = mouseLocation;
-
+                    //Prep selected pixels for dragging
                     m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-                    QPainter painter(&m_draggingPixelsImage);
-                    painter.setCompositionMode (QPainter::CompositionMode_Source);
-                    painter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
+                    QPainter dragPainter(&m_draggingPixelsImage);
+                    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+                    dragPainter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
 
                     for(QPoint p : m_selectedPixels)
                     {
-                        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
+                        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
                     }
+
+                    m_previousDragPos = mouseLocation;
                 }
 
                 m_dragOffsetX = 0;
