@@ -45,6 +45,16 @@ bool MainWindow::isCtrlPressed()
     return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();
 }
 
+void MainWindow::setCopyBuffer(QImage image)
+{
+    m_copyBuffer = image;
+}
+
+QImage MainWindow::getCopyBuffer()
+{
+    return m_copyBuffer;
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());

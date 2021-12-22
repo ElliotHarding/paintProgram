@@ -32,27 +32,25 @@ public:
 
     bool isCtrlPressed();
 
+    void setCopyBuffer(QImage image);
+    QImage getCopyBuffer();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
     void on_open_color_picker();
+
     void on_btn_selectTool_clicked();
     void on_btn_paintTool_clicked();
     void on_btn_addTab_clicked();
     void on_btn_removeTab_clicked();
-
     void on_btn_selectSpreadTool_clicked();
-
     void on_btn_eraserTool_clicked();
-
     void on_btn_panTool_clicked();
-
     void on_btn_undo_clicked();
-
     void on_btn_redo_clicked();
-
     void on_btn_dragTool_clicked();
 
 private:
@@ -64,5 +62,7 @@ private:
     void setCurrentTool(Tool t);
 
     QSet<int> m_pressedKeys;
+
+    QImage m_copyBuffer;
 };
 #endif // MAINWINDOW_H

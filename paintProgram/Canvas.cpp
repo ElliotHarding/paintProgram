@@ -95,11 +95,26 @@ void Canvas::copyKeysPressed()
 {
     prepSelectedPixelsForDragging();
 
+    m_pParent->setCopyBuffer(m_draggingPixelsImage);
+
     update();
 }
 
 void Canvas::pasteKeysPressed()
 {
+    m_draggingPixelsImage = m_pParent->getCopyBuffer();
+
+    m_selectedPixels.clear();
+
+    for(int x = 0; x < m_draggingPixelsImage.width(); x++)
+    {
+        for(int y = 0; y < m_draggingPixelsImage.height(); y++)
+        {
+            m_selectedPixels.push_back(QPoint(x,y));
+        }
+    }
+
+    update();
 }
 
 void Canvas::undoPressed()
