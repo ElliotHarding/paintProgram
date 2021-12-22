@@ -348,19 +348,23 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
     return transform.inverted().map(QPoint(event->x(), event->y()));
 }
 
-void spreadSelectRecursive(QImage image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int x, int y)
+void spreadSelectRecursive(QImage image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int x, int y)
 {
     if(x < image.width() && x > -1 && y < image.height() && y > -1)
     {
-        if(QColor(image.pixel(x,y)) == colorToSpreadOver)
+        const QColor pixelColor = QColor(image.pixel(x,y));
+        if(pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
+            pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
+                pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty
+                )
         {
             if(selectedPixels.indexOf(QPoint(x,y)) == -1)
             {
                 selectedPixels.push_back(QPoint(x,y));
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x + 1, y);
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x - 1, y);
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x, y + 1);
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, x, y - 1);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x + 1, y);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x - 1, y);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x, y + 1);
+                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x, y - 1);
             }
         }
     }
@@ -378,7 +382,8 @@ void Canvas::spreadSelectArea(int x, int y)
     if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
     {
         QColor initalPixel = m_canvasImage.pixel(x,y);
-        spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, x, y);
+        m_selectedPixels.reserve(40000);
+        spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
 
         //Call to redraw
         update();

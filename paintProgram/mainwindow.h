@@ -30,6 +30,8 @@ public:
     QColor getSelectedColor();
     int getBrushSize();
 
+    int getSpreadSensitivity();
+
     bool isCtrlPressed();
 
     void setCopyBuffer(QImage image);

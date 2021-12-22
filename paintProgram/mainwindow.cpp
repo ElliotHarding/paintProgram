@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->c_tabWidget->clear();
 
     //Will move this code eventually..
-    Canvas* c = new Canvas(this, 100, 100);
+    Canvas* c = new Canvas(this, 200, 200);
     ui->c_tabWidget->addTab(c, "My first tab");
 
     m_colorPicker = new QColorDialog(this);
@@ -38,6 +38,11 @@ QColor MainWindow::getSelectedColor()
 int MainWindow::getBrushSize()
 {
     return ui->spin_brushSize->value();
+}
+
+int MainWindow::getSpreadSensitivity()
+{
+    return ui->spin_spreadSensitivity->value();
 }
 
 bool MainWindow::isCtrlPressed()
