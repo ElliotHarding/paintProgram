@@ -9,6 +9,10 @@ Canvas::Canvas(MainWindow* parent, uint width, uint height) :
 {
     m_canvasImage = QImage(QSize(width, height), QImage::Format_ARGB32);
 
+    QPainter painter(&m_canvasImage);
+    painter.setCompositionMode (QPainter::CompositionMode_Clear);
+    painter.fillRect(m_canvasImage.rect(), Qt::transparent);
+
     recordImageHistory();
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
@@ -252,9 +256,14 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
         update();
     }
-    if(m_tool == TOOL_PAN)
+    else if(m_tool == TOOL_PAN)
     {
         m_previousPanPos = m_c_nullPanPos;
+    }
+    else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
+    {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        recordImageHistory();
     }
 }
 
@@ -354,8 +363,6 @@ void Canvas::paintPixel(uint posX, uint posY, QColor col)
         painter.setCompositionMode (QPainter::CompositionMode_Source);
         QRect rect = QRect(posX - m_pParent->getBrushSize()/2, posY - m_pParent->getBrushSize()/2, m_pParent->getBrushSize(), m_pParent->getBrushSize());
         painter.fillRect(rect, col);
-
-        recordImageHistory();
 
         //Call to redraw
         update();
