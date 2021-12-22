@@ -54,7 +54,6 @@ private:
     //Panning
     const QPoint m_c_nullPanPos = QPoint(-1,-1);
     QPoint m_previousPanPos = m_c_nullPanPos;
-    const float m_c_panSpeed = 2;
     float m_panOffsetX = 0;
     float m_panOffsetY = 0;
     std::mutex m_panOffsetMutex;

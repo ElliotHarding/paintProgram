@@ -93,23 +93,9 @@ void Canvas::deleteKeyPressed()
 
 void Canvas::copyKeysPressed()
 {
-    if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
-    {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+    prepSelectedPixelsForDragging();
 
-        //Prep copied pixels for dragging
-        m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-        QPainter dragPainter(&m_draggingPixelsImage);
-        dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-        dragPainter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
-
-        for(QPoint p : m_selectedPixels)
-        {
-            dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
-        }
-
-        update();
-    }
+    update();
 }
 
 void Canvas::pasteKeysPressed()
@@ -345,8 +331,8 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             else
             {
                 std::lock_guard<std::mutex> lock(m_panOffsetMutex);
-                m_panOffsetX += m_c_panSpeed * (mouseLocation.x() - m_previousPanPos.x());
-                m_panOffsetY += m_c_panSpeed * (mouseLocation.y() - m_previousPanPos.y());
+                m_panOffsetX += mouseLocation.x() - m_previousPanPos.x();
+                m_panOffsetY += mouseLocation.y() - m_previousPanPos.y();
 
                 update();
 
@@ -370,22 +356,12 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
                 if(draggingSelected)
                 {
-                    //Prep selected pixels for dragging
-                    m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-                    QPainter dragPainter(&m_draggingPixelsImage);
-                    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-                    dragPainter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
-
-                    for(QPoint p : m_selectedPixels)
-                    {
-                        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
-                    }
+                    prepSelectedPixelsForDragging();
 
                     m_previousDragPos = mouseLocation;
+                    m_dragOffsetX = 0;
+                    m_dragOffsetY = 0;
                 }
-
-                m_dragOffsetX = 0;
-                m_dragOffsetY = 0;
             }
             else
             {
@@ -450,6 +426,22 @@ void Canvas::spreadSelectArea(int x, int y)
 
         //Call to redraw
         update();
+    }
+}
+
+void Canvas::prepSelectedPixelsForDragging()
+{
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+    //Prep selected pixels for dragging
+    m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    QPainter dragPainter(&m_draggingPixelsImage);
+    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+    dragPainter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
+
+    for(QPoint p : m_selectedPixels)
+    {
+        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
     }
 }
 
