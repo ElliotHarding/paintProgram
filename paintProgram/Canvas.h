@@ -67,6 +67,7 @@ private:
     const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
     //Dragging - copy/paste
+    void prepSelectedPixelsForDragging();
     const QPoint m_c_nullDragPos = QPoint(0,0);
     QPoint m_previousDragPos = m_c_nullDragPos;
     QImage m_draggingPixelsImage;
