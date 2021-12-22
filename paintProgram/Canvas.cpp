@@ -416,9 +416,6 @@ void Canvas::spreadSelectArea(int x, int y)
     if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
     {
         QColor initalPixel = m_canvasImage.pixel(x,y);
-        //m_selectedPixels.reserve(40000);
-        //spreadSelectRecursive(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
-        //spreadSelectAlgorithm(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
         spreadSelectFunction(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
 
         //Call to redraw
