@@ -71,6 +71,14 @@ private:
     struct CopyPixel{QPoint position; QColor color;};
     QList<CopyPixel> m_copyBuffer;
 
+    //Dragging
+    const QPoint m_c_nullDragPos = QPoint(0,0);
+    QPoint m_previousDragPos = m_c_nullDragPos;
+    const float m_c_dragSpeed = 2;
+    QImage m_draggingPixelsImage;
+    int m_dragOffsetX = 0;
+    int m_dragOffsetY = 0;
+
     Tool m_tool = TOOL_PAINT;
 
     MainWindow* m_pParent;

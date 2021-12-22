@@ -36,7 +36,7 @@ void Canvas::setCurrentTool(Tool t)
         std::lock_guard<std::mutex> lock(m_canvasMutex);
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-        if(m_tool != TOOL_SPREAD_ON_SIMILAR)
+        if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
         {
             m_selectedPixels.clear();
         }
@@ -157,6 +157,9 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 
     //Switch out transparent pixels for grey-white pattern
     drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
+
+    //Draw dragging pixels
+    painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_draggingPixelsImage.width(), m_draggingPixelsImage.height()), m_draggingPixelsImage);
 
     //Draw highlighed pixels
     for(QPoint p : m_selectedPixels)
@@ -291,10 +294,24 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         m_previousPanPos = m_c_nullPanPos;
     }
+    else if(m_tool == TOOL_DRAG)
+    {
+        m_previousDragPos = m_c_nullDragPos;
+    }
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
         recordImageHistory();
+    }
+    else if(m_tool == TOOL_DRAG)
+    {
+        //todo : fix this, it dosent need to be this compliated
+        //m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+        QPainter painter(&m_draggingPixelsImage);
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
+        painter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
+
+        update();
     }
 }
 
@@ -334,6 +351,55 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 update();
 
                 m_previousPanPos = mouseLocation;
+            }
+        }
+        else if(m_tool == TOOL_DRAG)
+        {
+            if(m_previousDragPos == m_c_nullDragPos)
+            {
+                //check if mouse is over selection area
+                bool draggingSelected = false;
+                for(QPoint p : m_selectedPixels)
+                {
+                    if(p.x() == mouseLocation.x() && p.y() == mouseLocation.y())
+                    {
+                        draggingSelected = true;
+                        break;
+                    }
+                }
+
+                if(draggingSelected)
+                {
+                    m_previousDragPos = mouseLocation;
+
+                    m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+                    QPainter painter(&m_draggingPixelsImage);
+                    painter.setCompositionMode (QPainter::CompositionMode_Source);
+                    painter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
+
+                    for(QPoint p : m_selectedPixels)
+                    {
+                        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
+                    }
+                }
+            }
+            else
+            {
+                const int offsetX = (mouseLocation.x() - m_previousDragPos.x());
+                const int offsetY = (mouseLocation.y() - m_previousDragPos.y());
+
+                m_dragOffsetX += offsetX;
+                m_dragOffsetY += offsetY;
+
+                for(QPoint& p : m_selectedPixels)
+                {
+                    p.setX(p.x() + offsetX);
+                    p.setY(p.y() + offsetY);
+                }
+
+                update();
+
+                m_previousDragPos = mouseLocation;
             }
         }
     }

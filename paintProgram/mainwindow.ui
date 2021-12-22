@@ -167,6 +167,19 @@
      <string>Redo</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_dragTool">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>250</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Drag</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

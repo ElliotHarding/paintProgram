@@ -87,14 +87,15 @@ void MainWindow::on_open_color_picker()
     m_colorPicker->show();
 }
 
-void MainWindow::on_btn_selectTool_clicked()
+void MainWindow::on_btn_addTab_clicked()
 {
-    setCurrentTool(TOOL_SELECT);
+    Canvas* c = new Canvas(this, 100, 100); //todo set to dynamic size
+    ui->c_tabWidget->addTab(c, "todo");
 }
 
-void MainWindow::on_btn_paintTool_clicked()
+void MainWindow::on_btn_removeTab_clicked()
 {
-    setCurrentTool(TOOL_PAINT);
+    ui->c_tabWidget->removeTab(ui->c_tabWidget->currentIndex());
 }
 
 void MainWindow::setCurrentTool(Tool t)
@@ -110,15 +111,14 @@ void MainWindow::setCurrentTool(Tool t)
     }
 }
 
-void MainWindow::on_btn_addTab_clicked()
+void MainWindow::on_btn_selectTool_clicked()
 {
-    Canvas* c = new Canvas(this, 100, 100); //todo set to dynamic size
-    ui->c_tabWidget->addTab(c, "todo");
+    setCurrentTool(TOOL_SELECT);
 }
 
-void MainWindow::on_btn_removeTab_clicked()
+void MainWindow::on_btn_paintTool_clicked()
 {
-    ui->c_tabWidget->removeTab(ui->c_tabWidget->currentIndex());
+    setCurrentTool(TOOL_PAINT);
 }
 
 void MainWindow::on_btn_selectSpreadTool_clicked()
@@ -134,6 +134,11 @@ void MainWindow::on_btn_eraserTool_clicked()
 void MainWindow::on_btn_panTool_clicked()
 {
     setCurrentTool(TOOL_PAN);
+}
+
+void MainWindow::on_btn_dragTool_clicked()
+{
+    setCurrentTool(TOOL_DRAG);
 }
 
 void MainWindow::on_btn_undo_clicked()
