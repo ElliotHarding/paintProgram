@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->c_tabWidget->addTab(c, "My first tab");
 
     m_colorPicker = new QColorDialog(this);
+    m_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
     m_colorPicker->show();
 
     m_dlg_size = new DLG_Size();
