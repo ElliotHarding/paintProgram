@@ -281,15 +281,35 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
 
+        //Prep vector container of highlighted pixels
+        std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+        {
+            for(QPoint selectedPixel : m_selectedPixels)
+            {
+                highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
+            }
+        }
+
         const QRect geometry = m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY);
         for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
         {
             for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
             {
-                if(m_selectedPixels.indexOf(QPoint(x,y)) == -1)
+                if(highlightedPixels[x][y] == false)
                 {
-                    m_selectedPixels.push_back(QPoint(x,y));
+                    highlightedPixels[x][y] = true;
                 }
+            }
+        }
+
+        //Return highlighted pixels from algorithm to m_selectedPixels
+        m_selectedPixels.clear();
+        for(int x = 0; x < highlightedPixels.size(); x++)
+        {
+            for(int y = 0; y < highlightedPixels[x].size(); y++)
+            {
+                if(highlightedPixels[x][y])
+                    m_selectedPixels.push_back(QPoint(x,y));
             }
         }
 
