@@ -439,6 +439,9 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
     {
         const QColor originalPixelColor = QColor(image.pixel(startX, startY));
 
+        QPainter painter(&image);
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
+
         std::stack<QPoint> stack;
         stack.push(QPoint(startX,startY));
 
@@ -463,8 +466,6 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
                     )
             {
                 //Switch color
-                QPainter painter(&image);
-                painter.setCompositionMode (QPainter::CompositionMode_Source);
                 QRect rect = QRect(x, y, 1, 1);
                 painter.fillRect(rect, newColor);
 
