@@ -429,9 +429,7 @@ void Canvas::spreadSelectArea(int x, int y)
         highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
     }
 
-
-    QColor initalPixel = m_canvasImage.pixel(x,y);
-    spreadSelectFunction(m_canvasImage, highlightedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
+    spreadSelectFunction(m_canvasImage, highlightedPixels, m_canvasImage.pixel(x,y), m_pParent->getSpreadSensitivity(), x, y);
 
     m_selectedPixels.clear();
     for(int x = 0; x < highlightedPixels.size(); x++)
