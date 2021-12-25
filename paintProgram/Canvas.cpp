@@ -382,7 +382,7 @@ void spreadSelectRecursive(QImage& image, QList<QPoint>& selectedPixels, QColor 
     }
 }*/
 
-void spreadSelectFunction(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int startX, int startY)
+void spreadSelectFunction(QImage& image, std::vector<std::vector<bool>>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int startX, int startY)
 {
     if(startX < image.width() && startX > -1 && startY < image.height() && startY > -1)
     {
@@ -402,9 +402,9 @@ void spreadSelectFunction(QImage& image, QList<QPoint>& selectedPixels, QColor c
             if (pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
                 pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
                 pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty &&
-                selectedPixels.indexOf(QPoint(x,y)) == -1)
+                selectedPixels[x][y] == false)
             {
-                selectedPixels.push_back(QPoint(x,y));
+                selectedPixels[x][y] = true;
                 stack.push(QPoint(x + 1, y));
                 stack.push(QPoint(x - 1, y));
                 stack.push(QPoint(x, y + 1));
@@ -423,14 +423,28 @@ void Canvas::spreadSelectArea(int x, int y)
         m_selectedPixels.clear();
     }
 
-    if(x <= m_canvasImage.width() && y <= m_canvasImage.height())
+    std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+    for(QPoint selectedPixel : m_selectedPixels)
     {
-        QColor initalPixel = m_canvasImage.pixel(x,y);
-        spreadSelectFunction(m_canvasImage, m_selectedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
-
-        //Call to redraw
-        update();
+        highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
     }
+
+
+    QColor initalPixel = m_canvasImage.pixel(x,y);
+    spreadSelectFunction(m_canvasImage, highlightedPixels, initalPixel, m_pParent->getSpreadSensitivity(), x, y);
+
+    m_selectedPixels.clear();
+    for(int x = 0; x < highlightedPixels.size(); x++)
+    {
+        for(int y = 0; y < highlightedPixels[x].size(); y++)
+        {
+            if(highlightedPixels[x][y])
+                m_selectedPixels.push_back(QPoint(x,y));
+        }
+    }
+
+    //Call to redraw
+    update();
 }
 
 void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, int sensitivity)
