@@ -48,11 +48,6 @@ int MainWindow::getSpreadSensitivity()
     return ui->spin_spreadSensitivity->value();
 }
 
-bool MainWindow::isCtrlPressed()
-{
-    return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();
-}
-
 void MainWindow::setCopyBuffer(QImage image)
 {
     m_copyBuffer = image;
@@ -63,13 +58,15 @@ QImage MainWindow::getCopyBuffer()
     return m_copyBuffer;
 }
 
+bool MainWindow::isCtrlPressed()
+{
+    return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());
-}
 
-void MainWindow::keyReleaseEvent(QKeyEvent *event)
-{
     if(m_pressedKeys.find(Qt::Key_C) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
     {
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
@@ -97,6 +94,19 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         }
     }
 
+    if(m_pressedKeys.find(Qt::Key_X) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->copyKeysPressed();
+            c->deleteKeyPressed();
+        }
+    }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
     m_pressedKeys.remove(event->key());
 }
 

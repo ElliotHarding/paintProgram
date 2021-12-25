@@ -36,7 +36,7 @@ private:
     bool m_bMouseDown = false;
 
     //Drawing
-    void paintPixel(uint posX, uint posY, QColor col);
+    void paintBrush(uint posX, uint posY, QColor col);
     void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);
     QImage m_canvasImage;
     std::mutex m_canvasMutex;

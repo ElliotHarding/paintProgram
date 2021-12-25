@@ -236,12 +236,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     if(m_tool == TOOL_PAINT)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-        paintPixel(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
+        paintBrush(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
     }
     else if(m_tool == TOOL_ERASER)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-        paintPixel(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
+        paintBrush(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
     }
     else if(m_tool == TOOL_SELECT)
     {
@@ -313,11 +313,11 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         QPoint mouseLocation = getLocationFromMouseEvent(event);
         if(m_tool == TOOL_PAINT)
         {
-            paintPixel(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
+            paintBrush(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
         }
         else if(m_tool == TOOL_ERASER)
         {
-            paintPixel(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
+            paintBrush(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
         }
         else if(m_tool == TOOL_SELECT)
         {
@@ -556,7 +556,7 @@ void Canvas::dragPixels(QPoint mouseLocation)
     }
 }
 
-void Canvas::paintPixel(uint posX, uint posY, QColor col)
+void Canvas::paintBrush(uint posX, uint posY, QColor col)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
