@@ -59,7 +59,6 @@ private slots:
     void on_btn_undo_clicked();
     void on_btn_redo_clicked();
     void on_btn_dragTool_clicked();
-
     void on_btn_bucketTool_clicked();
 
 private:

@@ -355,7 +355,9 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 {
     QTransform transform;
     transform.scale(m_zoomFactor, m_zoomFactor);
-    return transform.inverted().map(QPoint(event->x(), event->y()));
+    const QPoint zoomPoint = transform.inverted().map(QPoint(event->x(), event->y()));
+    std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
+    return QPoint(zoomPoint.x() + m_panOffsetX * -1, zoomPoint.y() + m_panOffsetY * -1);
 }
 
 /*
