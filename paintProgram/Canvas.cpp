@@ -262,6 +262,15 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
         spreadSelectArea(mouseLocation.x(), mouseLocation.y());
     }
+    else if(m_tool == TOOL_BUCKET)
+    {
+        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        floodFillOnSimilar(m_canvasImage, m_pParent->getSelectedColor(), mouseLocation.x(), mouseLocation.y(), m_pParent->getSpreadSensitivity());
+
+        update();
+    }
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
@@ -421,6 +430,50 @@ void Canvas::spreadSelectArea(int x, int y)
 
         //Call to redraw
         update();
+    }
+}
+
+void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, int sensitivity)
+{
+    if(startX < image.width() && startX > -1 && startY < image.height() && startY > -1)
+    {
+        const QColor originalPixelColor = QColor(image.pixel(startX, startY));
+
+        std::stack<QPoint> stack;
+        stack.push(QPoint(startX,startY));
+
+        while (stack.size() > 0)
+        {
+            QPoint p = stack.top();
+            stack.pop();
+            const int x = p.x();
+            const int y = p.y();
+            if (y < 0 || y > image.height() || x < 0 || x > image.width())
+                continue;
+
+            const QColor pixelColor = QColor(image.pixel(x,y));
+            if (
+                //Check pixel color in sensitivity range
+                pixelColor.red() <= originalPixelColor.red() + sensitivity && pixelColor.red() >= originalPixelColor.red() - sensitivity &&
+                pixelColor.green() <= originalPixelColor.green() + sensitivity && pixelColor.green() >= originalPixelColor.green() - sensitivity &&
+                pixelColor.blue() <= originalPixelColor.blue() + sensitivity && pixelColor.blue() >= originalPixelColor.blue() - sensitivity &&
+
+                //Check not excat same color
+                pixelColor != newColor
+                    )
+            {
+                //Switch color
+                QPainter painter(&image);
+                painter.setCompositionMode (QPainter::CompositionMode_Source);
+                QRect rect = QRect(x, y, 1, 1);
+                painter.fillRect(rect, newColor);
+
+                stack.push(QPoint(x + 1, y));
+                stack.push(QPoint(x - 1, y));
+                stack.push(QPoint(x, y + 1));
+                stack.push(QPoint(x, y - 1));
+            }
+        }
     }
 }
 

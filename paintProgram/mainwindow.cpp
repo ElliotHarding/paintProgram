@@ -164,6 +164,11 @@ void MainWindow::on_btn_dragTool_clicked()
     setCurrentTool(TOOL_DRAG);
 }
 
+void MainWindow::on_btn_bucketTool_clicked()
+{
+    setCurrentTool(TOOL_BUCKET);
+}
+
 void MainWindow::on_btn_undo_clicked()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());

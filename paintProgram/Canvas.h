@@ -77,6 +77,9 @@ private:
     int m_dragOffsetX = 0;
     int m_dragOffsetY = 0;
 
+    //Bucket
+    void floodFillOnSimilar(QImage& image, QColor newColor, int startX, int startY, int sensitivity);
+
     Tool m_tool = TOOL_PAINT;
 
     MainWindow* m_pParent;

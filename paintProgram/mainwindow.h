@@ -18,7 +18,8 @@ enum Tool
     TOOL_SPREAD_ON_SIMILAR,
     TOOL_ERASER,
     TOOL_PAN,
-    TOOL_DRAG
+    TOOL_DRAG,
+    TOOL_BUCKET
 };
 
 class MainWindow : public QMainWindow
@@ -58,6 +59,8 @@ private slots:
     void on_btn_undo_clicked();
     void on_btn_redo_clicked();
     void on_btn_dragTool_clicked();
+
+    void on_btn_bucketTool_clicked();
 
 private:
     Ui::MainWindow *ui;
