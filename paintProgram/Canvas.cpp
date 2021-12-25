@@ -167,12 +167,12 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     //Zoom painter
     painter.scale(m_zoomFactor, m_zoomFactor);
 
+    //Switch out transparent pixels for grey-white pattern
+    drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
+
     //Draw current image
     QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
-
-    //Switch out transparent pixels for grey-white pattern
-    drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
 
     //Draw dragging pixels
     painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_draggingPixelsImage.width(), m_draggingPixelsImage.height()), m_draggingPixelsImage);
@@ -199,7 +199,7 @@ void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offse
     {
         for(int y = 0; y < m_canvasImage.height(); y++)
         {
-            if(m_canvasImage.pixelColor(x,y) == Qt::transparent)
+            if(m_canvasImage.pixelColor(x,y).alpha() < 255)
             {
                 const QColor col = (x % 2 == 0) ?
                             (y % 2 == 0) ? m_c_transparentWhite : m_c_transparentGrey
