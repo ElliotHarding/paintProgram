@@ -418,19 +418,24 @@ void Canvas::spreadSelectArea(int x, int y)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
+    //Prep vector container of highlighted pixels for spread algorithm
+    std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
     if(!m_pParent->isCtrlPressed())
     {
         m_selectedPixels.clear();
     }
-
-    std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
-    for(QPoint selectedPixel : m_selectedPixels)
+    else
     {
-        highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
+        for(QPoint selectedPixel : m_selectedPixels)
+        {
+            highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
+        }
     }
 
+    //Do spread highlight
     spreadSelectFunction(m_canvasImage, highlightedPixels, m_canvasImage.pixel(x,y), m_pParent->getSpreadSensitivity(), x, y);
 
+    //Return highlighted pixels from algorithm to m_selectedPixels
     m_selectedPixels.clear();
     for(int x = 0; x < highlightedPixels.size(); x++)
     {
