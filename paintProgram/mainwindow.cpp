@@ -66,7 +66,10 @@ bool MainWindow::isCtrlPressed()
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());
+}
 
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
     if(m_pressedKeys.find(Qt::Key_C) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
     {
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
@@ -103,10 +106,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             c->deleteKeyPressed();
         }
     }
-}
 
-void MainWindow::keyReleaseEvent(QKeyEvent *event)
-{
     m_pressedKeys.remove(event->key());
 }
 
