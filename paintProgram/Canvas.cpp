@@ -103,6 +103,26 @@ void Canvas::copyKeysPressed()
     update();
 }
 
+void Canvas::cutKeysPressed()
+{
+    prepSelectedPixelsForDragging();
+
+    m_pParent->setCopyBuffer(m_draggingPixelsImage);
+
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    QPainter painter(&m_canvasImage);
+    painter.setCompositionMode (QPainter::CompositionMode_Clear);
+
+    for(QPoint p : m_selectedPixels)
+    {
+        painter.fillRect(QRect(p.x(), p.y(), 1, 1), Qt::transparent);
+    }
+
+    recordImageHistory();
+
+    update();
+}
+
 void Canvas::pasteKeysPressed()
 {
     m_draggingPixelsImage = m_pParent->getCopyBuffer();
@@ -281,41 +301,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
     if(m_tool == TOOL_SELECT)
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
-
-        //Prep vector container of highlighted pixels
-        std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
-        {
-            for(QPoint selectedPixel : m_selectedPixels)
-            {
-                highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
-            }
-        }
-
-        const QRect geometry = m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY);
-        for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
-        {
-            for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
-            {
-                if(highlightedPixels[x][y] == false)
-                {
-                    highlightedPixels[x][y] = true;
-                }
-            }
-        }
-
-        //Return highlighted pixels from algorithm to m_selectedPixels
-        m_selectedPixels.clear();
-        for(int x = 0; x < highlightedPixels.size(); x++)
-        {
-            for(int y = 0; y < highlightedPixels[x].size(); y++)
-            {
-                if(highlightedPixels[x][y])
-                    m_selectedPixels.push_back(QPoint(x,y));
-            }
-        }
-
-        update();
+        releaseSelect();
     }
     else if(m_tool == TOOL_PAN)
     {
@@ -371,6 +357,45 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             dragPixels(mouseLocation);
         }
     }
+}
+
+void Canvas::releaseSelect()
+{
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+    //Prep vector container of highlighted pixels
+    std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+    {
+        for(QPoint selectedPixel : m_selectedPixels)
+        {
+            highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
+        }
+    }
+
+    const QRect geometry = m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY);
+    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+    {
+        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+        {
+            if(highlightedPixels[x][y] == false)
+            {
+                highlightedPixels[x][y] = true;
+            }
+        }
+    }
+
+    //Return highlighted pixels from algorithm to m_selectedPixels
+    m_selectedPixels.clear();
+    for(int x = 0; x < highlightedPixels.size(); x++)
+    {
+        for(int y = 0; y < highlightedPixels[x].size(); y++)
+        {
+            if(highlightedPixels[x][y])
+                m_selectedPixels.push_back(QPoint(x,y));
+        }
+    }
+
+    update();
 }
 
 QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)

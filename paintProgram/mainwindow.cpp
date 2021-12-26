@@ -101,8 +101,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->copyKeysPressed();
-            c->deleteKeyPressed();
+            c->cutKeysPressed();
         }
     }
 

@@ -19,6 +19,7 @@ public:
 
     void deleteKeyPressed();
     void copyKeysPressed();
+    void cutKeysPressed();
     void pasteKeysPressed();
     void undoPressed();
     void redoPressed();
@@ -64,6 +65,7 @@ private:
 
     //Selecting
     void spreadSelectArea(int x, int y);
+    void releaseSelect();
     QList<QPoint> m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
