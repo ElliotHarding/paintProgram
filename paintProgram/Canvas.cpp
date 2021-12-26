@@ -138,12 +138,14 @@ void Canvas::pasteKeysPressed()
     m_clipboardImage = m_pParent->getCopyBuffer();
 
     m_selectedPixels.clear();
+    m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
     for(int x = 0; x < m_clipboardImage.width(); x++)
     {
         for(int y = 0; y < m_clipboardImage.height(); y++)
         {
-            m_selectedPixels.push_back(QPoint(x,y));
+            if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
+                m_selectedPixels.push_back(QPoint(x,y));
         }
     }
 
