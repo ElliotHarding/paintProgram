@@ -265,7 +265,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
     m_bMouseDown = true;
 
-    //todo ~ check if we can take the mouseLocation init out of the two if statements
+    //todo ~ check if we can take the mouseLocation init out of the if statements
 
     if(m_tool == TOOL_PAINT)
     {
