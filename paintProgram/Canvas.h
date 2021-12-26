@@ -17,12 +17,14 @@ public:
     Canvas(MainWindow* parent, uint width, uint height);
     ~Canvas();
 
-    void setCurrentTool(Tool t);
     void deleteKeyPressed();
     void copyKeysPressed();
     void pasteKeysPressed();
     void undoPressed();
     void redoPressed();
+
+public slots:
+    void updateCurrentTool(Tool t);
 
 private:
     void paintEvent(QPaintEvent* paintEvent) override;

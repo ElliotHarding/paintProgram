@@ -44,6 +44,9 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
 
+signals:
+    void updateCurrentTool(Tool tool);
+
 private slots:
     void newCanvas(int width, int height);
 

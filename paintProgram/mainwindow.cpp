@@ -12,9 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->c_tabWidget->clear();
 
-    //Will move this code eventually..
-    Canvas* c = new Canvas(this, 200, 200);
-    ui->c_tabWidget->addTab(c, "My first tab");
+    newCanvas(200, 200);
 
     m_colorPicker = new QColorDialog(this);
     m_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
@@ -114,6 +112,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 void MainWindow::newCanvas(int width, int height)
 {
     Canvas* c = new Canvas(this, width, height);
+
+    c->updateCurrentTool(m_currentTool);
+    connect(this, SIGNAL(updateCurrentTool(Tool)), c, SLOT(updateCurrentTool(Tool)));
+
     ui->c_tabWidget->addTab(c, "todo");
 }
 
@@ -134,15 +136,8 @@ void MainWindow::on_btn_removeTab_clicked()
 
 void MainWindow::setCurrentTool(Tool t)
 {
-    //Loop through all tab widgets controls, if a canvas, update the current tool
-    for(int i = 0; i < ui->c_tabWidget->count(); i++)
-    {
-        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->widget(i));
-        if(c)
-        {
-            c->setCurrentTool(t);
-        }
-    }
+    m_currentTool = t;
+    emit updateCurrentTool(t);
 }
 
 void MainWindow::on_btn_selectTool_clicked()

@@ -28,7 +28,7 @@ Canvas::~Canvas()
         delete m_selectionTool;
 }
 
-void Canvas::setCurrentTool(Tool t)
+void Canvas::updateCurrentTool(Tool t)
 {
     m_tool = t;
 
