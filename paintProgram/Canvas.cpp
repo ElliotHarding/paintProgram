@@ -305,6 +305,13 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         update();
     }
+    else if(m_tool == TOOL_COLOR_PICKER)
+    {
+        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        m_pParent->setSelectedColor(m_canvasImage.pixelColor(mouseLocation.x(), mouseLocation.y()));
+    }
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)

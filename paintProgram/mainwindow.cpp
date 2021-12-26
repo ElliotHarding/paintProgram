@@ -37,6 +37,11 @@ QColor MainWindow::getSelectedColor()
     return m_colorPicker->currentColor();
 }
 
+void MainWindow::setSelectedColor(QColor col)
+{
+    m_colorPicker->setCurrentColor(col);
+}
+
 int MainWindow::getBrushSize()
 {
     return ui->spin_brushSize->value();
@@ -172,6 +177,11 @@ void MainWindow::on_btn_dragTool_clicked()
 void MainWindow::on_btn_bucketTool_clicked()
 {
     setCurrentTool(TOOL_BUCKET);
+}
+
+void MainWindow::on_btn_colorPickerTool_clicked()
+{
+    setCurrentTool(TOOL_COLOR_PICKER);
 }
 
 void MainWindow::on_btn_undo_clicked()

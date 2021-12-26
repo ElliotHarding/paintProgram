@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+//todo ~ colorPicker ~ shapes ~ text
+
 #include <QMainWindow>
 #include <QColorDialog>
 #include <QSet>
@@ -19,7 +21,8 @@ enum Tool
     TOOL_ERASER,
     TOOL_PAN,
     TOOL_DRAG,
-    TOOL_BUCKET
+    TOOL_BUCKET,
+    TOOL_COLOR_PICKER
 };
 
 class MainWindow : public QMainWindow
@@ -31,6 +34,8 @@ public:
     ~MainWindow();
 
     QColor getSelectedColor();
+    void setSelectedColor(QColor col);
+
     int getBrushSize();
 
     int getSpreadSensitivity();
@@ -63,6 +68,8 @@ private slots:
     void on_btn_redo_clicked();
     void on_btn_dragTool_clicked();
     void on_btn_bucketTool_clicked();
+
+    void on_btn_colorPickerTool_clicked();
 
 private:
     Ui::MainWindow *ui;
