@@ -50,6 +50,8 @@ void Canvas::setCurrentTool(Tool t)
 
     if(m_tool != TOOL_DRAG)
     {
+        std::lock_guard<std::mutex> lock(m_canvasMutex);
+
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
