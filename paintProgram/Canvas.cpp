@@ -55,12 +55,12 @@ void Canvas::updateCurrentTool(Tool t)
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
-        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_draggingPixelsImage.width(), m_draggingPixelsImage.height()), m_draggingPixelsImage);
+        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
         recordImageHistory();
 
         //Reset
-        m_draggingPixelsImage = QImage();
+        m_clipboardImage = QImage();
         m_previousDragPos = m_c_nullDragPos;
         m_dragOffsetX = 0;
         m_dragOffsetY = 0;
@@ -96,27 +96,37 @@ void Canvas::deleteKeyPressed()
 
 void Canvas::copyKeysPressed()
 {
-    prepSelectedPixelsForDragging();
+    prepClipBoard();
 
-    m_pParent->setCopyBuffer(m_draggingPixelsImage);
+    m_pParent->setCopyBuffer(m_clipboardImage);
 
     update();
 }
 
 void Canvas::cutKeysPressed()
 {
-    prepSelectedPixelsForDragging();
-
-    m_pParent->setCopyBuffer(m_draggingPixelsImage);
-
     std::lock_guard<std::mutex> lock(m_canvasMutex);
+
+    //Copy cut pixels to clipboard
+    QImage clipBoard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+
+    QPainter dragPainter(&clipBoard);
+    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+    dragPainter.fillRect(clipBoard.rect(), Qt::transparent);
+
     QPainter painter(&m_canvasImage);
     painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
     for(QPoint p : m_selectedPixels)
     {
+        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
         painter.fillRect(QRect(p.x(), p.y(), 1, 1), Qt::transparent);
     }
+
+    m_pParent->setCopyBuffer(clipBoard);
+
+    m_selectedPixels.clear();
+    m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
     recordImageHistory();
 
@@ -125,13 +135,13 @@ void Canvas::cutKeysPressed()
 
 void Canvas::pasteKeysPressed()
 {
-    m_draggingPixelsImage = m_pParent->getCopyBuffer();
+    m_clipboardImage = m_pParent->getCopyBuffer();
 
     m_selectedPixels.clear();
 
-    for(int x = 0; x < m_draggingPixelsImage.width(); x++)
+    for(int x = 0; x < m_clipboardImage.width(); x++)
     {
-        for(int y = 0; y < m_draggingPixelsImage.height(); y++)
+        for(int y = 0; y < m_clipboardImage.height(); y++)
         {
             m_selectedPixels.push_back(QPoint(x,y));
         }
@@ -197,7 +207,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
     //Draw dragging pixels
-    painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_draggingPixelsImage.width(), m_draggingPixelsImage.height()), m_draggingPixelsImage);
+    painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Draw highlighed pixels
     for(QPoint p : m_selectedPixels)
@@ -544,15 +554,15 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
     }
 }
 
-void Canvas::prepSelectedPixelsForDragging()
+void Canvas::prepClipBoard()
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
     //Prep selected pixels for dragging
-    m_draggingPixelsImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-    QPainter dragPainter(&m_draggingPixelsImage);
+    m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    QPainter dragPainter(&m_clipboardImage);
     dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-    dragPainter.fillRect(m_draggingPixelsImage.rect(), Qt::transparent);
+    dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
 
     for(QPoint p : m_selectedPixels)
     {
@@ -578,7 +588,8 @@ void Canvas::dragPixels(QPoint mouseLocation)
 
         if(draggingSelected)
         {
-            prepSelectedPixelsForDragging();
+            if(m_clipboardImage == QImage())
+                prepClipBoard();
 
             m_previousDragPos = mouseLocation;
             m_dragOffsetX = 0;

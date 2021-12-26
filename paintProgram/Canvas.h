@@ -72,12 +72,12 @@ private:
     const QColor m_c_selectionBorderColor = Qt::blue; //todo ~ not const because future cahnges planned (if highlight color and background color are the same)
     const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
-    //Dragging - copy/paste
-    void prepSelectedPixelsForDragging();
+    //Dragging/copy/paste
+    void prepClipBoard();
     void dragPixels(QPoint mousePosition);
     const QPoint m_c_nullDragPos = QPoint(0,0);
     QPoint m_previousDragPos = m_c_nullDragPos;
-    QImage m_draggingPixelsImage;
+    QImage m_clipboardImage;
     int m_dragOffsetX = 0;
     int m_dragOffsetY = 0;
 
