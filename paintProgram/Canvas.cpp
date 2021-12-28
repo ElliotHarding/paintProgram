@@ -468,7 +468,7 @@ void spreadSelectFunction(QImage& image, std::vector<std::vector<bool>>& selecte
             if (y < 0 || y > image.height() || x < 0 || x > image.width())
                 continue;
 
-            const QColor pixelColor = QColor(image.pixel(x,y));
+            const QColor pixelColor = image.pixelColor(x,y);
             if (pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
                 pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
                 pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty &&
@@ -538,10 +538,10 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
             stack.pop();
             const int x = p.x();
             const int y = p.y();
-            if (y < 0 || y > image.height() || x < 0 || x > image.width())
+            if (y < 0 || y >= image.height() || x < 0 || x >= image.width())
                 continue;
 
-            const QColor pixelColor = QColor(image.pixel(x,y));
+            const QColor pixelColor = image.pixelColor(x,y);
             if (
                 //Check pixel color in sensitivity range
                 pixelColor.red() <= originalPixelColor.red() + sensitivity && pixelColor.red() >= originalPixelColor.red() - sensitivity &&
