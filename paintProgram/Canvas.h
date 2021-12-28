@@ -24,6 +24,8 @@ public:
     void undoPressed();
     void redoPressed();
 
+    QImage getImageCopy();
+
 public slots:
     void updateCurrentTool(Tool t);
 

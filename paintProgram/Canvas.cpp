@@ -10,10 +10,6 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 {
     m_canvasImage = image;
 
-    //QPainter painter(&m_canvasImage);
-    //painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    //painter.fillRect(m_canvasImage.rect(), Qt::transparent);
-
     recordImageHistory();
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
@@ -174,6 +170,12 @@ void Canvas::redoPressed()
 
         update();
     }
+}
+
+QImage Canvas::getImageCopy()
+{
+    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    return m_canvasImage;
 }
 
 //Function called when m_canvasMutex is locked

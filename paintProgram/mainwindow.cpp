@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_size, SIGNAL(confirmedSize(int,int)), this, SLOT(on_new_canvas(int,int)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
     connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load_image()));
+    connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save_image()));
 }
 
 MainWindow::~MainWindow()
@@ -136,6 +137,16 @@ void MainWindow::on_load_image()
 
     QImage image(filePath);
     loadNewCanvas(image);
+}
+
+void MainWindow::on_save_image()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        QImage image = c->getImageCopy();
+        qDebug() << image.save(ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()) + ".png");
+    }
 }
 
 void MainWindow::on_new_canvas(int width, int height)

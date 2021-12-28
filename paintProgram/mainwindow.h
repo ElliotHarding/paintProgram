@@ -57,6 +57,7 @@ private slots:
 
     void on_open_color_picker();
     void on_load_image();
+    void on_save_image();
 
     void on_btn_selectTool_clicked();
     void on_btn_paintTool_clicked();

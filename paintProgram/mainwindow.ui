@@ -237,6 +237,7 @@
      <string>File</string>
     </property>
     <addaction name="actionLoad_Image"/>
+    <addaction name="actionSave_Image"/>
    </widget>
    <widget class="QMenu" name="menuMenu">
     <property name="title">
@@ -256,6 +257,11 @@
   <action name="actionLoad_Image">
    <property name="text">
     <string>Load Image</string>
+   </property>
+  </action>
+  <action name="actionSave_Image">
+   <property name="text">
+    <string>Save Image</string>
    </property>
   </action>
  </widget>
