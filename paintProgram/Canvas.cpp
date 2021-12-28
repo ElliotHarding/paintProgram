@@ -572,9 +572,10 @@ void Canvas::prepClipBoard()
     //Prep selected pixels for dragging
     m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
     QPainter dragPainter(&m_clipboardImage);
-    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+    dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
     dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
 
+    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
     for(QPoint p : m_selectedPixels)
     {
         dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
