@@ -236,6 +236,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionLoad_Image"/>
    </widget>
    <widget class="QMenu" name="menuMenu">
     <property name="title">
@@ -250,6 +251,11 @@
   <action name="actionColor_Picker">
    <property name="text">
     <string>Color Picker</string>
+   </property>
+  </action>
+  <action name="actionLoad_Image">
+   <property name="text">
+    <string>Load Image</string>
    </property>
   </action>
  </widget>

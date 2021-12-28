@@ -14,7 +14,7 @@ class Canvas: public QTabWidget
     Q_OBJECT
 
 public:
-    Canvas(MainWindow* parent, uint width, uint height);
+    Canvas(MainWindow* parent, QImage image);
     ~Canvas();
 
     void deleteKeyPressed();

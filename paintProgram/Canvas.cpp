@@ -4,15 +4,15 @@
 #include <QSet>
 #include <stack>
 
-Canvas::Canvas(MainWindow* parent, uint width, uint height) :
+Canvas::Canvas(MainWindow* parent, QImage image) :
     QTabWidget(),
     m_pParent(parent)
 {
-    m_canvasImage = QImage(QSize(width, height), QImage::Format_ARGB32);
+    m_canvasImage = image;
 
-    QPainter painter(&m_canvasImage);
-    painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    painter.fillRect(m_canvasImage.rect(), Qt::transparent);
+    //QPainter painter(&m_canvasImage);
+    //painter.setCompositionMode (QPainter::CompositionMode_Clear);
+    //painter.fillRect(m_canvasImage.rect(), Qt::transparent);
 
     recordImageHistory();
 

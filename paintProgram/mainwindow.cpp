@@ -3,6 +3,8 @@
 #include "Canvas.h"
 
 #include <QKeyEvent>
+#include <QFileDialog>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -12,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->c_tabWidget->clear();
 
-    newCanvas(200, 200);
+    on_new_canvas(200, 200);
 
     m_colorPicker = new QColorDialog(this);
     m_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
@@ -21,8 +23,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_size = new DLG_Size();
 
     //Connections
-    connect(m_dlg_size, SIGNAL(confirmedSize(int,int)), this, SLOT(newCanvas(int,int)));
+    connect(m_dlg_size, SIGNAL(confirmedSize(int,int)), this, SLOT(on_new_canvas(int,int)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
+    connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load_image()));
 }
 
 MainWindow::~MainWindow()
@@ -113,14 +116,31 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     m_pressedKeys.remove(event->key());
 }
 
-void MainWindow::newCanvas(int width, int height)
+void MainWindow::loadNewCanvas(QImage image)
 {
-    Canvas* c = new Canvas(this, width, height);
+    Canvas* c = new Canvas(this, image);
 
     c->updateCurrentTool(m_currentTool);
     connect(this, SIGNAL(updateCurrentTool(Tool)), c, SLOT(updateCurrentTool(Tool)));
 
     ui->c_tabWidget->addTab(c, "todo");
+}
+
+void MainWindow::on_load_image()
+{
+    QFileDialog loadDialog;
+    QString filePath = loadDialog.getOpenFileUrl(this).path();
+
+    //todo ~ why do i need to cut the first / of the url?
+    filePath = filePath.mid(1, filePath.length());
+
+    QImage image(filePath);
+    loadNewCanvas(image);
+}
+
+void MainWindow::on_new_canvas(int width, int height)
+{
+    loadNewCanvas(QImage(QSize(width, height), QImage::Format_ARGB32));
 }
 
 void MainWindow::on_open_color_picker()

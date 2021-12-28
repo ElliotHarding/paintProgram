@@ -53,9 +53,10 @@ signals:
     void updateCurrentTool(Tool tool);
 
 private slots:
-    void newCanvas(int width, int height);
+    void on_new_canvas(int width, int height);
 
     void on_open_color_picker();
+    void on_load_image();
 
     void on_btn_selectTool_clicked();
     void on_btn_paintTool_clicked();
@@ -68,7 +69,6 @@ private slots:
     void on_btn_redo_clicked();
     void on_btn_dragTool_clicked();
     void on_btn_bucketTool_clicked();
-
     void on_btn_colorPickerTool_clicked();
 
 private:
@@ -84,5 +84,7 @@ private:
     QSet<int> m_pressedKeys;
 
     QImage m_copyBuffer;
+
+    void loadNewCanvas(QImage image);
 };
 #endif // MAINWINDOW_H
