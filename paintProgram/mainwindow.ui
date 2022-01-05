@@ -17,10 +17,10 @@
    <widget class="QTabWidget" name="c_tabWidget">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>80</y>
-      <width>421</width>
-      <height>381</height>
+      <x>0</x>
+      <y>40</y>
+      <width>801</width>
+      <height>541</height>
      </rect>
     </property>
     <widget class="QWidget" name="tab">
@@ -37,8 +37,8 @@
    <widget class="QPushButton" name="btn_addTab">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>30</y>
+      <x>350</x>
+      <y>0</y>
       <width>32</width>
       <height>32</height>
      </rect>
@@ -62,8 +62,8 @@
    <widget class="QPushButton" name="btn_removeTab">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>30</y>
+      <x>310</x>
+      <y>0</y>
       <width>32</width>
       <height>32</height>
      </rect>
@@ -87,8 +87,8 @@
    <widget class="QSpinBox" name="spin_brushSize">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>30</y>
+      <x>100</x>
+      <y>10</y>
       <width>61</width>
       <height>22</height>
      </rect>
@@ -106,8 +106,8 @@
    <widget class="QPushButton" name="btn_undo">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>180</y>
+      <x>240</x>
+      <y>0</y>
       <width>32</width>
       <height>32</height>
      </rect>
@@ -116,7 +116,11 @@
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>Undo</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/Resources/icon-undo.png</normaloff>:/Resources/icon-undo.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -131,8 +135,8 @@
    <widget class="QPushButton" name="btn_redo">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>210</y>
+      <x>270</x>
+      <y>0</y>
       <width>32</width>
       <height>32</height>
      </rect>
@@ -141,7 +145,11 @@
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>Redo</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/Resources/icon-redo.png</normaloff>:/Resources/icon-redo.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -156,8 +164,8 @@
    <widget class="QSpinBox" name="spin_spreadSensitivity">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>70</y>
+      <x>170</x>
+      <y>10</y>
       <width>61</width>
       <height>22</height>
      </rect>
@@ -215,6 +223,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
