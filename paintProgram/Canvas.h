@@ -42,14 +42,14 @@ private:
 
     //Drawing
     void paintBrush(uint posX, uint posY, QColor col);
-    void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);
+    void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);//Called when m_canvasMutex is locked
     QImage m_canvasImage;
     QMutex m_canvasMutex;
     const QColor m_c_transparentGrey = QColor(190,190,190,255);
     const QColor m_c_transparentWhite = QColor(255,255,255,255);
 
     //Undo/redo
-    void recordImageHistory();
+    void recordImageHistory();//Function called when m_canvasMutex is locked
     std::vector<QImage> m_imageHistory;
     int m_imageHistoryIndex = 0;
     const int m_c_maxHistory = 20;
@@ -74,7 +74,7 @@ private:
     const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
     //Dragging/copy/paste
-    QImage genClipBoard();
+    QImage genClipBoard();//Requires m_canvasMutex to be locked
     void dragPixels(QPoint mousePosition);
     const QPoint m_c_nullDragPos = QPoint(0,0);
     QPoint m_previousDragPos = m_c_nullDragPos;
