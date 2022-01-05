@@ -229,7 +229,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     {
         //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
         painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
-        painter.drawRect(m_selectionTool->geometry()/*.translated(m_panOffsetX, m_panOffsetY)*/);
+        painter.drawRect(m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY));
     }
 }
 
@@ -397,7 +397,7 @@ void Canvas::releaseSelect()
         }
     }
 
-    const QRect geometry = m_selectionTool->geometry()/*.translated(m_panOffsetX, m_panOffsetY)*/;
+    const QRect geometry = m_selectionTool->geometry();
     for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
     {
         for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
