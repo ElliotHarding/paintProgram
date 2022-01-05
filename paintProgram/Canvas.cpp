@@ -136,6 +136,10 @@ void Canvas::pasteKeysPressed()
     m_selectedPixels.clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
+    m_previousDragPos = m_c_nullDragPos;
+    m_dragOffsetX = 0;
+    m_dragOffsetY = 0;
+
     for(int x = 0; x < m_clipboardImage.width(); x++)
     {
         for(int y = 0; y < m_clipboardImage.height(); y++)
