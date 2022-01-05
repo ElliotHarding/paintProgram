@@ -136,8 +136,6 @@ void Canvas::pasteKeysPressed()
     m_selectedPixels.clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    std::lock_guard<std::mutex> panLock(m_panOffsetMutex);
-
     for(int x = 0; x < m_clipboardImage.width(); x++)
     {
         for(int y = 0; y < m_clipboardImage.height(); y++)
@@ -227,7 +225,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     {
         //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
         painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
-        painter.drawRect(m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY));
+        painter.drawRect(m_selectionTool->geometry()/*.translated(m_panOffsetX, m_panOffsetY)*/);
     }
 }
 
@@ -395,15 +393,12 @@ void Canvas::releaseSelect()
         }
     }
 
-    const QRect geometry = m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY);
+    const QRect geometry = m_selectionTool->geometry()/*.translated(m_panOffsetX, m_panOffsetY)*/;
     for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
     {
         for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
         {
-            if(highlightedPixels[x][y] == false)
-            {
-                highlightedPixels[x][y] = true;
-            }
+            highlightedPixels[x][y] = true;
         }
     }
 
@@ -426,8 +421,8 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
     QTransform transform;
     transform.scale(m_zoomFactor, m_zoomFactor);
     const QPoint zoomPoint = transform.inverted().map(QPoint(event->x(), event->y()));
-    std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
-    return QPoint(zoomPoint.x() + m_panOffsetX * -1, zoomPoint.y() + m_panOffsetY * -1);
+    //std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
+    return QPoint(zoomPoint.x()/* + m_panOffsetX * -1*/, zoomPoint.y() /*+ m_panOffsetY * -1*/);
 }
 
 /*
