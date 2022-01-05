@@ -35,8 +35,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    m_dlg_colorPicker->close();
-    //delete m_dlg_colorPicker; todo check
     delete ui;
 }
 

@@ -92,9 +92,7 @@ void Canvas::deleteKeyPressed()
 
 void Canvas::copyKeysPressed()
 {
-    prepClipBoard();
-
-    m_pParent->setCopyBuffer(m_clipboardImage);
+    m_pParent->setCopyBuffer(genClipBoard());
 
     update();
 }
@@ -566,21 +564,23 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
     }
 }
 
-void Canvas::prepClipBoard()
+QImage Canvas::genClipBoard()
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
 
     //Prep selected pixels for dragging
-    m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-    QPainter dragPainter(&m_clipboardImage);
+    QImage clipboard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    QPainter dragPainter(&clipboard);
     dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
-    dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
+    dragPainter.fillRect(clipboard.rect(), Qt::transparent);
 
     dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
     for(QPoint p : m_selectedPixels)
     {
         dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
     }
+
+    return clipboard;
 }
 
 void Canvas::dragPixels(QPoint mouseLocation)
@@ -602,7 +602,7 @@ void Canvas::dragPixels(QPoint mouseLocation)
         if(draggingSelected)
         {
             if(m_clipboardImage == QImage())
-                prepClipBoard();
+                m_clipboardImage = genClipBoard();
 
             m_previousDragPos = mouseLocation;
             m_dragOffsetX = 0;
