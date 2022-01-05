@@ -68,6 +68,19 @@ QImage MainWindow::getCopyBuffer()
     return m_copyBuffer;
 }
 
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if(event->type() == QEvent::KeyPress)
+    {
+        keyPressEvent(dynamic_cast<QKeyEvent*>(event));
+    }
+    else if(event->type() == QEvent::KeyRelease)
+    {
+        keyReleaseEvent(dynamic_cast<QKeyEvent*>(event));
+    }
+    return QObject::eventFilter( watched, event );
+}
+
 bool MainWindow::isCtrlPressed()
 {
     return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();
