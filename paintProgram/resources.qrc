@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resources/icon-drag.png</file>
+        <file>Resources/icon-file-explorer.png</file>
+        <file>Resources/icon-file-up.png</file>
+        <file>Resources/icon-new-page.png</file>
+        <file>Resources/icon-pan.png</file>
+        <file>Resources/icon-redo.png</file>
+        <file>Resources/icon-undo.png</file>
+        <file>Resources/icon-zoom-in.png</file>
+        <file>Resources/icon-zoom-out.png</file>
+    </qresource>
+</RCC>

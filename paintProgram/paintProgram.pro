@@ -12,19 +12,25 @@ CONFIG += resources_big
 SOURCES += \
     Canvas.cpp \
     dlg_size.cpp \
+    dlg_tools.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     Canvas.h \
     dlg_size.h \
+    dlg_tools.h \
     mainwindow.h
 
 FORMS += \
     dlg_size.ui \
+    dlg_tools.ui \
     mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc
