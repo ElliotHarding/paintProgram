@@ -47,11 +47,12 @@ void Canvas::updateCurrentTool(Tool t)
     if(m_tool != TOOL_DRAG)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
+        std::lock_guard<std::mutex> panLock(m_panOffsetMutex);
 
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
-        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+        painter.drawImage(QRect(m_dragOffsetX + m_panOffsetX * -1, m_dragOffsetY + m_panOffsetY * -1, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
         recordImageHistory();
 
@@ -217,7 +218,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     for(QPoint p : m_selectedPixels)
     {
         //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
+        painter.fillRect(QRect(p.x() + m_panOffsetX, p.y() + m_panOffsetY, 1, 1), m_c_selectionAreaColor);
     }
 
     //Draw selection tool
@@ -568,6 +569,7 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
 void Canvas::prepClipBoard()
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
+    std::lock_guard<std::mutex> panLock(m_panOffsetMutex);
 
     //Prep selected pixels for dragging
     m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
@@ -578,7 +580,7 @@ void Canvas::prepClipBoard()
     dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
     for(QPoint p : m_selectedPixels)
     {
-        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
+        dragPainter.fillRect(QRect(p.x() + m_panOffsetX, p.y() + m_panOffsetY, 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
     }
 }
 
