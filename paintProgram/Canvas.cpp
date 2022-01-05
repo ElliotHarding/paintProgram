@@ -47,6 +47,7 @@ void Canvas::updateCurrentTool(Tool t)
     if(m_tool != TOOL_DRAG)
     {
         std::lock_guard<std::mutex> lock(m_canvasMutex);
+        std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
 
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
@@ -134,6 +135,7 @@ void Canvas::pasteKeysPressed()
     m_selectedPixels.clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
+    std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
     m_previousDragPos = m_c_nullDragPos;
     m_dragOffsetX = 0;
     m_dragOffsetY = 0;
@@ -197,6 +199,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     std::lock_guard<std::mutex> lock(m_canvasMutex);
     std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
+    std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
 
     //Setup painter
     QPainter painter(this);
@@ -604,6 +607,7 @@ void Canvas::dragPixels(QPoint mouseLocation)
             if(m_clipboardImage == QImage())
                 m_clipboardImage = genClipBoard();
 
+            std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
             m_previousDragPos = mouseLocation;
             m_dragOffsetX = 0;
             m_dragOffsetY = 0;
@@ -614,6 +618,7 @@ void Canvas::dragPixels(QPoint mouseLocation)
         const int offsetX = (mouseLocation.x() - m_previousDragPos.x());
         const int offsetY = (mouseLocation.y() - m_previousDragPos.y());
 
+        std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
         m_dragOffsetX += offsetX;
         m_dragOffsetY += offsetY;
 

@@ -82,6 +82,7 @@ private:
     QImage m_clipboardImage;
     int m_dragOffsetX = 0;
     int m_dragOffsetY = 0;
+    std::mutex m_dragOffsetMutex;
 
     //Bucket
     void floodFillOnSimilar(QImage& image, QColor newColor, int startX, int startY, int sensitivity);
