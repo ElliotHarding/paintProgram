@@ -3,7 +3,7 @@
 
 #include <QTabWidget>
 #include <QRubberBand>
-#include <mutex>
+#include <QMutex>
 #include <vector>
 #include <QPainter>
 
@@ -44,7 +44,7 @@ private:
     void paintBrush(uint posX, uint posY, QColor col);
     void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);
     QImage m_canvasImage;
-    std::mutex m_canvasMutex;
+    QMutex m_canvasMutex;
     const QColor m_c_transparentGrey = QColor(190,190,190,255);
     const QColor m_c_transparentWhite = QColor(255,255,255,255);
 
@@ -63,7 +63,6 @@ private:
     QPoint m_previousPanPos = m_c_nullPanPos;
     float m_panOffsetX = 0;
     float m_panOffsetY = 0;
-    std::mutex m_panOffsetMutex;
 
     //Selecting
     void spreadSelectArea(int x, int y);
@@ -82,7 +81,6 @@ private:
     QImage m_clipboardImage;
     int m_dragOffsetX = 0;
     int m_dragOffsetY = 0;
-    std::mutex m_dragOffsetMutex;
 
     //Bucket
     void floodFillOnSimilar(QImage& image, QColor newColor, int startX, int startY, int sensitivity);

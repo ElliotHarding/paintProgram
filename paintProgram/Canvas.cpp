@@ -32,8 +32,9 @@ void Canvas::updateCurrentTool(Tool t)
 
     if(m_tool != TOOL_SELECT)
     {
-        //Reset selection rectangle tool
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+        //Reset selection rectangle tool        
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
         if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
@@ -41,13 +42,14 @@ void Canvas::updateCurrentTool(Tool t)
             m_selectedPixels.clear();
         }
 
+        canvasMutexLocker.unlock();
+
         doUpdate = true;
     }
 
     if(m_tool != TOOL_DRAG)
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
-        std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
@@ -62,6 +64,8 @@ void Canvas::updateCurrentTool(Tool t)
         m_dragOffsetX = 0;
         m_dragOffsetY = 0;
 
+        canvasMutexLocker.unlock();
+
         doUpdate = true;
     }
 
@@ -73,7 +77,7 @@ void Canvas::deleteKeyPressed()
 {
     if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
@@ -86,6 +90,8 @@ void Canvas::deleteKeyPressed()
         m_selectedPixels.clear();
 
         recordImageHistory();
+
+        canvasMutexLocker.unlock();
 
         update();
     }
@@ -100,7 +106,7 @@ void Canvas::copyKeysPressed()
 
 void Canvas::cutKeysPressed()
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Copy cut pixels to clipboard
     QImage clipBoard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
@@ -116,26 +122,28 @@ void Canvas::cutKeysPressed()
     {
         dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
         painter.fillRect(QRect(p.x(), p.y(), 1, 1), Qt::transparent);
-    }
-
-    m_pParent->setCopyBuffer(clipBoard);
+    }    
 
     m_selectedPixels.clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
+    canvasMutexLocker.unlock();
+
     recordImageHistory();
 
+    m_pParent->setCopyBuffer(clipBoard);
     update();
 }
 
 void Canvas::pasteKeysPressed()
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
     m_clipboardImage = m_pParent->getCopyBuffer();
 
     m_selectedPixels.clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
     m_previousDragPos = m_c_nullDragPos;
     m_dragOffsetX = 0;
     m_dragOffsetY = 0;
@@ -149,15 +157,16 @@ void Canvas::pasteKeysPressed()
         }
     }
 
+    canvasMutexLocker.unlock();
+
     update();
 }
 
 void Canvas::undoPressed()
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_imageHistoryIndex > 0)
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
-
         m_canvasImage = m_imageHistory[size_t(--m_imageHistoryIndex)];
 
         update();
@@ -166,10 +175,9 @@ void Canvas::undoPressed()
 
 void Canvas::redoPressed()
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_imageHistoryIndex < int(m_imageHistory.size() - 1))
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
-
         m_canvasImage = m_imageHistory[size_t(++m_imageHistoryIndex)];
 
         update();
@@ -178,7 +186,7 @@ void Canvas::redoPressed()
 
 QImage Canvas::getImageCopy()
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     return m_canvasImage;
 }
 
@@ -197,9 +205,7 @@ void Canvas::recordImageHistory()
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
-    std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
-    std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
+    m_canvasMutex.lock();
 
     //Setup painter
     QPainter painter(this);
@@ -212,6 +218,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
 
     //Draw current image
+
     QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
@@ -232,8 +239,11 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
         painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
         painter.drawRect(m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY));
     }
+
+    m_canvasMutex.unlock();
 }
 
+//Called when m_canvasMutex is locked
 void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offsetY)
 {
     for(int x = 0; x < m_canvasImage.width(); x++)
@@ -257,10 +267,12 @@ void Canvas::wheelEvent(QWheelEvent* event)
 {
     if(event->angleDelta().y() > 0)
     {
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_zoomFactor += m_cZoomIncrement;
     }
     else if(event->angleDelta().y() < 0)
     {
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
          m_zoomFactor -= m_cZoomIncrement;
     }
 
@@ -286,10 +298,9 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SELECT)
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
-
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
 
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         if(!m_pParent->isCtrlPressed())
         {
             m_selectedPixels.clear();
@@ -307,7 +318,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
 
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         floodFillOnSimilar(m_canvasImage, m_pParent->getSelectedColor(), mouseLocation.x(), mouseLocation.y(), m_pParent->getSpreadSensitivity());
 
         update();
@@ -316,7 +327,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
 
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_pParent->setSelectedColor(m_canvasImage.pixelColor(mouseLocation.x(), mouseLocation.y()));
     }
 }
@@ -331,11 +342,12 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if(m_tool == TOOL_PAN)
     {
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_previousPanPos = m_c_nullPanPos;
     }
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
-        std::lock_guard<std::mutex> lock(m_canvasMutex);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         recordImageHistory();
     }
 }
@@ -355,10 +367,11 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_SELECT)
         {
-            std::lock_guard<std::mutex> lock(m_canvasMutex);
+            m_canvasMutex.lock();
             m_selectionTool->setGeometry(
                         QRect(m_selectionToolOrigin, QPoint(mouseLocation.x(), mouseLocation.y())).normalized()
                         );
+            m_canvasMutex.unlock();
             update();
         }
         else if(m_tool == TOOL_PAN)
@@ -369,13 +382,15 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                std::lock_guard<std::mutex> lock(m_panOffsetMutex);
+                m_canvasMutex.lock();
                 m_panOffsetX += mouseLocation.x() - m_previousPanPos.x();
                 m_panOffsetY += mouseLocation.y() - m_previousPanPos.y();
 
-                update();
-
                 m_previousPanPos = mouseLocation;
+
+                m_canvasMutex.unlock();
+
+                update();                
             }
         }
         else if(m_tool == TOOL_DRAG)
@@ -387,7 +402,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
 void Canvas::releaseSelect()
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    m_canvasMutex.lock();
 
     //Prep vector container of highlighted pixels
     std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
@@ -399,6 +414,7 @@ void Canvas::releaseSelect()
     }
 
     const QRect geometry = m_selectionTool->geometry();
+    m_canvasMutex.unlock();
     for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
     {
         for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
@@ -406,6 +422,8 @@ void Canvas::releaseSelect()
             highlightedPixels[x][y] = true;
         }
     }
+
+    m_canvasMutex.lock();
 
     //Return highlighted pixels from algorithm to m_selectedPixels
     m_selectedPixels.clear();
@@ -418,15 +436,17 @@ void Canvas::releaseSelect()
         }
     }
 
+    m_canvasMutex.unlock();
+
     update();
 }
 
 QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     QTransform transform;
     transform.scale(m_zoomFactor, m_zoomFactor);
     const QPoint zoomPoint = transform.inverted().map(QPoint(event->x(), event->y()));
-    std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
     return QPoint(zoomPoint.x() + m_panOffsetX * -1, zoomPoint.y() + m_panOffsetY * -1);
 }
 
@@ -488,7 +508,7 @@ void spreadSelectFunction(QImage& image, std::vector<std::vector<bool>>& selecte
 
 void Canvas::spreadSelectArea(int x, int y)
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    m_canvasMutex.lock();
 
     //Prep vector container of highlighted pixels for spread algorithm
     std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
@@ -517,6 +537,8 @@ void Canvas::spreadSelectArea(int x, int y)
                 m_selectedPixels.push_back(QPoint(x,y));
         }
     }
+
+    m_canvasMutex.unlock();
 
     //Call to redraw
     update();
@@ -569,7 +591,7 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
 
 QImage Canvas::genClipBoard()
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    m_canvasMutex.lock();
 
     //Prep selected pixels for dragging
     QImage clipboard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
@@ -583,11 +605,15 @@ QImage Canvas::genClipBoard()
         dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
     }
 
+    m_canvasMutex.unlock();
+
     return clipboard;
 }
 
 void Canvas::dragPixels(QPoint mouseLocation)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
     //If starting dragging
     if(m_previousDragPos == m_c_nullDragPos)
     {
@@ -607,7 +633,6 @@ void Canvas::dragPixels(QPoint mouseLocation)
             if(m_clipboardImage == QImage())
                 m_clipboardImage = genClipBoard();
 
-            std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
             m_previousDragPos = mouseLocation;
             m_dragOffsetX = 0;
             m_dragOffsetY = 0;
@@ -618,7 +643,6 @@ void Canvas::dragPixels(QPoint mouseLocation)
         const int offsetX = (mouseLocation.x() - m_previousDragPos.x());
         const int offsetY = (mouseLocation.y() - m_previousDragPos.y());
 
-        std::lock_guard<std::mutex> dragOffsetLock(m_dragOffsetMutex);
         m_dragOffsetX += offsetX;
         m_dragOffsetY += offsetY;
 
@@ -636,7 +660,7 @@ void Canvas::dragPixels(QPoint mouseLocation)
 
 void Canvas::paintBrush(uint posX, uint posY, QColor col)
 {
-    std::lock_guard<std::mutex> lock(m_canvasMutex);
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Check positions are in bounds of vector
     if(posX <= m_canvasImage.width() && posY <= m_canvasImage.height())
