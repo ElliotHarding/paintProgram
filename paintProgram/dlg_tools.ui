@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>624</width>
-    <height>586</height>
+    <width>74</width>
+    <height>158</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="btn_dragTool">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>280</y>
+     <x>0</x>
+     <y>84</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -26,7 +26,11 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Drag</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/icon-drag.png</normaloff>:/Resources/icon-drag.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -41,8 +45,8 @@
   <widget class="QPushButton" name="btn_bucketTool">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>320</y>
+     <x>42</x>
+     <y>84</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -66,8 +70,8 @@
   <widget class="QPushButton" name="btn_paintTool">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>60</y>
+     <x>42</x>
+     <y>0</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -91,8 +95,8 @@
   <widget class="QPushButton" name="btn_colorPickerTool">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>360</y>
+     <x>0</x>
+     <y>126</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -116,8 +120,8 @@
   <widget class="QPushButton" name="btn_selectTool">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>50</y>
+     <x>0</x>
+     <y>0</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -126,7 +130,11 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Select</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/icon-selection.png</normaloff>:/Resources/icon-selection.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -141,8 +149,8 @@
   <widget class="QPushButton" name="btn_panTool">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>430</y>
+     <x>42</x>
+     <y>126</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -170,8 +178,8 @@
   <widget class="QPushButton" name="btn_eraserTool">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>130</y>
+     <x>42</x>
+     <y>42</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -195,8 +203,8 @@
   <widget class="QPushButton" name="btn_selectSpreadTool">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>100</y>
+     <x>0</x>
+     <y>42</y>
      <width>32</width>
      <height>32</height>
     </rect>
