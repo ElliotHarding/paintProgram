@@ -14,36 +14,40 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->c_tabWidget->clear();
 
+    m_dlg_colorPicker = new QColorDialog(this);
+    m_dlg_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
+    m_dlg_colorPicker->show();
+
+    m_dlg_size = new DLG_Size(this);
+
+    m_dlg_tools = new DLG_Tools(this);
+    m_dlg_tools->show();
+
     on_new_canvas(200, 200);
-
-    m_colorPicker = new QColorDialog(this);
-    m_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
-    m_colorPicker->show();
-
-    m_dlg_size = new DLG_Size();
 
     //Connections
     connect(m_dlg_size, SIGNAL(confirmedSize(int,int)), this, SLOT(on_new_canvas(int,int)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
+    connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(on_open_tools()));
     connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load_image()));
     connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save_image()));
 }
 
 MainWindow::~MainWindow()
 {
-    m_colorPicker->close();
-    delete m_colorPicker;
+    m_dlg_colorPicker->close();
+    //delete m_dlg_colorPicker; todo check
     delete ui;
 }
 
 QColor MainWindow::getSelectedColor()
 {
-    return m_colorPicker->currentColor();
+    return m_dlg_colorPicker->currentColor();
 }
 
 void MainWindow::setSelectedColor(QColor col)
 {
-    m_colorPicker->setCurrentColor(col);
+    m_dlg_colorPicker->setCurrentColor(col);
 }
 
 int MainWindow::getBrushSize()
@@ -121,8 +125,8 @@ void MainWindow::loadNewCanvas(QImage image)
 {
     Canvas* c = new Canvas(this, image);
 
-    c->updateCurrentTool(m_currentTool);
-    connect(this, SIGNAL(updateCurrentTool(Tool)), c, SLOT(updateCurrentTool(Tool)));
+    c->updateCurrentTool(m_dlg_tools->getCurrentTool());
+    connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), c, SLOT(updateCurrentTool(Tool)));
 
     ui->c_tabWidget->addTab(c, "todo");
 }
@@ -156,7 +160,12 @@ void MainWindow::on_new_canvas(int width, int height)
 
 void MainWindow::on_open_color_picker()
 {
-    m_colorPicker->show();
+    m_dlg_colorPicker->show();
+}
+
+void MainWindow::on_open_tools()
+{
+    m_dlg_tools->show();
 }
 
 void MainWindow::on_btn_addTab_clicked()
@@ -167,52 +176,6 @@ void MainWindow::on_btn_addTab_clicked()
 void MainWindow::on_btn_removeTab_clicked()
 {
     ui->c_tabWidget->removeTab(ui->c_tabWidget->currentIndex());
-}
-
-void MainWindow::setCurrentTool(Tool t)
-{
-    m_currentTool = t;
-    emit updateCurrentTool(t);
-}
-
-void MainWindow::on_btn_selectTool_clicked()
-{
-    setCurrentTool(TOOL_SELECT);
-}
-
-void MainWindow::on_btn_paintTool_clicked()
-{
-    setCurrentTool(TOOL_PAINT);
-}
-
-void MainWindow::on_btn_selectSpreadTool_clicked()
-{
-    setCurrentTool(TOOL_SPREAD_ON_SIMILAR);
-}
-
-void MainWindow::on_btn_eraserTool_clicked()
-{
-    setCurrentTool(TOOL_ERASER);
-}
-
-void MainWindow::on_btn_panTool_clicked()
-{
-    setCurrentTool(TOOL_PAN);
-}
-
-void MainWindow::on_btn_dragTool_clicked()
-{
-    setCurrentTool(TOOL_DRAG);
-}
-
-void MainWindow::on_btn_bucketTool_clicked()
-{
-    setCurrentTool(TOOL_BUCKET);
-}
-
-void MainWindow::on_btn_colorPickerTool_clicked()
-{
-    setCurrentTool(TOOL_COLOR_PICKER);
 }
 
 void MainWindow::on_btn_undo_clicked()

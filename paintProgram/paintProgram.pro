@@ -20,7 +20,8 @@ HEADERS += \
     Canvas.h \
     dlg_size.h \
     dlg_tools.h \
-    mainwindow.h
+    mainwindow.h \
+    tools.h
 
 FORMS += \
     dlg_size.ui \

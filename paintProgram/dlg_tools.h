@@ -3,20 +3,40 @@
 
 #include <QDialog>
 
+#include "tools.h"
+
 namespace Ui {
 class dlg_tools;
 }
 
-class dlg_tools : public QDialog
+class DLG_Tools : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit dlg_tools(QWidget *parent = nullptr);
-    ~dlg_tools();
+    explicit DLG_Tools(QWidget *parent = nullptr);
+    ~DLG_Tools();
+
+    Tool getCurrentTool() { return m_currentTool; }
+
+signals:
+    void currentToolUpdated(Tool tool);
+
+private slots:
+    void on_btn_selectTool_clicked();
+    void on_btn_paintTool_clicked();
+    void on_btn_selectSpreadTool_clicked();
+    void on_btn_eraserTool_clicked();
+    void on_btn_dragTool_clicked();
+    void on_btn_bucketTool_clicked();
+    void on_btn_colorPickerTool_clicked();
+    void on_btn_panTool_clicked();
 
 private:
     Ui::dlg_tools *ui;
+
+    void setCurrentTool(Tool tool);
+    Tool m_currentTool = TOOL_PAINT;
 };
 
 #endif // DLG_TOOLS_H

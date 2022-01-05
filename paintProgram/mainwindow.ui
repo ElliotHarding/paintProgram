@@ -34,56 +34,6 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QPushButton" name="btn_selectTool">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>20</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Select</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_paintTool">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>30</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Paint</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QPushButton" name="btn_addTab">
     <property name="geometry">
      <rect>
@@ -134,31 +84,6 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="btn_selectSpreadTool">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Select Spread</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QSpinBox" name="spin_brushSize">
     <property name="geometry">
      <rect>
@@ -176,60 +101,6 @@
     </property>
     <property name="value">
      <number>20</number>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_eraserTool">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>100</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Eraser</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_panTool">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>400</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="icon">
-     <iconset resource="resources.qrc">
-      <normaloff>:/Resources/icon-pan.png</normaloff>:/Resources/icon-pan.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_undo">
@@ -282,31 +153,6 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="btn_dragTool">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>250</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Drag</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QSpinBox" name="spin_spreadSensitivity">
     <property name="geometry">
      <rect>
@@ -318,56 +164,6 @@
     </property>
     <property name="maximum">
      <number>255</number>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_bucketTool">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>290</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Bucket</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_colorPickerTool">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>330</y>
-      <width>32</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Color Picker</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
     </property>
    </widget>
   </widget>
@@ -392,6 +188,7 @@
      <string>Menu</string>
     </property>
     <addaction name="actionColor_Picker"/>
+    <addaction name="actionTools"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMenu"/>
@@ -412,9 +209,12 @@
     <string>Save Image</string>
    </property>
   </action>
+  <action name="actionTools">
+   <property name="text">
+    <string>Tools</string>
+   </property>
+  </action>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
