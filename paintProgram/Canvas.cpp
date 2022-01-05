@@ -99,7 +99,9 @@ void Canvas::deleteKeyPressed()
 
 void Canvas::copyKeysPressed()
 {
+    m_canvasMutex.lock();
     m_pParent->setCopyBuffer(genClipBoard());
+    m_canvasMutex.unlock();
 
     update();
 }
@@ -589,10 +591,9 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
     }
 }
 
+//Requires m_canvasMutex to be locked
 QImage Canvas::genClipBoard()
 {
-    m_canvasMutex.lock();
-
     //Prep selected pixels for dragging
     QImage clipboard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
     QPainter dragPainter(&clipboard);
@@ -604,8 +605,6 @@ QImage Canvas::genClipBoard()
     {
         dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
     }
-
-    m_canvasMutex.unlock();
 
     return clipboard;
 }
