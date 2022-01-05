@@ -9,6 +9,6 @@
         <file>Resources/icon-undo.png</file>
         <file>Resources/icon-zoom-in.png</file>
         <file>Resources/icon-zoom-out.png</file>
-        <file>Resources/icon-gate-selection.png</file>
+        <file>Resources/icon-selection.png</file>
     </qresource>
 </RCC>
