@@ -215,13 +215,13 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
     //Draw dragging pixels
-    painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+    painter.drawImage(QRect(m_dragOffsetX + m_panOffsetX, m_dragOffsetY + m_panOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Draw highlighed pixels
     for(QPoint p : m_selectedPixels)
     {
         //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-        painter.fillRect(QRect(p.x(), p.y(), 1, 1), m_c_selectionAreaColor);
+        painter.fillRect(QRect(p.x() + m_panOffsetX, p.y() + m_panOffsetY, 1, 1), m_c_selectionAreaColor);
     }
 
     //Draw selection tool
@@ -425,8 +425,8 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
     QTransform transform;
     transform.scale(m_zoomFactor, m_zoomFactor);
     const QPoint zoomPoint = transform.inverted().map(QPoint(event->x(), event->y()));
-    //std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
-    return QPoint(zoomPoint.x()/* + m_panOffsetX * -1*/, zoomPoint.y() /*+ m_panOffsetY * -1*/);
+    std::lock_guard<std::mutex> panOffsetLock(m_panOffsetMutex);
+    return QPoint(zoomPoint.x() + m_panOffsetX * -1, zoomPoint.y() + m_panOffsetY * -1);
 }
 
 /*
