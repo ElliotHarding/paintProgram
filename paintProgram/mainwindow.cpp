@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(on_open_tools()));
     connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load_image()));
     connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save_image()));
+    connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
 }
 
 MainWindow::~MainWindow()
@@ -137,10 +138,16 @@ void MainWindow::on_get_canvas_settings(int width, int height, QString name)
 {
     if(m_bMakingNewCanvas)
     {
-        loadNewCanvas(QImage(QSize(width, height), QImage::Format_ARGB32));
+        QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
+        QPainter painter(&newImage);
+        painter.setCompositionMode (QPainter::CompositionMode_Clear);
+        painter.fillRect(QRect(0, 0, newImage.width(), newImage.height()), Qt::transparent);
+
+        loadNewCanvas(newImage, name);
     }
     else
     {
+        ui->c_tabWidget->setTabText(ui->c_tabWidget->currentIndex(), name);
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
@@ -167,26 +174,28 @@ void MainWindow::on_btn_canvasSettings_clicked()
     }
 }
 
-void MainWindow::loadNewCanvas(QImage image)
+void MainWindow::loadNewCanvas(QImage image, QString name)
 {
     Canvas* c = new Canvas(this, image);
 
     c->updateCurrentTool(m_dlg_tools->getCurrentTool());
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), c, SLOT(updateCurrentTool(Tool)));
 
-    ui->c_tabWidget->addTab(c, "todo");
+    ui->c_tabWidget->addTab(c, name);
 }
 
 void MainWindow::on_load_image()
 {
     QFileDialog loadDialog;
-    QString filePath = loadDialog.getOpenFileUrl(this).path();
+    const QUrl fileUrl = loadDialog.getOpenFileUrl(this);
+    QString filePath = fileUrl.path();
+    QString fileName = fileUrl.fileName();
 
     //todo ~ why do i need to cut the first / of the url?
     filePath = filePath.mid(1, filePath.length());
 
     QImage image(filePath);
-    loadNewCanvas(image);
+    loadNewCanvas(image, fileName);
 }
 
 void MainWindow::on_save_image()

@@ -208,8 +208,15 @@
     <addaction name="actionColor_Picker"/>
     <addaction name="actionTools"/>
    </widget>
+   <widget class="QMenu" name="menuImage">
+    <property name="title">
+     <string>Image</string>
+    </property>
+    <addaction name="actionImageSettings"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMenu"/>
+   <addaction name="menuImage"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionColor_Picker">
@@ -230,6 +237,11 @@
   <action name="actionTools">
    <property name="text">
     <string>Tools</string>
+   </property>
+  </action>
+  <action name="actionImageSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

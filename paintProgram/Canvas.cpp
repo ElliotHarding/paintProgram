@@ -55,7 +55,7 @@ void Canvas::updateSettings(int width, int height, QString name)
 
     //Paint old image onto new image
     painter.setCompositionMode (QPainter::CompositionMode_Source);
-    painter.drawImage(newImage.rect(), m_canvasImage);
+    painter.drawImage(m_canvasImage.rect(), m_canvasImage);
 
     painter.end();
 
