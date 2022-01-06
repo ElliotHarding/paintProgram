@@ -231,9 +231,7 @@ void MainWindow::on_save_as()
 
 QString MainWindow::getSaveAsPath(QString name)
 {
-    QString fname = QFileDialog::getSaveFileName(nullptr, "test sav e name", ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );
-    qDebug() << "name is : " << fname;
-    return fname;
+    return QFileDialog::getSaveFileName(nullptr, "file", ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );;
 }
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
