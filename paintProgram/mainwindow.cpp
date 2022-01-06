@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_tools = new DLG_Tools(this);
     m_dlg_tools->show();
 
+    m_bMakingNewCanvas = true;
     on_get_canvas_settings(200, 200, "New");
 
     //Connections
@@ -134,7 +135,36 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)
 {
-    loadNewCanvas(QImage(QSize(width, height), QImage::Format_ARGB32));
+    if(m_bMakingNewCanvas)
+    {
+        loadNewCanvas(QImage(QSize(width, height), QImage::Format_ARGB32));
+    }
+    else
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->updateSettings(width, height, name);
+        }
+    }
+}
+
+void MainWindow::on_btn_addTab_clicked()
+{
+    m_bMakingNewCanvas = true;
+    m_dlg_canvasSettings->show();
+}
+
+void MainWindow::on_btn_canvasSettings_clicked()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        m_dlg_canvasSettings->setCurrentValues(c->width(), c->height(), c->name());
+
+        m_bMakingNewCanvas = false;
+        m_dlg_canvasSettings->show();
+    }
 }
 
 void MainWindow::loadNewCanvas(QImage image)
@@ -177,11 +207,6 @@ void MainWindow::on_open_color_picker()
 void MainWindow::on_open_tools()
 {
     m_dlg_tools->show();
-}
-
-void MainWindow::on_btn_addTab_clicked()
-{
-    m_dlg_canvasSettings->show();
 }
 
 void MainWindow::on_btn_undo_clicked()

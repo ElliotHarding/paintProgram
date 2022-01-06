@@ -13,6 +13,15 @@ DLG_SetCanvasSettings::~DLG_SetCanvasSettings()
     delete ui;
 }
 
+void DLG_SetCanvasSettings::setCurrentValues(int width, int height, QString name)
+{
+    ui->spinBox_width->setValue(width);
+    ui->spinBox_height->setValue(height);
+    ui->textEdit_name->setText(name);
+
+    update();
+}
+
 void DLG_SetCanvasSettings::on_btn_okay_clicked()
 {
     QString name = ui->textEdit_name->text();

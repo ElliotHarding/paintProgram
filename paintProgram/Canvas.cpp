@@ -24,6 +24,48 @@ Canvas::~Canvas()
         delete m_selectionTool;
 }
 
+int Canvas::width()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    return m_canvasImage.width();
+}
+
+int Canvas::height()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    return m_canvasImage.height();
+}
+
+QString Canvas::name()
+{
+    return m_name;
+}
+
+void Canvas::updateSettings(int width, int height, QString name)
+{
+    //Create new image based on new settings
+    QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
+
+    m_canvasMutex.lock();
+
+    //Fill new image as transparent
+    QPainter painter(&newImage);
+    painter.setCompositionMode (QPainter::CompositionMode_Clear);
+    painter.fillRect(QRect(0, 0, newImage.width(), newImage.height()), Qt::transparent);
+
+    //Paint old image onto new image
+    painter.setCompositionMode (QPainter::CompositionMode_Source);
+    painter.drawImage(newImage.rect(), m_canvasImage);
+
+    painter.end();
+
+    m_canvasImage = newImage;
+
+    m_canvasMutex.unlock();
+
+    m_name = name;
+}
+
 void Canvas::updateCurrentTool(Tool t)
 {
     m_tool = t;

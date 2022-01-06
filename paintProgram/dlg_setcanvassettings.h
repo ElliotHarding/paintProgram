@@ -15,6 +15,8 @@ public:
     explicit DLG_SetCanvasSettings(QWidget *parent = nullptr);
     ~DLG_SetCanvasSettings();
 
+    void setCurrentValues(int width, int height, QString name);
+
 signals:
     void confirmCanvasSettings(int width, int height, QString name);
 

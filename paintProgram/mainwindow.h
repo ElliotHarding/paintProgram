@@ -55,6 +55,8 @@ private slots:
 
     void on_c_tabWidget_tabCloseRequested(int index);
 
+    void on_btn_canvasSettings_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -68,5 +70,6 @@ private:
     QImage m_copyBuffer;
 
     void loadNewCanvas(QImage image);
+    bool m_bMakingNewCanvas = false;
 };
 #endif // MAINWINDOW_H
