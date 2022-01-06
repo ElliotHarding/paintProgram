@@ -14,6 +14,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class Canvas;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -45,8 +47,9 @@ private slots:
     void on_open_color_picker();
     void on_open_tools();
 
-    void on_load_image();
-    void on_save_image();
+    void on_load();
+    void on_save();
+    void on_save_as();
 
     void on_btn_addTab_clicked();
 
@@ -71,5 +74,8 @@ private:
 
     void loadNewCanvas(QImage image, QString name, QString savePath = "");
     bool m_bMakingNewCanvas = false;
+
+    QString getSaveAsPath(QString name);
+    void saveCanvas(Canvas* canvas, QString path);
 };
 #endif // MAINWINDOW_H

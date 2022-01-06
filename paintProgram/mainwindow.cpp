@@ -30,9 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
     connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(on_open_tools()));
-    connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load_image()));
-    connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save_image()));
+    connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load()));
+    connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save()));
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
+    connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(on_save_as()));
 }
 
 MainWindow::~MainWindow()
@@ -186,7 +187,7 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
     ui->c_tabWidget->addTab(c, name);
 }
 
-void MainWindow::on_load_image()
+void MainWindow::on_load()
 {
     QFileDialog loadDialog;
     const QUrl fileUrl = loadDialog.getOpenFileUrl(this);
@@ -200,27 +201,49 @@ void MainWindow::on_load_image()
     loadNewCanvas(image, fileName, filePath);
 }
 
-void MainWindow::on_save_image()
+void MainWindow::on_save()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        QString savePath = c->getSavePath();
+        if(savePath == "")
+        {
+            savePath = getSaveAsPath(ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()));
+        }
+
+        saveCanvas(c, savePath);
+    }
+}
+
+void MainWindow::on_save_as()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
         QImage image = c->getImageCopy();
 
-        QString savePath = c->getSavePath();
-        if(savePath == "")
-        {
-            QString saveDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                             "/home",
-                                                             QFileDialog::ShowDirsOnly
-                                                             | QFileDialog::DontResolveSymlinks);
-            savePath = saveDir + "/" + ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()) + ".png";
-            c->setSavePath(savePath);
-        }
+        const QString savePath = getSaveAsPath(ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()));
 
-        qDebug() << savePath;
-        qDebug() << (image.save(savePath) ? "Saved image" : "Failed to save image");
+        saveCanvas(c, savePath);
     }
+}
+
+QString MainWindow::getSaveAsPath(QString name)
+{
+    const QString saveDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                     "/home",
+                                                     QFileDialog::ShowDirsOnly
+                                                     | QFileDialog::DontResolveSymlinks);
+    return saveDir + "/" + name + ".png";
+}
+
+void MainWindow::saveCanvas(Canvas *canvas, QString path)
+{
+    canvas->setSavePath(path);
+
+    qDebug() << path;
+    qDebug() << (canvas->getImageCopy().save(path) ? "Saved image" : "Failed to save image");
 }
 
 void MainWindow::on_open_color_picker()
