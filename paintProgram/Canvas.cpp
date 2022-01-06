@@ -2,6 +2,7 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <QSet>
+#include <QFileInfo>
 #include <stack>
 
 Canvas::Canvas(MainWindow* parent, QImage image) :
@@ -70,7 +71,9 @@ void Canvas::updateSettings(int width, int height, QString name)
 
     if(m_savePath != "")
     {
-        //Todo replace name of file in path with new name
+        QFileInfo info(m_savePath);
+        m_savePath = info.path() + "/" + name + ".png";
+        qDebug() << m_savePath;
     }
 }
 
