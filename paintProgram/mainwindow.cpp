@@ -151,7 +151,7 @@ void MainWindow::on_get_canvas_settings(int width, int height, QString name)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->updateSettings(width, height);
+            c->updateSettings(width, height, name);
         }
     }
 }
@@ -174,11 +174,13 @@ void MainWindow::on_btn_canvasSettings_clicked()
     }
 }
 
-void MainWindow::loadNewCanvas(QImage image, QString name)
+void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
 {
     Canvas* c = new Canvas(this, image);
 
-    c->updateCurrentTool(m_dlg_tools->getCurrentTool());
+    c->setSavePath(savePath);
+
+    c->updateCurrentTool(m_dlg_tools->getCurrentTool());    
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), c, SLOT(updateCurrentTool(Tool)));
 
     ui->c_tabWidget->addTab(c, name);
@@ -195,7 +197,7 @@ void MainWindow::on_load_image()
     filePath = filePath.mid(1, filePath.length());
 
     QImage image(filePath);
-    loadNewCanvas(image, fileName);
+    loadNewCanvas(image, fileName, filePath);
 }
 
 void MainWindow::on_save_image()
@@ -204,7 +206,20 @@ void MainWindow::on_save_image()
     if(c)
     {
         QImage image = c->getImageCopy();
-        qDebug() << image.save(ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()) + ".png");
+
+        QString savePath = c->getSavePath();
+        if(savePath == "")
+        {
+            QString saveDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                             "/home",
+                                                             QFileDialog::ShowDirsOnly
+                                                             | QFileDialog::DontResolveSymlinks);
+            savePath = saveDir + "/" + ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()) + ".png";
+            c->setSavePath(savePath);
+        }
+
+        qDebug() << savePath;
+        qDebug() << (image.save(savePath) ? "Saved image" : "Failed to save image");
     }
 }
 

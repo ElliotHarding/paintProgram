@@ -20,7 +20,10 @@ public:
     int width();
     int height();
 
-    void updateSettings(int width, int height);
+    QString getSavePath();
+    void setSavePath(QString path);
+
+    void updateSettings(int width, int height, QString name);
 
     void deleteKeyPressed();
     void copyKeysPressed();
@@ -93,6 +96,8 @@ private:
     Tool m_tool = TOOL_PAINT;
 
     MainWindow* m_pParent;
+
+    QString m_savePath = "";
 };
 
 #endif // CANVAS_H

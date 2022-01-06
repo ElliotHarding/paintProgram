@@ -36,7 +36,17 @@ int Canvas::height()
     return m_canvasImage.height();
 }
 
-void Canvas::updateSettings(int width, int height)
+QString Canvas::getSavePath()
+{
+    return m_savePath;
+}
+
+void Canvas::setSavePath(QString path)
+{
+    m_savePath = path;
+}
+
+void Canvas::updateSettings(int width, int height, QString name)
 {
     //Create new image based on new settings
     QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
@@ -57,6 +67,11 @@ void Canvas::updateSettings(int width, int height)
     m_canvasImage = newImage;
 
     m_canvasMutex.unlock();
+
+    if(m_savePath != "")
+    {
+        //Todo replace name of file in path with new name
+    }
 }
 
 void Canvas::updateCurrentTool(Tool t)

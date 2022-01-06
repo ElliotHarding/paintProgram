@@ -69,7 +69,7 @@ private:
 
     QImage m_copyBuffer;
 
-    void loadNewCanvas(QImage image, QString name);
+    void loadNewCanvas(QImage image, QString name, QString savePath = "");
     bool m_bMakingNewCanvas = false;
 };
 #endif // MAINWINDOW_H
