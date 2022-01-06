@@ -72,7 +72,7 @@ void Canvas::updateSettings(int width, int height, QString name)
     if(m_savePath != "")
     {
         QFileInfo info(m_savePath);
-        m_savePath = info.path() + "/" + name + ".png";
+        m_savePath = info.path() + "/" + name + "." + info.completeSuffix();
         qDebug() << m_savePath;
     }
 }
