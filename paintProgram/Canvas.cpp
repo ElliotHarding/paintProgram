@@ -36,12 +36,7 @@ int Canvas::height()
     return m_canvasImage.height();
 }
 
-QString Canvas::name()
-{
-    return m_name;
-}
-
-void Canvas::updateSettings(int width, int height, QString name)
+void Canvas::updateSettings(int width, int height)
 {
     //Create new image based on new settings
     QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
@@ -62,8 +57,6 @@ void Canvas::updateSettings(int width, int height, QString name)
     m_canvasImage = newImage;
 
     m_canvasMutex.unlock();
-
-    m_name = name;
 }
 
 void Canvas::updateCurrentTool(Tool t)

@@ -151,7 +151,7 @@ void MainWindow::on_get_canvas_settings(int width, int height, QString name)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->updateSettings(width, height, name);
+            c->updateSettings(width, height);
         }
     }
 }
@@ -167,7 +167,7 @@ void MainWindow::on_btn_canvasSettings_clicked()
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        m_dlg_canvasSettings->setCurrentValues(c->width(), c->height(), c->name());
+        m_dlg_canvasSettings->setCurrentValues(c->width(), c->height(), ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()));
 
         m_bMakingNewCanvas = false;
         m_dlg_canvasSettings->show();
@@ -189,7 +189,7 @@ void MainWindow::on_load_image()
     QFileDialog loadDialog;
     const QUrl fileUrl = loadDialog.getOpenFileUrl(this);
     QString filePath = fileUrl.path();
-    QString fileName = fileUrl.fileName();
+    QString fileName = QFileInfo(fileUrl.fileName()).baseName();
 
     //todo ~ why do i need to cut the first / of the url?
     filePath = filePath.mid(1, filePath.length());

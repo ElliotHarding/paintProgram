@@ -19,9 +19,8 @@ public:
 
     int width();
     int height();
-    QString name();
 
-    void updateSettings(int width, int height, QString name);
+    void updateSettings(int width, int height);
 
     void deleteKeyPressed();
     void copyKeysPressed();
@@ -92,8 +91,6 @@ private:
     void floodFillOnSimilar(QImage& image, QColor newColor, int startX, int startY, int sensitivity);
 
     Tool m_tool = TOOL_PAINT;
-
-    QString m_name;
 
     MainWindow* m_pParent;
 };
