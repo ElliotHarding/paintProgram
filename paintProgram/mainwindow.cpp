@@ -18,15 +18,15 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
     m_dlg_colorPicker->show();
 
-    m_dlg_size = new DLG_Size(this);
+    m_dlg_canvasSettings = new DLG_SetCanvasSettings(this);
 
     m_dlg_tools = new DLG_Tools(this);
     m_dlg_tools->show();
 
-    on_new_canvas(200, 200);
+    on_get_canvas_settings(200, 200, "New");
 
     //Connections
-    connect(m_dlg_size, SIGNAL(confirmedSize(int,int)), this, SLOT(on_new_canvas(int,int)));
+    connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
     connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(on_open_tools()));
     connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load_image()));
@@ -132,6 +132,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     m_pressedKeys.remove(event->key());
 }
 
+void MainWindow::on_get_canvas_settings(int width, int height, QString name)
+{
+    loadNewCanvas(QImage(QSize(width, height), QImage::Format_ARGB32));
+}
+
 void MainWindow::loadNewCanvas(QImage image)
 {
     Canvas* c = new Canvas(this, image);
@@ -164,11 +169,6 @@ void MainWindow::on_save_image()
     }
 }
 
-void MainWindow::on_new_canvas(int width, int height)
-{
-    loadNewCanvas(QImage(QSize(width, height), QImage::Format_ARGB32));
-}
-
 void MainWindow::on_open_color_picker()
 {
     m_dlg_colorPicker->show();
@@ -181,7 +181,7 @@ void MainWindow::on_open_tools()
 
 void MainWindow::on_btn_addTab_clicked()
 {
-    m_dlg_size->show();
+    m_dlg_canvasSettings->show();
 }
 
 void MainWindow::on_btn_undo_clicked()

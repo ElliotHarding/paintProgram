@@ -11,20 +11,20 @@ CONFIG += resources_big
 
 SOURCES += \
     Canvas.cpp \
-    dlg_size.cpp \
+    dlg_setcanvassettings.cpp \
     dlg_tools.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     Canvas.h \
-    dlg_size.h \
+    dlg_setcanvassettings.h \
     dlg_tools.h \
     mainwindow.h \
     tools.h
 
 FORMS += \
-    dlg_size.ui \
+    dlg_setcanvassettings.ui \
     dlg_tools.ui \
     mainwindow.ui
 

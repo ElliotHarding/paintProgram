@@ -7,7 +7,7 @@
 #include <QColorDialog>
 #include <QSet>
 
-#include "dlg_size.h"
+#include "dlg_setcanvassettings.h"
 #include "dlg_tools.h"
 
 QT_BEGIN_NAMESPACE
@@ -40,7 +40,7 @@ protected: //todo - can remove the key events because event filter handles them.
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
-    void on_new_canvas(int width, int height);
+    void on_get_canvas_settings(int width, int height, QString name);
 
     void on_open_color_picker();
     void on_open_tools();
@@ -59,7 +59,7 @@ private:
     Ui::MainWindow *ui;
 
     //Dialogs
-    DLG_Size* m_dlg_size;
+    DLG_SetCanvasSettings* m_dlg_canvasSettings;
     DLG_Tools* m_dlg_tools;
     QColorDialog* m_dlg_colorPicker;
 

@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DLG_Size</class>
- <widget class="QDialog" name="DLG_Size">
+ <class>DLG_SetCanvasSettings</class>
+ <widget class="QDialog" name="DLG_SetCanvasSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>98</height>
+    <width>150</width>
+    <height>141</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <widget class="QLabel" name="lbl_height">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>60</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Height</string>
+   </property>
+  </widget>
   <widget class="QPushButton" name="btn_okay">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>60</y>
+     <x>40</x>
+     <y>110</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -26,11 +39,24 @@
     <string>Okay</string>
    </property>
   </widget>
+  <widget class="QLabel" name="lbl_width">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>60</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Width</string>
+   </property>
+  </widget>
   <widget class="QSpinBox" name="spinBox_width">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>30</y>
+     <x>10</x>
+     <y>80</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -45,8 +71,8 @@
   <widget class="QSpinBox" name="spinBox_height">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>30</y>
+     <x>80</x>
+     <y>80</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -58,30 +84,27 @@
     <number>8192</number>
    </property>
   </widget>
-  <widget class="QLabel" name="lbl_width">
+  <widget class="QLineEdit" name="textEdit_name">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>10</y>
-     <width>47</width>
-     <height>13</height>
+     <x>10</x>
+     <y>30</y>
+     <width>131</width>
+     <height>20</height>
     </rect>
-   </property>
-   <property name="text">
-    <string>Width</string>
    </property>
   </widget>
-  <widget class="QLabel" name="lbl_height">
+  <widget class="QLabel" name="lbl_name">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>10</x>
      <y>10</y>
      <width>47</width>
      <height>13</height>
     </rect>
    </property>
    <property name="text">
-    <string>Height</string>
+    <string>Name</string>
    </property>
   </widget>
  </widget>
