@@ -231,11 +231,9 @@ void MainWindow::on_save_as()
 
 QString MainWindow::getSaveAsPath(QString name)
 {
-    const QString saveDir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                     "/home",
-                                                     QFileDialog::ShowDirsOnly
-                                                     | QFileDialog::DontResolveSymlinks);
-    return saveDir + "/" + name + ".png";
+    QString fname = QFileDialog::getSaveFileName(nullptr, "test sav e name", ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm)" );
+    qDebug() << "name is : " << fname;
+    return fname;
 }
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
