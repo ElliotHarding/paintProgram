@@ -11,6 +11,9 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 {
     m_canvasImage = image;
 
+    m_panOffsetX = (geometry().width() / 2) - (m_canvasImage.width() / 4);
+    m_panOffsetY = (geometry().height() / 2) - (m_canvasImage.height() / 2);
+
     recordImageHistory();
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
@@ -267,7 +270,10 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
     //Zoom painter
+    QPointF center(geometry().width() / qreal(2), geometry().height() / qreal(2));
+    painter.translate(center);
     painter.scale(m_zoomFactor, m_zoomFactor);
+    painter.translate(-center);
 
     //Switch out transparent pixels for grey-white pattern
     drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
@@ -320,14 +326,22 @@ void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offse
 
 void Canvas::wheelEvent(QWheelEvent* event)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    const int direction = event->angleDelta().y() > 0 ? 1 : -1;
+
+    const int xFromCenter = event->x() - geometry().width() / 2;
+    m_panOffsetX -= xFromCenter * 0.05 * direction;
+
+    const int yFromCenter = event->y() - geometry().height() / 2;
+    m_panOffsetY -= yFromCenter * 0.05 * direction;
+
     if(event->angleDelta().y() > 0)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_zoomFactor += m_cZoomIncrement;
     }
     else if(event->angleDelta().y() < 0)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
          m_zoomFactor -= m_cZoomIncrement;
     }
 
