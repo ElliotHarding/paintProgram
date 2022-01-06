@@ -49,10 +49,11 @@ private slots:
     void on_save_image();
 
     void on_btn_addTab_clicked();
-    void on_btn_removeTab_clicked();
 
     void on_btn_undo_clicked();
     void on_btn_redo_clicked();
+
+    void on_c_tabWidget_tabCloseRequested(int index);
 
 private:
     Ui::MainWindow *ui;

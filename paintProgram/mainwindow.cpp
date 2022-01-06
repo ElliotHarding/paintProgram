@@ -184,11 +184,6 @@ void MainWindow::on_btn_addTab_clicked()
     m_dlg_size->show();
 }
 
-void MainWindow::on_btn_removeTab_clicked()
-{
-    ui->c_tabWidget->removeTab(ui->c_tabWidget->currentIndex());
-}
-
 void MainWindow::on_btn_undo_clicked()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
@@ -205,4 +200,11 @@ void MainWindow::on_btn_redo_clicked()
     {
         c->redoPressed();
     }
+}
+
+void MainWindow::on_c_tabWidget_tabCloseRequested(int index)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->widget(index));
+    ui->c_tabWidget->removeTab(index);
+    delete c;
 }
