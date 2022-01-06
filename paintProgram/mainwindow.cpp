@@ -96,15 +96,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
-    if(m_pressedKeys.find(Qt::Key_C) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
-    {
-        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
-        if(c)
-        {
-            c->copyKeysPressed();
-        }
-    }
-
     if(m_pressedKeys.find(Qt::Key_Delete) != m_pressedKeys.end())
     {
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
@@ -114,21 +105,38 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         }
     }
 
-    if(m_pressedKeys.find(Qt::Key_V) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
+    if(m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
     {
-        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
-        if(c)
+        if(m_pressedKeys.find(Qt::Key_C) != m_pressedKeys.end())
         {
-            c->pasteKeysPressed();
+            Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+            if(c)
+            {
+                c->copyKeysPressed();
+            }
         }
-    }
 
-    if(m_pressedKeys.find(Qt::Key_X) != m_pressedKeys.end() && m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
-    {
-        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
-        if(c)
+        else if(m_pressedKeys.find(Qt::Key_V) != m_pressedKeys.end())
         {
-            c->cutKeysPressed();
+            Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+            if(c)
+            {
+                c->pasteKeysPressed();
+            }
+        }
+
+        else if(m_pressedKeys.find(Qt::Key_X) != m_pressedKeys.end())
+        {
+            Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+            if(c)
+            {
+                c->cutKeysPressed();
+            }
+        }
+
+        else if(m_pressedKeys.find(Qt::Key_S) != m_pressedKeys.end())
+        {
+            on_save();
         }
     }
 
