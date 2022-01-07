@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->c_tabWidget->clear();
 
     m_dlg_colorPicker = new QColorDialog(this);
-    m_dlg_colorPicker->setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel);
+    m_dlg_colorPicker->setOptions(QColorDialog::ColorDialogOption::ShowAlphaChannel | QColorDialog::ColorDialogOption::NoButtons | QColorDialog::ColorDialogOption::DontUseNativeDialog);
     m_dlg_colorPicker->show();
 
     m_dlg_canvasSettings = new DLG_SetCanvasSettings(this);
@@ -163,7 +163,7 @@ void MainWindow::moveEvent(QMoveEvent *moveEvent)
         m_dlg_tools->move(pos().x(), (geometry().height() / 2) - (m_dlg_tools->geometry().height() / 2));
 
     if(m_dlg_colorPicker)
-        m_dlg_colorPicker->move(geometry().right() - m_dlg_colorPicker->geometry().width(), geometry().bottom() - m_dlg_colorPicker->geometry().height());
+        m_dlg_colorPicker->move(geometry().right() - m_dlg_colorPicker->geometry().width(), (geometry().bottom() / 2) - (m_dlg_colorPicker->geometry().height() / 2));
 }
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)
