@@ -479,6 +479,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
 }
 
+//refactor : recordImageHistory, dragPixels(mouseLocation);, spreadSelectArea <-- todo
+
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
     m_bMouseDown = false;
