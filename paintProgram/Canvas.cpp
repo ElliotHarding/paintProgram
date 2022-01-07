@@ -413,6 +413,17 @@ QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& cente
     return QPoint(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
 }
 
+void paintRect(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight)
+{
+    if(x <= canvas.width() && y <= canvas.height())
+    {
+        QPainter painter(&canvas);
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
+        QRect rect = QRect(x - widthHeight/2, y - widthHeight/2, widthHeight, widthHeight);
+        painter.fillRect(rect, col);
+    }
+}
+
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
     m_bMouseDown = true;
@@ -421,14 +432,14 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
     if(m_tool == TOOL_PAINT)
-    {        
-        canvasMutexLocker.unlock();
-        paintBrush(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
+    {
+        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize());
+        update();
     }
     else if(m_tool == TOOL_ERASER)
-    {        
-        canvasMutexLocker.unlock();
-        paintBrush(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
+    {
+        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize());
+        update();
     }
     else if(m_tool == TOOL_SELECT)
     {
@@ -488,22 +499,25 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_bMouseDown)
     {
+        m_canvasMutex.lock();
+
         QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
+
         if(m_tool == TOOL_PAINT)
         {
-            paintBrush(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
+            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize());
+            update();
         }
         else if(m_tool == TOOL_ERASER)
         {
-            paintBrush(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
+            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize());
+            update();
         }
         else if(m_tool == TOOL_SELECT)
         {
-            m_canvasMutex.lock();
             m_selectionTool->setGeometry(
                         QRect(m_selectionToolOrigin, QPoint(mouseLocation.x(), mouseLocation.y())).normalized()
                         );
-            m_canvasMutex.unlock();
             update();
         }
         else if(m_tool == TOOL_PAN)
@@ -514,21 +528,22 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                m_canvasMutex.lock();
                 m_panOffsetX += mouseLocation.x() - m_previousPanPos.x();
                 m_panOffsetY += mouseLocation.y() - m_previousPanPos.y();
 
                 m_previousPanPos = mouseLocation;
-
-                m_canvasMutex.unlock();
 
                 update();                
             }
         }
         else if(m_tool == TOOL_DRAG)
         {
+            m_canvasMutex.unlock();
             dragPixels(mouseLocation);
+            m_canvasMutex.lock();
         }
+
+        m_canvasMutex.unlock();
     }
 }
 
@@ -780,22 +795,5 @@ void Canvas::dragPixels(QPoint mouseLocation)
         update();
 
         m_previousDragPos = mouseLocation;
-    }
-}
-
-void Canvas::paintBrush(uint posX, uint posY, QColor col)
-{
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
-    //Check positions are in bounds of vector
-    if(posX <= m_canvasImage.width() && posY <= m_canvasImage.height())
-    {
-        QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_Source);
-        QRect rect = QRect(posX - m_pParent->getBrushSize()/2, posY - m_pParent->getBrushSize()/2, m_pParent->getBrushSize(), m_pParent->getBrushSize());
-        painter.fillRect(rect, col);
-
-        //Call to redraw
-        update();
     }
 }

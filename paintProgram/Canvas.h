@@ -53,7 +53,6 @@ private:
     bool m_bMouseDown = false;
 
     //Drawing
-    void paintBrush(uint posX, uint posY, QColor col);
     void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);//Called when m_canvasMutex is locked
     QImage m_canvasImage;
     QMutex m_canvasMutex;
