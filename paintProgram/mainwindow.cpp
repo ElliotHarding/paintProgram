@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "Canvas.h"
 
+#include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QFileDialog>
 #include <QDebug>
@@ -152,6 +153,17 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QMainWindow::resizeEvent(event);
 
     ui->c_tabWidget->resize(geometry().width(), geometry().height() - 40);//todo make the 40 a constant or caculate it
+}
+
+void MainWindow::moveEvent(QMoveEvent *moveEvent)
+{
+    QMainWindow::moveEvent(moveEvent);
+
+    if(m_dlg_tools)
+        m_dlg_tools->move(pos().x(), (geometry().height() / 2) - (m_dlg_tools->geometry().height() / 2));
+
+    if(m_dlg_colorPicker)
+        m_dlg_colorPicker->move(geometry().right() - m_dlg_colorPicker->geometry().width(), geometry().bottom() - m_dlg_colorPicker->geometry().height());
 }
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)

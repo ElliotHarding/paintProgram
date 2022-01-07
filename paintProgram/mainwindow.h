@@ -42,6 +42,7 @@ protected: //todo - can remove the key events because event filter handles them.
     void keyReleaseEvent(QKeyEvent *event) override;
 
     void resizeEvent(QResizeEvent* event) override;
+    void moveEvent(QMoveEvent* moveEvent) override;
 
 private slots:
     void on_get_canvas_settings(int width, int height, QString name);
@@ -66,9 +67,9 @@ private:
     Ui::MainWindow *ui;
 
     //Dialogs
-    DLG_SetCanvasSettings* m_dlg_canvasSettings;
-    DLG_Tools* m_dlg_tools;
-    QColorDialog* m_dlg_colorPicker;
+    DLG_SetCanvasSettings* m_dlg_canvasSettings = nullptr;
+    DLG_Tools* m_dlg_tools = nullptr;
+    QColorDialog* m_dlg_colorPicker = nullptr;
 
     QSet<int> m_pressedKeys;
 
