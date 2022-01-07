@@ -57,14 +57,14 @@ void Canvas::writeText(QString letter, QFont font)
 
         m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
 
-        QPainter dragPainter(&m_clipboardImage);
-        dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
-        dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
+        QPainter textPainter(&m_clipboardImage);
+        textPainter.setCompositionMode (QPainter::CompositionMode_Clear);
+        textPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
 
-        dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-        dragPainter.setPen(m_pParent->getSelectedColor());
-        dragPainter.setFont(font);
-        dragPainter.drawText(m_textDrawLocation, m_textToDraw);
+        textPainter.setCompositionMode (QPainter::CompositionMode_Source);
+        textPainter.setPen(m_pParent->getSelectedColor());
+        textPainter.setFont(font);
+        textPainter.drawText(m_textDrawLocation, m_textToDraw);
 
         m_canvasMutex.unlock();
 
@@ -452,6 +452,9 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_textDrawLocation = QPoint(mouseEvent->x() - m_panOffsetX, mouseEvent->y() - m_panOffsetY);
+        canvasMutexLocker.unlock();
+
+        updateText(m_pParent->getTextFont());
     }
 }
 

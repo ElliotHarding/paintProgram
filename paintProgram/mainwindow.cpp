@@ -79,6 +79,11 @@ QImage MainWindow::getCopyBuffer()
     return m_copyBuffer;
 }
 
+QFont MainWindow::getTextFont()
+{
+    return m_dlg_textSettings->getFont();
+}
+
 //todo. pass mousewheel events to canvas for zoom. because clicking on other dialogs means you cant zoom until clicked back on mainwindow
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {

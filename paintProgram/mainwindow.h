@@ -37,6 +37,8 @@ public:
     void setCopyBuffer(QImage image);
     QImage getCopyBuffer();
 
+    QFont getTextFont();
+
 protected: //todo - can remove the key events because event filter handles them....
     bool eventFilter(QObject* watched, QEvent* event ) override;
     void keyPressEvent(QKeyEvent *event) override;
