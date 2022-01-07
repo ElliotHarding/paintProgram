@@ -50,7 +50,6 @@ private:
     void mousePressEvent(QMouseEvent* mouseEvent) override;
     void mouseReleaseEvent(QMouseEvent *releaseEvent) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    QPoint getLocationFromMouseEvent(QMouseEvent* event);
     bool m_bMouseDown = false;
 
     //Drawing

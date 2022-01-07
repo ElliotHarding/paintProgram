@@ -384,10 +384,10 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
     const int direction = event->angleDelta().y() > 0 ? 1 : -1;
 
-    const int xFromCenter = event->x() - geometry().width() / 2;
+    const int xFromCenter = event->x() - m_center.x();
     m_panOffsetX -= xFromCenter * 0.05 * direction;
 
-    const int yFromCenter = event->y() - geometry().height() / 2;
+    const int yFromCenter = event->y() - m_center.y();
     m_panOffsetY -= yFromCenter * 0.05 * direction;
 
     if(event->angleDelta().y() > 0)
@@ -403,27 +403,35 @@ void Canvas::wheelEvent(QWheelEvent* event)
     update();
 }
 
+QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, float& zoomFactor, float& offsetX, float& offsetY)
+{
+    QTransform transform;
+    transform.translate(center.x(), center.y());
+    transform.scale(zoomFactor, zoomFactor);
+    transform.translate(-center.x(), -center.y());
+    const QPoint zoomPoint = transform.inverted().map(QPoint(globalPos.x(), globalPos.y()));
+    return QPoint(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
+}
+
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
     m_bMouseDown = true;
 
-    //todo ~ check if we can take the mouseLocation init out of the if statements
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
     if(m_tool == TOOL_PAINT)
-    {
-        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+    {        
+        canvasMutexLocker.unlock();
         paintBrush(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
     }
     else if(m_tool == TOOL_ERASER)
-    {
-        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+    {        
+        canvasMutexLocker.unlock();
         paintBrush(mouseLocation.x(), mouseLocation.y(), Qt::transparent);
     }
     else if(m_tool == TOOL_SELECT)
     {
-        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         if(!m_pParent->isCtrlPressed())
         {
             m_selectedPixels.clear();
@@ -433,33 +441,24 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
-    {
-        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
+    {        
         spreadSelectArea(mouseLocation.x(), mouseLocation.y());
     }
     else if(m_tool == TOOL_BUCKET)
     {
-        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         floodFillOnSimilar(m_canvasImage, m_pParent->getSelectedColor(), mouseLocation.x(), mouseLocation.y(), m_pParent->getSpreadSensitivity());
 
         update();
     }
     else if(m_tool == TOOL_COLOR_PICKER)
     {
-        QPoint mouseLocation = getLocationFromMouseEvent(mouseEvent);
-
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_pParent->setSelectedColor(m_canvasImage.pixelColor(mouseLocation.x(), mouseLocation.y()));
     }
     else if(m_tool == TOOL_TEXT)
     {
-        QPoint clickPos = getLocationFromMouseEvent(mouseEvent);
+        m_textDrawLocation = mouseLocation;
 
-        m_canvasMutex.lock();
-        m_textDrawLocation = clickPos;
-        m_canvasMutex.unlock();
+        canvasMutexLocker.unlock();
 
         updateText(m_pParent->getTextFont());
     }
@@ -489,7 +488,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_bMouseDown)
     {
-        QPoint mouseLocation = getLocationFromMouseEvent(event);
+        QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
         if(m_tool == TOOL_PAINT)
         {
             paintBrush(mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor());
@@ -572,17 +571,6 @@ void Canvas::releaseSelect()
     m_canvasMutex.unlock();
 
     update();
-}
-
-QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
-{
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    QTransform transform;
-    transform.translate(m_center.x(), m_center.y());
-    transform.scale(m_zoomFactor, m_zoomFactor);
-    transform.translate(-m_center.x(), -m_center.y());
-    const QPoint zoomPoint = transform.inverted().map(QPoint(event->x(), event->y()));
-    return QPoint(zoomPoint.x() + m_panOffsetX * -1, zoomPoint.y() + m_panOffsetY * -1);
 }
 
 /*
