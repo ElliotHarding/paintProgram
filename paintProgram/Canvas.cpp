@@ -453,7 +453,9 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
     {        
+        canvasMutexLocker.unlock();
         spreadSelectArea(mouseLocation.x(), mouseLocation.y());
+        canvasMutexLocker.relock();
     }
     else if(m_tool == TOOL_BUCKET)
     {
@@ -472,6 +474,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         canvasMutexLocker.unlock();
 
         updateText(m_pParent->getTextFont());
+
+        canvasMutexLocker.relock();
     }
 }
 
