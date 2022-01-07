@@ -479,7 +479,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
 }
 
-//refactor : recordImageHistory, dragPixels(mouseLocation);, spreadSelectArea <-- todo
+//refactor : recordImageHistory, dragPixels(mouseLocation);, spreadSelectArea, & maybe releaseSelect() <-- todo
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
