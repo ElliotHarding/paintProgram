@@ -450,7 +450,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_TEXT)
     {
-        m_textDrawLocation = getLocationFromMouseEvent(mouseEvent);
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
+        m_textDrawLocation = QPoint(mouseEvent->x() - m_panOffsetX, mouseEvent->y() - m_panOffsetY);
     }
 }
 
