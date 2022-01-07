@@ -448,7 +448,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
             m_selectedPixels.clear();
         }
 
-        m_selectionToolOrigin = QPoint(mouseLocation.x(), mouseLocation.y());
+        m_selectionToolOrigin = mouseLocation;
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
