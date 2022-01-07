@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save()));
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
     connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(on_save_as()));
+    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_btn_addTab_clicked()));
 }
 
 MainWindow::~MainWindow()
