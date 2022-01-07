@@ -100,6 +100,10 @@ private:
     //Bucket
     void floodFillOnSimilar(QImage& image, QColor newColor, int startX, int startY, int sensitivity);
 
+    //Geometry
+    QPoint m_center;
+    void updateCenter();
+
     Tool m_tool = TOOL_PAINT;
 
     MainWindow* m_pParent;

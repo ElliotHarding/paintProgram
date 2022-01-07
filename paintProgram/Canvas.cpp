@@ -11,8 +11,10 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 {
     m_canvasImage = image;
 
-    m_panOffsetX = (geometry().width() / 2) - (m_canvasImage.width() / 4);
-    m_panOffsetY = (geometry().height() / 2) - (m_canvasImage.height() / 2);
+    updateCenter();
+
+    m_panOffsetX = m_center.x() - (m_canvasImage.width() / 4);
+    m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
 
     m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
 
@@ -64,6 +66,7 @@ void Canvas::writeText(QString letter, QFont font)
         textPainter.setCompositionMode (QPainter::CompositionMode_Source);
         textPainter.setPen(m_pParent->getSelectedColor());
         textPainter.setFont(font);
+
         textPainter.drawText(m_textDrawLocation, m_textToDraw);
 
         m_canvasMutex.unlock();
@@ -288,8 +291,11 @@ void Canvas::resizeEvent(QResizeEvent *event)
     QTabWidget::resizeEvent(event);
 
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    m_panOffsetX = (geometry().width() / 2) - (m_canvasImage.width() / 2);
-    m_panOffsetY = (geometry().height() / 2) - (m_canvasImage.height() / 2);
+
+    updateCenter();
+
+    m_panOffsetX = m_center.x() - (m_canvasImage.width() / 2);
+    m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
 
     if(m_textDrawLocation.x() > m_canvasImage.width() || m_textDrawLocation.y() > m_canvasImage.height())
         m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
@@ -318,11 +324,10 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     QPainter painter(this);
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
-    //Zoom painter
-    QPointF center(geometry().width() / qreal(2), geometry().height() / qreal(2));
-    painter.translate(center);
+    //Zoom painter    
+    painter.translate(m_center);
     painter.scale(m_zoomFactor, m_zoomFactor);
-    painter.translate(-center);
+    painter.translate(-m_center);
 
     //Switch out transparent pixels for grey-white pattern
     drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
@@ -450,9 +455,10 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_TEXT)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
-        m_textDrawLocation = QPoint(mouseEvent->x() - m_panOffsetX, mouseEvent->y() - m_panOffsetY);
-        canvasMutexLocker.unlock();
+        //QMutexLocker canvasMutexLocker(&m_canvasMutex);
+        //m_textDrawLocation = QPoint(mouseEvent->x() - m_panOffsetX, mouseEvent->y() - m_panOffsetY);
+        m_textDrawLocation = getLocationFromMouseEvent(mouseEvent);
+        //canvasMutexLocker.unlock();
 
         updateText(m_pParent->getTextFont());
     }
@@ -571,7 +577,9 @@ QPoint Canvas::getLocationFromMouseEvent(QMouseEvent *event)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     QTransform transform;
+    transform.translate(m_center.x(), m_center.y());
     transform.scale(m_zoomFactor, m_zoomFactor);
+    transform.translate(-m_center.x(), -m_center.y());
     const QPoint zoomPoint = transform.inverted().map(QPoint(event->x(), event->y()));
     return QPoint(zoomPoint.x() + m_panOffsetX * -1, zoomPoint.y() + m_panOffsetY * -1);
 }
@@ -713,6 +721,11 @@ void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int 
             }
         }
     }
+}
+
+void Canvas::updateCenter()
+{
+    m_center = QPoint(geometry().width() / 2, geometry().height() / 2);
 }
 
 //Requires m_canvasMutex to be locked
