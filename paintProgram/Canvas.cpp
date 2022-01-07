@@ -455,10 +455,11 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_TEXT)
     {
-        //QMutexLocker canvasMutexLocker(&m_canvasMutex);
-        //m_textDrawLocation = QPoint(mouseEvent->x() - m_panOffsetX, mouseEvent->y() - m_panOffsetY);
-        m_textDrawLocation = getLocationFromMouseEvent(mouseEvent);
-        //canvasMutexLocker.unlock();
+        QPoint clickPos = getLocationFromMouseEvent(mouseEvent);
+
+        m_canvasMutex.lock();
+        m_textDrawLocation = clickPos;
+        m_canvasMutex.unlock();
 
         updateText(m_pParent->getTextFont());
     }
