@@ -248,6 +248,17 @@ QImage Canvas::getImageCopy()
     return m_canvasImage;
 }
 
+void Canvas::resizeEvent(QResizeEvent *event)
+{
+    QTabWidget::resizeEvent(event);
+
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_panOffsetX = (geometry().width() / 2) - (m_canvasImage.width() / 2);
+    m_panOffsetY = (geometry().height() / 2) - (m_canvasImage.height() / 2);
+
+    update();
+}
+
 //Function called when m_canvasMutex is locked
 void Canvas::recordImageHistory()
 {

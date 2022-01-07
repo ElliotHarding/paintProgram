@@ -34,6 +34,8 @@ public:
 
     QImage getImageCopy();
 
+    void resizeEvent(QResizeEvent* event) override;
+
 public slots:
     void updateCurrentTool(Tool t);
 

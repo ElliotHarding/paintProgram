@@ -23,9 +23,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_tools = new DLG_Tools(this);
     m_dlg_tools->show();
 
-    m_bMakingNewCanvas = true;
-    on_get_canvas_settings(200, 200, "New");
-
     //Connections
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
@@ -35,6 +32,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
     connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(on_save_as()));
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_btn_addTab_clicked()));
+
+    showMaximized();
+
+    m_bMakingNewCanvas = true;
+    on_get_canvas_settings(200, 200, "New");
 }
 
 MainWindow::~MainWindow()
@@ -72,6 +74,7 @@ QImage MainWindow::getCopyBuffer()
     return m_copyBuffer;
 }
 
+//todo. pass mousewheel events to canvas for zoom. because clicking on other dialogs means you cant zoom until clicked back on mainwindow
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::KeyPress)
@@ -142,6 +145,13 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     }
 
     m_pressedKeys.remove(event->key());
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+
+    ui->c_tabWidget->resize(geometry().width(), geometry().height() - 40);//todo make the 40 a constant or caculate it
 }
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)

@@ -41,6 +41,8 @@ protected: //todo - can remove the key events because event filter handles them.
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
 
+    void resizeEvent(QResizeEvent* event) override;
+
 private slots:
     void on_get_canvas_settings(int width, int height, QString name);
 
