@@ -8,7 +8,7 @@ DLG_Tools::DLG_Tools(QWidget *parent) :
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     setFixedWidth(74);
-    setFixedHeight(158);
+    setFixedHeight(195);
 }
 
 DLG_Tools::~DLG_Tools()
@@ -60,4 +60,9 @@ void DLG_Tools::on_btn_colorPickerTool_clicked()
 void DLG_Tools::on_btn_panTool_clicked()
 {
     setCurrentTool(TOOL_PAN);
+}
+
+void DLG_Tools::on_btn_textTool_clicked()
+{
+    setCurrentTool(TOOL_TEXT);
 }

@@ -32,6 +32,8 @@ private slots:
     void on_btn_colorPickerTool_clicked();
     void on_btn_panTool_clicked();
 
+    void on_btn_textTool_clicked();
+
 private:
     Ui::dlg_tools *ui;
 

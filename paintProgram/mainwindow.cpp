@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_tools = new DLG_Tools(this);
     m_dlg_tools->show();
 
+    m_dlg_textSettings = new DLG_TextSettings(this);
+
     //Connections
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
@@ -33,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
     connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(on_save_as()));
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_btn_addTab_clicked()));
+    connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), this, SLOT(updatedCurrentTool(Tool)));
+    connect(m_dlg_textSettings, SIGNAL(updateFont(QFont)), this, SLOT(on_update_font(QFont)));
 
     showMaximized();
 
@@ -97,6 +101,15 @@ bool MainWindow::isCtrlPressed()
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());
+
+    if(m_dlg_tools->getCurrentTool() == TOOL_TEXT)
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->writeText(event->text(), m_dlg_textSettings->getFont());
+        }
+    }
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
@@ -185,6 +198,27 @@ void MainWindow::on_get_canvas_settings(int width, int height, QString name)
         {
             c->updateSettings(width, height, name);
         }
+    }
+}
+
+void MainWindow::updatedCurrentTool(Tool tool)
+{
+    if(tool == TOOL_TEXT)
+    {
+        m_dlg_textSettings->show();
+    }
+    else
+    {
+        m_dlg_textSettings->hide();
+    }
+}
+
+void MainWindow::on_update_font(QFont font)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->updateText(m_dlg_textSettings->getFont());
     }
 }
 

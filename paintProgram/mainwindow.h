@@ -9,6 +9,7 @@
 
 #include "dlg_setcanvassettings.h"
 #include "dlg_tools.h"
+#include "dlg_textsettings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -47,6 +48,10 @@ protected: //todo - can remove the key events because event filter handles them.
 private slots:
     void on_get_canvas_settings(int width, int height, QString name);
 
+    void updatedCurrentTool(Tool tool);
+
+    void on_update_font(QFont font);
+
     void on_open_color_picker();
     void on_open_tools();
 
@@ -69,6 +74,7 @@ private:
     //Dialogs
     DLG_SetCanvasSettings* m_dlg_canvasSettings = nullptr;
     DLG_Tools* m_dlg_tools = nullptr;
+    DLG_TextSettings* m_dlg_textSettings = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
 
     QSet<int> m_pressedKeys;

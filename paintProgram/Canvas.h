@@ -20,6 +20,9 @@ public:
     int width();
     int height();
 
+    void updateText(QFont font);
+    void writeText(QString letter, QFont font);
+
     QString getSavePath();
     void setSavePath(QString path);
 
@@ -57,6 +60,8 @@ private:
     QMutex m_canvasMutex;
     const QColor m_c_transparentGrey = QColor(190,190,190,255);
     const QColor m_c_transparentWhite = QColor(255,255,255,255);
+    QString m_textToDraw = "";
+    QPoint m_textDrawLocation;
 
     //Undo/redo
     void recordImageHistory();//Function called when m_canvasMutex is locked

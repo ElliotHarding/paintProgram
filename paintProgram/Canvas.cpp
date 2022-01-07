@@ -14,6 +14,8 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     m_panOffsetX = (geometry().width() / 2) - (m_canvasImage.width() / 4);
     m_panOffsetY = (geometry().height() / 2) - (m_canvasImage.height() / 2);
 
+    m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
+
     recordImageHistory();
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
@@ -38,6 +40,36 @@ int Canvas::height()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     return m_canvasImage.height();
+}
+
+void Canvas::updateText(QFont font)
+{
+    writeText("", font);
+}
+
+void Canvas::writeText(QString letter, QFont font)
+{
+    if(m_tool == TOOL_TEXT)
+    {
+        m_textToDraw += letter;
+
+        m_canvasMutex.lock();
+
+        m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+
+        QPainter dragPainter(&m_clipboardImage);
+        dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
+        dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
+
+        dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+        dragPainter.setPen(m_pParent->getSelectedColor());
+        dragPainter.setFont(font);
+        dragPainter.drawText(m_textDrawLocation, m_textToDraw);
+
+        m_canvasMutex.unlock();
+
+        update();
+    }
 }
 
 QString Canvas::getSavePath()
@@ -82,6 +114,9 @@ void Canvas::updateSettings(int width, int height, QString name)
 
 void Canvas::updateCurrentTool(Tool t)
 {
+    if(m_tool == TOOL_TEXT && t != TOOL_TEXT)
+        m_textToDraw = "";
+
     m_tool = t;
 
     bool doUpdate = false;
@@ -256,6 +291,9 @@ void Canvas::resizeEvent(QResizeEvent *event)
     m_panOffsetX = (geometry().width() / 2) - (m_canvasImage.width() / 2);
     m_panOffsetY = (geometry().height() / 2) - (m_canvasImage.height() / 2);
 
+    if(m_textDrawLocation.x() > m_canvasImage.width() || m_textDrawLocation.y() > m_canvasImage.height())
+        m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
+
     update();
 }
 
@@ -409,6 +447,10 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_pParent->setSelectedColor(m_canvasImage.pixelColor(mouseLocation.x(), mouseLocation.y()));
+    }
+    else if(m_tool == TOOL_TEXT)
+    {
+        m_textDrawLocation = getLocationFromMouseEvent(mouseEvent);
     }
 }
 
