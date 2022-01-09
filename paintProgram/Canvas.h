@@ -78,7 +78,6 @@ private:
     float m_panOffsetY = 0;
 
     //Selecting
-    void spreadSelectArea(int x, int y);
     void releaseSelect();
     QList<QPoint> m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
