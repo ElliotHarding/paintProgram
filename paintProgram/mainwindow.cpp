@@ -26,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_textSettings = new DLG_TextSettings(this);
 
+    m_dlg_brushSettings = new DLG_BrushSettings(this);
+    m_dlg_brushSettings->show();
+
     //Connections
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
@@ -61,7 +64,7 @@ void MainWindow::setSelectedColor(QColor col)
 
 int MainWindow::getBrushSize()
 {
-    return ui->spin_brushSize->value();
+    return m_dlg_brushSettings->getBrushSize();
 }
 
 int MainWindow::getSpreadSensitivity()
@@ -182,6 +185,9 @@ void MainWindow::moveEvent(QMoveEvent *moveEvent)
 
     if(m_dlg_colorPicker)
         m_dlg_colorPicker->move(geometry().right() - m_dlg_colorPicker->geometry().width(), (geometry().bottom() / 2) - (m_dlg_colorPicker->geometry().height() / 2));
+
+    if(m_dlg_brushSettings)
+        m_dlg_brushSettings->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
 }
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)
@@ -216,6 +222,15 @@ void MainWindow::updatedCurrentTool(Tool tool)
     {
         m_dlg_textSettings->hide();
     }
+
+    if(tool == TOOL_PAINT || tool == TOOL_ERASER)
+    {
+        m_dlg_brushSettings->show();
+    }
+    else
+    {
+        m_dlg_brushSettings->hide();
+    }
 }
 
 void MainWindow::on_update_font(QFont font)
@@ -223,7 +238,7 @@ void MainWindow::on_update_font(QFont font)
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->updateText(m_dlg_textSettings->getFont());
+        c->updateText(font);
     }
 }
 

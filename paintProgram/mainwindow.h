@@ -10,6 +10,7 @@
 #include "dlg_setcanvassettings.h"
 #include "dlg_tools.h"
 #include "dlg_textsettings.h"
+#include "dlg_brushsettings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -77,6 +78,7 @@ private:
     DLG_SetCanvasSettings* m_dlg_canvasSettings = nullptr;
     DLG_Tools* m_dlg_tools = nullptr;
     DLG_TextSettings* m_dlg_textSettings = nullptr;
+    DLG_BrushSettings* m_dlg_brushSettings = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
 
     QSet<int> m_pressedKeys;

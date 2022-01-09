@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DLG_BrushSettings</class>
+ <widget class="QDialog" name="DLG_BrushSettings">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>70</width>
+    <height>35</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Brush</string>
+  </property>
+  <widget class="QSpinBox" name="spin_brushSize">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>5</y>
+     <width>60</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
+   <property name="maximum">
+    <number>100</number>
+   </property>
+   <property name="value">
+    <number>20</number>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
