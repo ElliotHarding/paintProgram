@@ -587,6 +587,18 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
 }
 
+bool isSelectedPixelClicked(QList<QPoint>& selectedPixels, QPoint& mouseLocation)
+{
+    for(QPoint p : selectedPixels)
+    {
+        if(p.x() == mouseLocation.x() && p.y() == mouseLocation.y())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_bMouseDown)
@@ -634,17 +646,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             if(m_previousDragPos == Constants::NullDragPoint)
             {
                 //check if mouse is over selection area
-                bool draggingSelected = false;
-                for(QPoint p : m_selectedPixels)
-                {
-                    if(p.x() == mouseLocation.x() && p.y() == mouseLocation.y())
-                    {
-                        draggingSelected = true;
-                        break;
-                    }
-                }
-
-                if(draggingSelected)
+                if(isSelectedPixelClicked(m_selectedPixels, mouseLocation))
                 {
                     if(m_clipboardImage == QImage())
                         m_clipboardImage = generateClipBoard(m_canvasImage, m_selectedPixels);
