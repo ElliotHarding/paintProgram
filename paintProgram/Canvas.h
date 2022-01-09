@@ -17,6 +17,8 @@ public:
     Canvas(MainWindow* parent, QImage image);
     ~Canvas();
 
+    void addedToTab();
+
     int width();
     int height();
 

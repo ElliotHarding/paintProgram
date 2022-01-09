@@ -17,15 +17,6 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 {
     m_canvasImage = image;
 
-    updateCenter();
-
-    m_panOffsetX = m_center.x() - (m_canvasImage.width() / 4);
-    m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
-
-    m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
-
-    recordImageHistory();
-
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
@@ -36,6 +27,27 @@ Canvas::~Canvas()
 {
     if(m_selectionTool)
         delete m_selectionTool;
+}
+
+void Canvas::addedToTab()
+{
+    updateCenter();
+
+    const float x = float(geometry().width()) / float(m_canvasImage.width());
+    const float y = float(geometry().height()) / float(m_canvasImage.height());
+    m_zoomFactor = x < y ? x * 2 : y * 2;
+    if(m_zoomFactor < float(0.1))
+        m_zoomFactor = 0.1;
+
+    qDebug() << m_zoomFactor;
+    qDebug() << "=========";
+
+    m_panOffsetX = m_center.x() - (m_canvasImage.width() / 2);
+    m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
+
+    m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
+
+    recordImageHistory();
 }
 
 int Canvas::width()
@@ -419,8 +431,11 @@ void Canvas::wheelEvent(QWheelEvent* event)
     }
     else if(event->angleDelta().y() < 0)
     {
-         m_zoomFactor -= m_cZoomIncrement;
+        if(m_zoomFactor - m_cZoomIncrement > 0)
+            m_zoomFactor -= m_cZoomIncrement;
     }
+
+    qDebug() << m_zoomFactor;
 
     //Call to redraw
     update();

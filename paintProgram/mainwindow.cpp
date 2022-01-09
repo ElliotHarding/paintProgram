@@ -286,6 +286,7 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), c, SLOT(updateCurrentTool(Tool)));
 
     ui->c_tabWidget->addTab(c, name);
+    c->addedToTab();
 }
 
 void MainWindow::on_load()
