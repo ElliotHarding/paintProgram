@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_colorPicker = new QColorDialog(this);
     m_dlg_colorPicker->setOptions(QColorDialog::ColorDialogOption::ShowAlphaChannel | QColorDialog::ColorDialogOption::NoButtons | QColorDialog::ColorDialogOption::DontUseNativeDialog);
+    m_dlg_colorPicker->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     m_dlg_colorPicker->show();
 
     m_dlg_canvasSettings = new DLG_SetCanvasSettings(this);
