@@ -432,8 +432,6 @@ void Canvas::wheelEvent(QWheelEvent* event)
             m_zoomFactor -= m_cZoomIncrement;
     }
 
-    qDebug() << m_zoomFactor;
-
     //Call to redraw
     update();
 }
