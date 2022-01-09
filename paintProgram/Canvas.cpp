@@ -565,24 +565,60 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
 }
 
-//refactor : recordImageHistory, dragPixels(mouseLocation);, & maybe releaseSelect() <-- todo
+QList<QPoint> combineSelections(QImage& image, QList<QPoint> originalSelectedPixels, QRubberBand* newSelectionArea)
+{
+    if(newSelectionArea == nullptr)
+        return QList<QPoint>();
+
+    //Prep vector container of highlighted pixels
+    std::vector<std::vector<bool>> highlightedPixels(image.width(), std::vector<bool>(image.height(), false));
+    {
+        for(QPoint selectedPixel : originalSelectedPixels)
+        {
+            highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
+        }
+    }
+
+    const QRect geometry = newSelectionArea->geometry();
+    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+    {
+        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+        {
+            if(y > -1 && y < highlightedPixels[x].size() && x > -1 && y < highlightedPixels.size())
+                highlightedPixels[x][y] = true;
+        }
+    }
+
+    //Return highlighted pixels from algorithm to m_selectedPixels
+    QList<QPoint> newleySelectedPixels;
+    for(int x = 0; x < highlightedPixels.size(); x++)
+    {
+        for(int y = 0; y < highlightedPixels[x].size(); y++)
+        {
+            if(highlightedPixels[x][y])
+                newleySelectedPixels.push_back(QPoint(x,y));
+        }
+    }
+
+    return newleySelectedPixels;
+}
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_bMouseDown = false;
 
     if(m_tool == TOOL_SELECT)
     {
-        releaseSelect();
+        m_selectedPixels = combineSelections(m_canvasImage, m_selectedPixels, m_selectionTool);
+        update();
     }
     else if(m_tool == TOOL_PAN)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         m_previousPanPos = m_c_nullPanPos;
     }
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
         recordImageHistory();
     }
 }
@@ -678,47 +714,6 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
         m_canvasMutex.unlock();
     }
-}
-
-void Canvas::releaseSelect()
-{
-    m_canvasMutex.lock();
-
-    //Prep vector container of highlighted pixels
-    std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
-    {
-        for(QPoint selectedPixel : m_selectedPixels)
-        {
-            highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
-        }
-    }
-
-    const QRect geometry = m_selectionTool->geometry();
-    m_canvasMutex.unlock();
-    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
-    {
-        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
-        {
-            highlightedPixels[x][y] = true;
-        }
-    }
-
-    m_canvasMutex.lock();
-
-    //Return highlighted pixels from algorithm to m_selectedPixels
-    m_selectedPixels.clear();
-    for(int x = 0; x < highlightedPixels.size(); x++)
-    {
-        for(int y = 0; y < highlightedPixels[x].size(); y++)
-        {
-            if(highlightedPixels[x][y])
-                m_selectedPixels.push_back(QPoint(x,y));
-        }
-    }
-
-    m_canvasMutex.unlock();
-
-    update();
 }
 
 void Canvas::floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, int sensitivity)

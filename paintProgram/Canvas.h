@@ -78,7 +78,6 @@ private:
     float m_panOffsetY = 0;
 
     //Selecting
-    void releaseSelect();
     QList<QPoint> m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
