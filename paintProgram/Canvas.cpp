@@ -620,6 +620,13 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         canvasMutexLocker.relock();
     }
+    else if(m_tool == TOOL_SHAPE)
+    {
+        m_clipboardImage == QImage();
+        m_dragOffsetX = 0;
+        m_dragOffsetY = 0;
+        m_drawShapeOrigin = mouseLocation;
+    }
 }
 
 QList<QPoint> combineSelections(QImage& image, QList<QPoint> originalSelectedPixels, QRubberBand* newSelectionArea)
@@ -767,6 +774,49 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
                 m_previousDragPos = mouseLocation;
             }
+        }
+        else if(m_tool == TOOL_SHAPE)
+        {
+            const int xPos = m_drawShapeOrigin.x() < mouseLocation.x() ? m_drawShapeOrigin.x() : mouseLocation.x();
+            const int yPos = m_drawShapeOrigin.y() < mouseLocation.y() ? m_drawShapeOrigin.y() : mouseLocation.y();
+
+            int xLen = m_drawShapeOrigin.x() - mouseLocation.x();
+            if (xLen < 0)
+                xLen *= -1;
+
+            int yLen = m_drawShapeOrigin.y() - mouseLocation.y();
+            if (yLen < 0)
+                yLen *= -1;
+
+            m_dragOffsetX = xPos;
+            m_dragOffsetY = yPos;
+
+            m_clipboardImage = QImage(QSize(xLen, yLen), QImage::Format_ARGB32);
+            QPainter dragPainter(&m_clipboardImage);
+            dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
+            dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
+
+            dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+
+            if(m_pParent->getCurrentShape() == SHAPE_RECT)
+            {
+                if(m_pParent->getIsFillShape())
+                {
+                    dragPainter.fillRect(QRect(0,0,xLen,yLen), m_pParent->getSelectedColor());
+                }
+                else
+                {
+                    QPen p;
+                    p.setWidth(m_pParent->getBrushSize());
+                    p.setColor(m_pParent->getSelectedColor());
+                    dragPainter.setPen(p);
+                    dragPainter.drawRect(QRect(0,0,xLen,yLen));
+                }
+
+            }
+
+            update();
+
         }
 
         m_canvasMutex.unlock();

@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_sensitivity = new DLG_Sensitivity(this);
 
+    m_dlg_shapes = new DLG_Shapes(this);
+
     //Connections
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
@@ -106,6 +108,16 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 bool MainWindow::isCtrlPressed()
 {
     return m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end();
+}
+
+Shape MainWindow::getCurrentShape()
+{
+    return m_dlg_shapes->getShape();
+}
+
+bool MainWindow::getIsFillShape()
+{
+    return m_dlg_shapes->fillShape();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -246,6 +258,16 @@ void MainWindow::updatedCurrentTool(Tool tool)
     else
     {
         m_dlg_sensitivity->hide();
+    }
+
+    if(tool == TOOL_SHAPE)
+    {
+        m_dlg_shapes->show();
+        m_dlg_brushSettings->show();
+    }
+    else
+    {
+        m_dlg_shapes->hide();
     }
 }
 

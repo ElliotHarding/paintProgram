@@ -12,6 +12,7 @@
 #include "dlg_textsettings.h"
 #include "dlg_brushsettings.h"
 #include "dlg_sensitivity.h"
+#include "dlg_shapes.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -35,6 +36,9 @@ public:
     int getSpreadSensitivity();
 
     bool isCtrlPressed();
+
+    Shape getCurrentShape();
+    bool getIsFillShape();
 
     void setCopyBuffer(QImage image);
     QImage getCopyBuffer();
@@ -81,6 +85,7 @@ private:
     DLG_TextSettings* m_dlg_textSettings = nullptr;
     DLG_BrushSettings* m_dlg_brushSettings = nullptr;
     DLG_Sensitivity* m_dlg_sensitivity = nullptr;
+    DLG_Shapes* m_dlg_shapes = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
 
     QSet<int> m_pressedKeys;

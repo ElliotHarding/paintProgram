@@ -34,6 +34,8 @@ private slots:
 
     void on_btn_textTool_clicked();
 
+    void on_btn_shapeTool_clicked();
+
 private:
     Ui::dlg_tools *ui;
 

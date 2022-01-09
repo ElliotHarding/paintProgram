@@ -63,6 +63,9 @@ private:
     QString m_textToDraw = "";
     QPoint m_textDrawLocation;
 
+    //Draw shape
+    QPoint m_drawShapeOrigin = QPoint(0,0);
+
     //Undo/redo
     void recordImageHistory();//Function called when m_canvasMutex is locked
     std::vector<QImage> m_imageHistory;

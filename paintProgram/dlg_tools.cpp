@@ -66,3 +66,8 @@ void DLG_Tools::on_btn_textTool_clicked()
 {
     setCurrentTool(TOOL_TEXT);
 }
+
+void DLG_Tools::on_btn_shapeTool_clicked()
+{
+    setCurrentTool(TOOL_SHAPE);
+}

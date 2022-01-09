@@ -11,7 +11,8 @@ enum Tool
     TOOL_DRAG,
     TOOL_BUCKET,
     TOOL_COLOR_PICKER,
-    TOOL_TEXT
+    TOOL_TEXT,
+    TOOL_SHAPE
 };
 
 #endif // TOOLS_H
