@@ -7,7 +7,7 @@ DLG_Tools::DLG_Tools(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    setFixedWidth(74);
+    setFixedWidth(64);
     setFixedHeight(195);
 }
 
