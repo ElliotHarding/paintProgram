@@ -90,9 +90,6 @@ private:
     int m_dragOffsetX = 0;
     int m_dragOffsetY = 0;
 
-    //Bucket
-    void floodFillOnSimilar(QImage& image, QColor newColor, int startX, int startY, int sensitivity);
-
     //Geometry
     QPoint m_center;
     void updateCenter();
