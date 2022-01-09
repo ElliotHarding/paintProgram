@@ -86,9 +86,7 @@ private:
     const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
     //Dragging/copy/paste
-    void dragPixels(QPoint mousePosition);
-    const QPoint m_c_nullDragPos = QPoint(0,0);
-    QPoint m_previousDragPos = m_c_nullDragPos;
+    QPoint m_previousDragPos;
     QImage m_clipboardImage;
     int m_dragOffsetX = 0;
     int m_dragOffsetY = 0;
