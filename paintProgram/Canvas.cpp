@@ -39,9 +39,6 @@ void Canvas::addedToTab()
     if(m_zoomFactor < float(0.1))
         m_zoomFactor = 0.1;
 
-    qDebug() << m_zoomFactor;
-    qDebug() << "=========";
-
     m_panOffsetX = m_center.x() - (m_canvasImage.width() / 2);
     m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
 
