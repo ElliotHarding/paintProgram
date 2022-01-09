@@ -179,6 +179,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         {
             on_save();
         }
+
+        else if(m_pressedKeys.find(Qt::Key_Z) != m_pressedKeys.end())
+        {
+            on_btn_undo_clicked();
+        }
     }
 
     m_pressedKeys.remove(event->key());
