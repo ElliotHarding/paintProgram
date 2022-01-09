@@ -424,6 +424,64 @@ void paintRect(QImage& canvas, const uint x, const uint y, const QColor col, con
     }
 }
 
+void spreadSelectSimilarColorFunction(QImage& image, std::vector<std::vector<bool>>& selectedPixels, QPoint startPixel, int sensitivty)
+{
+    const QColor colorToSpreadOver = image.pixelColor(startPixel);
+
+    std::stack<QPoint> stack;
+    stack.push(startPixel);
+
+    while (stack.size() > 0)
+    {
+        QPoint p = stack.top();
+        stack.pop();
+        const int x = p.x();
+        const int y = p.y();
+        if (y < 0 || y >= image.height() || x < 0 || x >= image.width())
+            continue;
+
+        const QColor pixelColor = image.pixelColor(x,y);
+        if (pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
+            pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
+            pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty &&
+            selectedPixels[x][y] == false)
+        {
+            selectedPixels[x][y] = true;
+            stack.push(QPoint(x + 1, y));
+            stack.push(QPoint(x - 1, y));
+            stack.push(QPoint(x, y + 1));
+            stack.push(QPoint(x, y - 1));
+        }
+    }
+}
+
+void spreadSelectSimilarColor(QImage& canvas, QList<QPoint>& selectedPixels, const QPoint startPixel, const int spreadSensitivity)
+{
+    if(startPixel.x() <= canvas.width() && startPixel.x() > -1 && startPixel.y() <= canvas.height() && startPixel.y() > -1)
+    {
+        //Prep vector container of highlighted pixels for spread algorithm
+        std::vector<std::vector<bool>> highlightedPixels(canvas.width(), std::vector<bool>(canvas.height(), false));
+        for(QPoint selectedPixel : selectedPixels)
+        {
+            highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
+        }
+
+        //Do spread highlight
+        spreadSelectSimilarColorFunction(canvas, highlightedPixels, startPixel, spreadSensitivity);
+
+        //Return highlighted pixels from algorithm to selectedPixels
+        selectedPixels.clear();
+        for(int x = 0; x < highlightedPixels.size(); x++)
+        {
+            for(int y = 0; y < highlightedPixels[x].size(); y++)
+            {
+                if(highlightedPixels[x][y])
+                    selectedPixels.push_back(QPoint(x,y));
+            }
+        }
+    }
+}
+
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
     m_bMouseDown = true;
@@ -453,9 +511,14 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
     {        
-        canvasMutexLocker.unlock();
-        spreadSelectArea(mouseLocation.x(), mouseLocation.y());
-        canvasMutexLocker.relock();
+        if(!m_pParent->isCtrlPressed())
+        {
+            m_selectedPixels.clear();
+        }
+
+        spreadSelectSimilarColor(m_canvasImage, m_selectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
+
+        update();
     }
     else if(m_tool == TOOL_BUCKET)
     {
@@ -591,100 +654,6 @@ void Canvas::releaseSelect()
 
     m_canvasMutex.unlock();
 
-    update();
-}
-
-/*
-void spreadSelectRecursive(QImage& image, QList<QPoint>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int x, int y)
-{
-    if(x < image.width() && x > -1 && y < image.height() && y > -1)
-    {
-        const QColor pixelColor = QColor(image.pixel(x,y));
-        if(pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
-            pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
-                pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty
-                )
-        {
-            if(selectedPixels.indexOf(QPoint(x,y)) == -1)
-            {
-                selectedPixels.push_back(QPoint(x,y));
-
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x + 1, y);
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x - 1, y);
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x, y + 1);
-                spreadSelectRecursive(image, selectedPixels, colorToSpreadOver, sensitivty, x, y - 1);
-            }
-        }
-    }
-}*/
-
-void spreadSelectFunction(QImage& image, std::vector<std::vector<bool>>& selectedPixels, QColor colorToSpreadOver, int sensitivty, int startX, int startY)
-{
-    if(startX < image.width() && startX > -1 && startY < image.height() && startY > -1)
-    {
-        std::stack<QPoint> stack;
-        stack.push(QPoint(startX,startY));
-
-        while (stack.size() > 0)
-        {
-            QPoint p = stack.top();
-            stack.pop();
-            const int x = p.x();
-            const int y = p.y();
-            if (y < 0 || y > image.height() || x < 0 || x > image.width())
-                continue;
-
-            const QColor pixelColor = image.pixelColor(x,y);
-            if (pixelColor.red() <= colorToSpreadOver.red() + sensitivty && pixelColor.red() >= colorToSpreadOver.red() - sensitivty &&
-                pixelColor.green() <= colorToSpreadOver.green() + sensitivty && pixelColor.green() >= colorToSpreadOver.green() - sensitivty &&
-                pixelColor.blue() <= colorToSpreadOver.blue() + sensitivty && pixelColor.blue() >= colorToSpreadOver.blue() - sensitivty &&
-                selectedPixels[x][y] == false)
-            {
-                selectedPixels[x][y] = true;
-                stack.push(QPoint(x + 1, y));
-                stack.push(QPoint(x - 1, y));
-                stack.push(QPoint(x, y + 1));
-                stack.push(QPoint(x, y - 1));
-            }
-        }
-    }
-}
-
-void Canvas::spreadSelectArea(int x, int y)
-{
-    m_canvasMutex.lock();
-
-    //Prep vector container of highlighted pixels for spread algorithm
-    std::vector<std::vector<bool>> highlightedPixels(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
-    if(!m_pParent->isCtrlPressed())
-    {
-        m_selectedPixels.clear();
-    }
-    else
-    {
-        for(QPoint selectedPixel : m_selectedPixels)
-        {
-            highlightedPixels[selectedPixel.x()][selectedPixel.y()] = true;
-        }
-    }
-
-    //Do spread highlight
-    spreadSelectFunction(m_canvasImage, highlightedPixels, m_canvasImage.pixel(x,y), m_pParent->getSpreadSensitivity(), x, y);
-
-    //Return highlighted pixels from algorithm to m_selectedPixels
-    m_selectedPixels.clear();
-    for(int x = 0; x < highlightedPixels.size(); x++)
-    {
-        for(int y = 0; y < highlightedPixels[x].size(); y++)
-        {
-            if(highlightedPixels[x][y])
-                m_selectedPixels.push_back(QPoint(x,y));
-        }
-    }
-
-    m_canvasMutex.unlock();
-
-    //Call to redraw
     update();
 }
 
