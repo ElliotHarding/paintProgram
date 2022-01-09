@@ -191,10 +191,27 @@ void Canvas::deleteKeyPressed()
     }
 }
 
-void Canvas::copyKeysPressed()
+QImage generateClipBoard(QImage& canvas, QList<QPoint>& selectedPixels)
 {
+    //Prep selected pixels for dragging
+    QImage clipboard = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
+    QPainter dragPainter(&clipboard);
+    dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
+    dragPainter.fillRect(clipboard.rect(), Qt::transparent);
+
+    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+    for(QPoint p : selectedPixels)
+    {
+        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), canvas.pixelColor(p));
+    }
+
+    return clipboard;
+}
+
+void Canvas::copyKeysPressed()
+{   
     m_canvasMutex.lock();
-    m_pParent->setCopyBuffer(genClipBoard());
+    m_pParent->setCopyBuffer(generateClipBoard(m_canvasImage, m_selectedPixels));
     m_canvasMutex.unlock();
 
     update();
@@ -542,7 +559,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
 }
 
-//refactor : recordImageHistory, dragPixels(mouseLocation);, spreadSelectArea, & maybe releaseSelect() <-- todo
+//refactor : recordImageHistory, dragPixels(mouseLocation);, & maybe releaseSelect() <-- todo
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
@@ -707,24 +724,6 @@ void Canvas::updateCenter()
     m_center = QPoint(geometry().width() / 2, geometry().height() / 2);
 }
 
-//Requires m_canvasMutex to be locked
-QImage Canvas::genClipBoard()
-{
-    //Prep selected pixels for dragging
-    QImage clipboard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
-    QPainter dragPainter(&clipboard);
-    dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
-    dragPainter.fillRect(clipboard.rect(), Qt::transparent);
-
-    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-    for(QPoint p : m_selectedPixels)
-    {
-        dragPainter.fillRect(QRect(p.x(), p.y(), 1, 1), m_canvasImage.pixelColor(p.x(), p.y()));
-    }
-
-    return clipboard;
-}
-
 void Canvas::dragPixels(QPoint mouseLocation)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
@@ -746,7 +745,7 @@ void Canvas::dragPixels(QPoint mouseLocation)
         if(draggingSelected)
         {
             if(m_clipboardImage == QImage())
-                m_clipboardImage = genClipBoard();
+                m_clipboardImage = generateClipBoard(m_canvasImage, m_selectedPixels);
 
             m_previousDragPos = mouseLocation;
             m_dragOffsetX = 0;

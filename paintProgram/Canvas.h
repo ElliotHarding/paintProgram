@@ -86,7 +86,6 @@ private:
     const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
     //Dragging/copy/paste
-    QImage genClipBoard();//Requires m_canvasMutex to be locked
     void dragPixels(QPoint mousePosition);
     const QPoint m_c_nullDragPos = QPoint(0,0);
     QPoint m_previousDragPos = m_c_nullDragPos;
