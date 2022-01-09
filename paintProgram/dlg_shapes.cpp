@@ -27,3 +27,8 @@ void DLG_Shapes::on_btn_shapeRect_clicked()
 {
     m_shape = SHAPE_RECT;
 }
+
+void DLG_Shapes::on_btn_shapeCircle_clicked()
+{
+    m_shape = SHAPE_CIRCLE;
+}

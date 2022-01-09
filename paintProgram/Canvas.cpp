@@ -803,6 +803,8 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             if (yLen < 0)
                 yLen *= -1;
 
+            const QRect rect = QRect(0,0,xLen,yLen);
+
             m_dragOffsetX = xPos;
             m_dragOffsetY = yPos;
 
@@ -811,13 +813,15 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
             dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
 
+            dragPainter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+
             dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
 
             if(m_pParent->getCurrentShape() == SHAPE_RECT)
             {
                 if(m_pParent->getIsFillShape())
                 {
-                    dragPainter.fillRect(QRect(0,0,xLen,yLen), m_pParent->getSelectedColor());
+                    dragPainter.fillRect(rect, m_pParent->getSelectedColor());
                 }
                 else
                 {
@@ -825,9 +829,24 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     p.setWidth(m_pParent->getBrushSize());
                     p.setColor(m_pParent->getSelectedColor());
                     dragPainter.setPen(p);
-                    dragPainter.drawRect(QRect(0,0,xLen,yLen));
+                    dragPainter.drawRect(rect);
                 }
 
+            }
+            else if(m_pParent->getCurrentShape() == SHAPE_CIRCLE)
+            {
+                QPen p;
+                if(m_pParent->getIsFillShape())
+                {
+                    dragPainter.setBrush(m_pParent->getSelectedColor());
+                }
+                else
+                {
+                    p.setWidth(m_pParent->getBrushSize());
+                }
+                p.setColor(m_pParent->getSelectedColor());
+                dragPainter.setPen(p);
+                dragPainter.drawEllipse(rect);
             }
 
             update();
