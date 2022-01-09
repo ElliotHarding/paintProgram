@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_brushSettings = new DLG_BrushSettings(this);
     m_dlg_brushSettings->show();
 
+    m_dlg_sensitivity = new DLG_Sensitivity(this);
+
     //Connections
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
@@ -69,7 +71,7 @@ int MainWindow::getBrushSize()
 
 int MainWindow::getSpreadSensitivity()
 {
-    return ui->spin_spreadSensitivity->value();
+    return m_dlg_sensitivity->getSensitivity();
 }
 
 void MainWindow::setCopyBuffer(QImage image)
@@ -188,6 +190,11 @@ void MainWindow::moveEvent(QMoveEvent *moveEvent)
 
     if(m_dlg_brushSettings)
         m_dlg_brushSettings->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
+
+    if(m_dlg_sensitivity)
+    {
+        m_dlg_sensitivity->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
+    }
 }
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)
@@ -230,6 +237,15 @@ void MainWindow::updatedCurrentTool(Tool tool)
     else
     {
         m_dlg_brushSettings->hide();
+    }
+
+    if(tool == TOOL_BUCKET || tool == TOOL_SPREAD_ON_SIMILAR)
+    {
+        m_dlg_sensitivity->show();
+    }
+    else
+    {
+        m_dlg_sensitivity->hide();
     }
 }
 
