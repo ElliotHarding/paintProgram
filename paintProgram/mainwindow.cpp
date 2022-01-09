@@ -322,8 +322,6 @@ void MainWindow::on_save_as()
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        QImage image = c->getImageCopy();
-
         const QString savePath = getSaveAsPath(ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()));
 
         saveCanvas(c, savePath);
@@ -332,7 +330,7 @@ void MainWindow::on_save_as()
 
 QString MainWindow::getSaveAsPath(QString name)
 {
-    return QFileDialog::getSaveFileName(nullptr, "file", ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );;
+    return QFileDialog::getSaveFileName(nullptr, name, ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );;
 }
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
