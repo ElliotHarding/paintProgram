@@ -6,6 +6,7 @@ DLG_Shapes::DLG_Shapes(QWidget *parent) :
     ui(new Ui::DLG_Shapes)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 }
 
 DLG_Shapes::~DLG_Shapes()

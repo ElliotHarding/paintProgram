@@ -207,6 +207,11 @@ void MainWindow::moveEvent(QMoveEvent *moveEvent)
     {
         m_dlg_sensitivity->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
     }
+
+    if(m_dlg_shapes)
+    {
+        m_dlg_shapes->move(m_dlg_brushSettings->geometry().right(), geometry().top());
+    }
 }
 
 void MainWindow::on_get_canvas_settings(int width, int height, QString name)
