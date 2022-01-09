@@ -685,6 +685,21 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         recordImageHistory();
     }
+    else if(m_tool == TOOL_SHAPE)
+    {
+        //Dump dragged contents onto m_canvasImage
+        QPainter painter(&m_canvasImage);
+        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
+        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+
+        recordImageHistory();
+
+        //Reset
+        m_clipboardImage = QImage();
+        m_previousDragPos = Constants::NullDragPoint;
+        m_dragOffsetX = 0;
+        m_dragOffsetY = 0;
+    }
 }
 
 bool isSelectedPixelClicked(QList<QPoint>& selectedPixels, QPoint& mouseLocation)
