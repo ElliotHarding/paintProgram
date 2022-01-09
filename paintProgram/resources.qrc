@@ -10,5 +10,12 @@
         <file>Resources/icon-zoom-in.png</file>
         <file>Resources/icon-zoom-out.png</file>
         <file>Resources/icon-selection.png</file>
+        <file>Resources/icon-paint-brush.png</file>
+        <file>Resources/icon-eraser.png</file>
+        <file>Resources/icon-shapes.png</file>
+        <file>Resources/icon-text.png</file>
+        <file>Resources/icon-bucket.png</file>
+        <file>Resources/icon-color-picker.png</file>
+        <file>Resources/icon-select-spread.png</file>
     </qresource>
 </RCC>
