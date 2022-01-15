@@ -4,6 +4,7 @@
 #include <QSet>
 #include <QFileInfo>
 #include <stack>
+#include <QPainterPath>
 
 namespace Constants
 {
@@ -849,6 +850,25 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 p.setColor(m_pParent->getSelectedColor());
                 dragPainter.setPen(p);
                 dragPainter.drawEllipse(rect);
+            }
+            else if(m_pParent->getCurrentShape() == SHAPE_TRIANGLE)
+            {
+                QPainterPath path;
+                const QPoint topMiddle = QPoint(rect.left() + rect.width()/2, rect.top());
+                path.moveTo(topMiddle);
+                path.lineTo(rect.bottomLeft());
+                path.lineTo(rect.bottomRight());
+                path.lineTo(topMiddle);
+
+                if(m_pParent->getIsFillShape())
+                {
+                    dragPainter.fillPath(path, m_pParent->getSelectedColor());
+                }
+                else
+                {
+                    dragPainter.setPen(QPen(m_pParent->getSelectedColor(),m_pParent->getBrushSize()));
+                    dragPainter.drawPath(path);
+                }
             }
 
             update();

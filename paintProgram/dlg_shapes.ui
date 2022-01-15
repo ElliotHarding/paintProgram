@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>149</width>
+    <width>171</width>
     <height>42</height>
    </rect>
   </property>
@@ -41,7 +41,7 @@
   <widget class="QCheckBox" name="checkBox_fill">
    <property name="geometry">
     <rect>
-     <x>79</x>
+     <x>101</x>
      <y>5</y>
      <width>70</width>
      <height>32</height>
@@ -65,6 +65,31 @@
    </property>
    <property name="text">
     <string>Circle</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_shapeTriangle">
+   <property name="geometry">
+    <rect>
+     <x>69</x>
+     <y>5</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Triangle</string>
    </property>
    <property name="iconSize">
     <size>

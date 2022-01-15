@@ -33,3 +33,8 @@ void DLG_Shapes::on_btn_shapeCircle_clicked()
 {
     m_shape = SHAPE_CIRCLE;
 }
+
+void DLG_Shapes::on_btn_shapeTriangle_clicked()
+{
+    m_shape = SHAPE_TRIANGLE;
+}
