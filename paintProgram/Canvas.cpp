@@ -8,6 +8,7 @@
 namespace Constants
 {
 const QPoint NullDragPoint = QPoint(0,0);
+const QColor ImageBorderColor = QColor(200,200,200,255);
 }
 
 Canvas::Canvas(MainWindow* parent, QImage image) :
@@ -386,6 +387,9 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
         painter.setPen(QPen(m_c_selectionBorderColor, 1/m_zoomFactor));
         painter.drawRect(m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY));
     }
+
+    painter.setPen(QPen(Constants::ImageBorderColor, 1/m_zoomFactor));
+    painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
 
     m_canvasMutex.unlock();
 }
