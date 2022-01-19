@@ -817,12 +817,12 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             if (yLen < 0)
                 yLen *= -1;
 
-            const QRect rect = QRect(0,0,xLen,yLen);
+            const QRect rect = QRect(xPos,yPos,xLen,yLen);
 
-            m_dragOffsetX = xPos;
-            m_dragOffsetY = yPos;
+            m_dragOffsetX = 0;
+            m_dragOffsetY = 0;
 
-            m_clipboardImage = QImage(QSize(xLen, yLen), QImage::Format_ARGB32);
+            m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
             QPainter dragPainter(&m_clipboardImage);
             dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
             dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
