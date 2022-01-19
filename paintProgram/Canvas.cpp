@@ -625,9 +625,19 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SHAPE)
     {
-        m_clipboardImage == QImage();
+        //Dump dragged contents onto m_canvasImage
+        QPainter painter(&m_canvasImage);
+        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
+        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+
+        recordImageHistory();
+
+        //Reset
+        m_clipboardImage = QImage();
+        m_previousDragPos = Constants::NullDragPoint;
         m_dragOffsetX = 0;
         m_dragOffsetY = 0;
+
         m_drawShapeOrigin = mouseLocation;
     }
 }
@@ -690,18 +700,19 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if(m_tool == TOOL_SHAPE)
     {
-        //Dump dragged contents onto m_canvasImage
-        QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
-        painter.drawImage(QRect(m_dragOffsetX, m_dragOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+        m_selectedPixels.clear();
+        for(int x = 0; x < m_clipboardImage.width(); x++)
+        {
+            for(int y = 0; y < m_clipboardImage.height(); y++)
+            {
+                if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
+                {
+                    m_selectedPixels.push_back(QPoint(x, y));
+                }
+            }
+        }
 
-        recordImageHistory();
-
-        //Reset
-        m_clipboardImage = QImage();
-        m_previousDragPos = Constants::NullDragPoint;
-        m_dragOffsetX = 0;
-        m_dragOffsetY = 0;
+        update();
     }
 }
 
@@ -872,7 +883,6 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
 
             update();
-
         }
 
         m_canvasMutex.unlock();
