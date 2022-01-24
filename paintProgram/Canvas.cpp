@@ -848,6 +848,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         QPen p;
                         p.setWidth(m_pParent->getBrushSize());
                         p.setColor(m_pParent->getSelectedColor());
+                        p.setJoinStyle(Qt::MiterJoin);
                         dragPainter.setPen(p);
                         dragPainter.drawRect(rect);
                     }
@@ -883,7 +884,11 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     }
                     else
                     {
-                        dragPainter.setPen(QPen(m_pParent->getSelectedColor(),m_pParent->getBrushSize()));
+                        QPen p;
+                        p.setWidth(m_pParent->getBrushSize());
+                        p.setColor(m_pParent->getSelectedColor());
+                        p.setJoinStyle(Qt::MiterJoin);
+                        dragPainter.setPen(p);
                         dragPainter.drawPath(path);
                     }
                 }
