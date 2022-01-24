@@ -53,6 +53,7 @@ private:
     void paintEvent(QPaintEvent* paintEvent) override;
     void wheelEvent(QWheelEvent* event) override;
     void showEvent(QShowEvent *) override;
+    bool eventFilter(QObject* watched, QEvent* event ) override;
 
     //Mouse events and members
     void mousePressEvent(QMouseEvent* mouseEvent) override;
