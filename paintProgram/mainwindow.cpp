@@ -214,7 +214,7 @@ void MainWindow::moveEvent(QMoveEvent *moveEvent)
     repositionDialogs();
 }
 
-void MainWindow::repositionDialogs()
+void MainWindow::repositionDialogs() //todo ~ do this based of percentages that save, so when move it move to where user positioned it
 {
     if(m_bDialogsCreated)
     {
