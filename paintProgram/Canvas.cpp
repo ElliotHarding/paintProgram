@@ -806,85 +806,87 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_SHAPE)
         {           
-            const int xPos = m_drawShapeOrigin.x() < mouseLocation.x() ? m_drawShapeOrigin.x() : mouseLocation.x();
-            const int yPos = m_drawShapeOrigin.y() < mouseLocation.y() ? m_drawShapeOrigin.y() : mouseLocation.y();
 
-            int xLen = m_drawShapeOrigin.x() - mouseLocation.x();
-            if (xLen < 0)
-                xLen *= -1;
-
-            int yLen = m_drawShapeOrigin.y() - mouseLocation.y();
-            if (yLen < 0)
-                yLen *= -1;
-
-            const QRect rect = QRect(xPos,yPos,xLen,yLen);
-
+            //Prep clipboard image
             m_dragOffsetX = 0;
             m_dragOffsetY = 0;
-
             m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
             QPainter dragPainter(&m_clipboardImage);
             dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
             dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
-
             dragPainter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-
             dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
 
-            if(m_pParent->getCurrentShape() == SHAPE_RECT)
+            if(m_pParent->getCurrentShape() == SHAPE_LINE)
             {
-                if(m_pParent->getIsFillShape())
-                {
-                    dragPainter.fillRect(rect, m_pParent->getSelectedColor());
-                }
-                else
-                {
-                    QPen p;
-                    p.setWidth(m_pParent->getBrushSize());
-                    p.setColor(m_pParent->getSelectedColor());
-                    dragPainter.setPen(p);
-                    dragPainter.drawRect(rect);
-                }
-
-            }
-            else if(m_pParent->getCurrentShape() == SHAPE_CIRCLE)
-            {
-                QPen p;
-                if(m_pParent->getIsFillShape())
-                {
-                    dragPainter.setBrush(m_pParent->getSelectedColor());
-                }
-                else
-                {
-                    p.setWidth(m_pParent->getBrushSize());
-                }
-                p.setColor(m_pParent->getSelectedColor());
-                dragPainter.setPen(p);
-                dragPainter.drawEllipse(rect);
-            }
-            else if(m_pParent->getCurrentShape() == SHAPE_TRIANGLE)
-            {
-                QPainterPath path;
-                const QPoint topMiddle = QPoint(rect.left() + rect.width()/2, rect.top());
-                path.moveTo(topMiddle);
-                path.lineTo(rect.bottomLeft());
-                path.lineTo(rect.bottomRight());
-                path.lineTo(topMiddle);
-
-                if(m_pParent->getIsFillShape())
-                {
-                    dragPainter.fillPath(path, m_pParent->getSelectedColor());
-                }
-                else
-                {
-                    dragPainter.setPen(QPen(m_pParent->getSelectedColor(),m_pParent->getBrushSize()));
-                    dragPainter.drawPath(path);
-                }
-            }
-            else if(m_pParent->getCurrentShape() == SHAPE_LINE)
-            {
+                //Draw line
                 dragPainter.setPen(QPen(m_pParent->getSelectedColor(), m_pParent->getBrushSize()));
                 dragPainter.drawLine(m_drawShapeOrigin, mouseLocation);
+            }
+            else
+            {
+                //Prep shape dimensions in form of rectangle
+                const int xPos = m_drawShapeOrigin.x() < mouseLocation.x() ? m_drawShapeOrigin.x() : mouseLocation.x();
+                const int yPos = m_drawShapeOrigin.y() < mouseLocation.y() ? m_drawShapeOrigin.y() : mouseLocation.y();
+                int xLen = m_drawShapeOrigin.x() - mouseLocation.x();
+                if (xLen < 0)
+                    xLen *= -1;
+                int yLen = m_drawShapeOrigin.y() - mouseLocation.y();
+                if (yLen < 0)
+                    yLen *= -1;
+                const QRect rect = QRect(xPos,yPos,xLen,yLen);
+
+                //Draw selected shape
+                if(m_pParent->getCurrentShape() == SHAPE_RECT)
+                {
+                    if(m_pParent->getIsFillShape())
+                    {
+                        dragPainter.fillRect(rect, m_pParent->getSelectedColor());
+                    }
+                    else
+                    {
+                        QPen p;
+                        p.setWidth(m_pParent->getBrushSize());
+                        p.setColor(m_pParent->getSelectedColor());
+                        dragPainter.setPen(p);
+                        dragPainter.drawRect(rect);
+                    }
+
+                }
+                else if(m_pParent->getCurrentShape() == SHAPE_CIRCLE)
+                {
+                    QPen p;
+                    if(m_pParent->getIsFillShape())
+                    {
+                        dragPainter.setBrush(m_pParent->getSelectedColor());
+                    }
+                    else
+                    {
+                        p.setWidth(m_pParent->getBrushSize());
+                    }
+                    p.setColor(m_pParent->getSelectedColor());
+                    dragPainter.setPen(p);
+                    dragPainter.drawEllipse(rect);
+                }
+                else if(m_pParent->getCurrentShape() == SHAPE_TRIANGLE)
+                {
+                    QPainterPath path;
+                    const QPoint topMiddle = QPoint(rect.left() + rect.width()/2, rect.top());
+                    path.moveTo(topMiddle);
+                    path.lineTo(rect.bottomLeft());
+                    path.lineTo(rect.bottomRight());
+                    path.lineTo(topMiddle);
+
+                    if(m_pParent->getIsFillShape())
+                    {
+                        dragPainter.fillPath(path, m_pParent->getSelectedColor());
+                    }
+                    else
+                    {
+                        dragPainter.setPen(QPen(m_pParent->getSelectedColor(),m_pParent->getBrushSize()));
+                        dragPainter.drawPath(path);
+                    }
+                }
             }
 
             update();
