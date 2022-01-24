@@ -422,10 +422,10 @@ void Canvas::wheelEvent(QWheelEvent* event)
     const int direction = event->angleDelta().y() > 0 ? 1 : -1;
 
     const int xFromCenter = event->x() - m_center.x();
-    m_panOffsetX -= xFromCenter * 0.05 * direction;
+    m_panOffsetX -= xFromCenter * 0.05 * direction * (1/m_zoomFactor);
 
     const int yFromCenter = event->y() - m_center.y();
-    m_panOffsetY -= yFromCenter * 0.05 * direction;
+    m_panOffsetY -= yFromCenter * 0.05 * direction * (1/m_zoomFactor);
 
     if(event->angleDelta().y() > 0)
     {
