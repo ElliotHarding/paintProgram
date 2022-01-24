@@ -44,9 +44,15 @@ public:
 public slots:
     void updateCurrentTool(Tool t);
 
+signals:
+    void selectionAreaResize(const int x, const int y);
+    void mousePositionChange(const int x, const int y);
+    void canvasSizeChange(const int x, const int y);
+
 private:
     void paintEvent(QPaintEvent* paintEvent) override;
     void wheelEvent(QWheelEvent* event) override;
+    void showEvent(QShowEvent *) override;
 
     //Mouse events and members
     void mousePressEvent(QMouseEvent* mouseEvent) override;

@@ -38,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_shapes = new DLG_Shapes(this);
 
+    m_dlg_info = new DLG_Info(this);
+    m_dlg_info->show();
+
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -329,6 +332,9 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
 
     c->updateCurrentTool(m_dlg_tools->getCurrentTool());    
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), c, SLOT(updateCurrentTool(Tool)));
+    connect(c, SIGNAL(selectionAreaResize(const int, const int)), m_dlg_info, SLOT(onSelectionAreaResize(const int, const int)));
+    connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
+    connect(c, SIGNAL(canvasSizeChange(const int, const int)), m_dlg_info, SLOT(onCanvasSizeChange(const int, const int)));
 
     ui->c_tabWidget->addTab(c, name);
     c->addedToTab();

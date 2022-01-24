@@ -122,6 +122,8 @@ void Canvas::updateSettings(int width, int height, QString name)
 
     m_canvasImage = newImage;
 
+    emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
+
     m_canvasMutex.unlock();
 
     if(m_savePath != "")
@@ -147,6 +149,8 @@ void Canvas::updateCurrentTool(Tool t)
 
         //Reset selection rectangle tool        
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
+
+        emit selectionAreaResize(0,0);
 
         if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
         {
@@ -441,6 +445,12 @@ void Canvas::wheelEvent(QWheelEvent* event)
     update();
 }
 
+void Canvas::showEvent(QShowEvent *)
+{
+    emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
+    emit selectionAreaResize(0,0);
+}
+
 QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, float& zoomFactor, float& offsetX, float& offsetY)
 {
     QTransform transform;
@@ -730,12 +740,13 @@ bool isSelectedPixelClicked(QList<QPoint>& selectedPixels, QPoint& mouseLocation
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
+    m_canvasMutex.lock();
+
+    QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
+    emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
+
     if(m_bMouseDown)
     {
-        m_canvasMutex.lock();
-
-        QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
-
         if(m_tool == TOOL_PAINT)
         {
             paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize());
@@ -752,6 +763,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         QRect(m_selectionToolOrigin, QPoint(mouseLocation.x(), mouseLocation.y())).normalized()
                         );
             update();
+            emit selectionAreaResize(m_selectionTool->geometry().width(), m_selectionTool->geometry().height());
         }
         else if(m_tool == TOOL_PAN)
         {
@@ -895,10 +907,9 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
 
             update();
-        }
-
-        m_canvasMutex.unlock();
+        }        
     }
+    m_canvasMutex.unlock();
 }
 
 void Canvas::updateCenter()

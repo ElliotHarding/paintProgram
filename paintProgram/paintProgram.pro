@@ -12,6 +12,7 @@ CONFIG += resources_big
 SOURCES += \
     Canvas.cpp \
     dlg_brushsettings.cpp \
+    dlg_info.cpp \
     dlg_sensitivity.cpp \
     dlg_setcanvassettings.cpp \
     dlg_shapes.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 HEADERS += \
     Canvas.h \
     dlg_brushsettings.h \
+    dlg_info.h \
     dlg_sensitivity.h \
     dlg_setcanvassettings.h \
     dlg_shapes.h \
@@ -33,6 +35,7 @@ HEADERS += \
 
 FORMS += \
     dlg_brushsettings.ui \
+    dlg_info.ui \
     dlg_sensitivity.ui \
     dlg_setcanvassettings.ui \
     dlg_shapes.ui \
