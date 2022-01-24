@@ -115,6 +115,14 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     {
         keyReleaseEvent(dynamic_cast<QKeyEvent*>(event));
     }
+    if(event->type() == QEvent::MouseMove)
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->mouseMoveEvent(dynamic_cast<QMouseEvent*>(event));
+        }
+    }
     return QObject::eventFilter( watched, event );
 }
 

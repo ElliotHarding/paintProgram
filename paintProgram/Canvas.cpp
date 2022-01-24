@@ -5,7 +5,6 @@
 #include <QFileInfo>
 #include <stack>
 #include <QPainterPath>
-#include <QApplication>
 
 namespace Constants
 {
@@ -24,7 +23,6 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
     setMouseTracking(true);
-    QCoreApplication::instance()->installEventFilter(this);
 }
 
 Canvas::~Canvas()
@@ -738,15 +736,6 @@ bool isSelectedPixelClicked(QList<QPoint>& selectedPixels, QPoint& mouseLocation
         }
     }
     return false;
-}
-
-bool Canvas::eventFilter(QObject *watched, QEvent *event)
-{
-    if(event->type() == QEvent::MouseMove)
-    {
-        QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(dynamic_cast<QMouseEvent*>(event)->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
-        emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
-    }
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)

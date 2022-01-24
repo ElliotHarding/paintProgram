@@ -41,6 +41,8 @@ public:
 
     void resizeEvent(QResizeEvent* event) override;
 
+    void mouseMoveEvent(QMouseEvent* event) override;
+
 public slots:
     void updateCurrentTool(Tool t);
 
@@ -53,12 +55,10 @@ private:
     void paintEvent(QPaintEvent* paintEvent) override;
     void wheelEvent(QWheelEvent* event) override;
     void showEvent(QShowEvent *) override;
-    bool eventFilter(QObject* watched, QEvent* event ) override;
 
     //Mouse events and members
     void mousePressEvent(QMouseEvent* mouseEvent) override;
     void mouseReleaseEvent(QMouseEvent *releaseEvent) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
     bool m_bMouseDown = false;
 
     //Drawing
