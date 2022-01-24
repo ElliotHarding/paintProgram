@@ -1,5 +1,6 @@
 #include "dlg_brushsettings.h"
 #include "ui_dlg_brushsettings.h"
+#include <QDebug>
 
 DLG_BrushSettings::DLG_BrushSettings(QWidget *parent) :
     QDialog(parent),
@@ -16,5 +17,5 @@ DLG_BrushSettings::~DLG_BrushSettings()
 
 int DLG_BrushSettings::getBrushSize()
 {
-    ui->spin_brushSize->value();
+    return ui->spin_brushSize->value();
 }
