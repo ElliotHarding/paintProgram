@@ -193,7 +193,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
 
-    ui->c_tabWidget->resize(geometry().width(), geometry().height() - 40);//todo make the 40 a constant or caculate it
+    ui->c_tabWidget->resize(geometry().width(), geometry().height() - ui->c_tabWidget->pos().y());
 }
 
 void MainWindow::moveEvent(QMoveEvent *moveEvent)
