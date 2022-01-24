@@ -805,7 +805,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
         }
         else if(m_tool == TOOL_SHAPE)
-        {
+        {           
             const int xPos = m_drawShapeOrigin.x() < mouseLocation.x() ? m_drawShapeOrigin.x() : mouseLocation.x();
             const int yPos = m_drawShapeOrigin.y() < mouseLocation.y() ? m_drawShapeOrigin.y() : mouseLocation.y();
 
@@ -880,6 +880,11 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     dragPainter.setPen(QPen(m_pParent->getSelectedColor(),m_pParent->getBrushSize()));
                     dragPainter.drawPath(path);
                 }
+            }
+            else if(m_pParent->getCurrentShape() == SHAPE_LINE)
+            {
+                dragPainter.setPen(QPen(m_pParent->getSelectedColor(), m_pParent->getBrushSize()));
+                dragPainter.drawLine(m_drawShapeOrigin, mouseLocation);
             }
 
             update();

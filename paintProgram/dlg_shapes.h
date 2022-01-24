@@ -11,7 +11,8 @@ enum Shape
 {
     SHAPE_RECT,
     SHAPE_CIRCLE,
-    SHAPE_TRIANGLE
+    SHAPE_TRIANGLE,
+    SHAPE_LINE
 };
 
 class DLG_Shapes : public QDialog
@@ -31,6 +32,8 @@ private slots:
     void on_btn_shapeCircle_clicked();
 
     void on_btn_shapeTriangle_clicked();
+
+    void on_btn_shapeLine_clicked();
 
 private:
     Ui::DLG_Shapes *ui;
