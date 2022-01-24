@@ -26,7 +26,11 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Rect</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/icon-rectangle.png</normaloff>:/Resources/icon-rectangle.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -64,7 +68,11 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Circle</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/icon-circle.png</normaloff>:/Resources/icon-circle.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -89,7 +97,11 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Triangle</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/icon-triangle.png</normaloff>:/Resources/icon-triangle.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -114,7 +126,11 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Line</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/icon-line.png</normaloff>:/Resources/icon-line.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -127,6 +143,8 @@
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

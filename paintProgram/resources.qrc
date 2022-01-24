@@ -17,5 +17,9 @@
         <file>Resources/icon-bucket.png</file>
         <file>Resources/icon-color-picker.png</file>
         <file>Resources/icon-select-spread.png</file>
+        <file>Resources/icon-circle.png</file>
+        <file>Resources/icon-line.png</file>
+        <file>Resources/icon-rectangle.png</file>
+        <file>Resources/icon-triangle.png</file>
     </qresource>
 </RCC>
