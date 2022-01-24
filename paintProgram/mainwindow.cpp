@@ -15,6 +15,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->c_tabWidget->clear();
 
+
+
+    //Create dialogs
+
     m_dlg_colorPicker = new QColorDialog(this);
     m_dlg_colorPicker->setOptions(QColorDialog::ColorDialogOption::ShowAlphaChannel | QColorDialog::ColorDialogOption::NoButtons | QColorDialog::ColorDialogOption::DontUseNativeDialog);
     m_dlg_colorPicker->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -33,6 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_sensitivity = new DLG_Sensitivity(this);
 
     m_dlg_shapes = new DLG_Shapes(this);
+
+
+    //Finished creating dialogs
+    m_bDialogsCreated = true;
+
 
     //Connections
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
@@ -194,33 +203,31 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QMainWindow::resizeEvent(event);
 
     ui->c_tabWidget->resize(geometry().width(), geometry().height() - ui->c_tabWidget->pos().y());
+
+    repositionDialogs();
 }
 
 void MainWindow::moveEvent(QMoveEvent *moveEvent)
 {
     QMainWindow::moveEvent(moveEvent);
 
-    if(m_dlg_tools)
-        m_dlg_tools->move(pos().x(), (geometry().height() / 2) - (m_dlg_tools->geometry().height() / 2));
+    repositionDialogs();
+}
 
-    if(m_dlg_colorPicker)
-        m_dlg_colorPicker->move(geometry().right() - m_dlg_colorPicker->geometry().width(), (geometry().bottom() / 2) - (m_dlg_colorPicker->geometry().height() / 2));
+void MainWindow::repositionDialogs()
+{
+    if(m_bDialogsCreated)
+    {
+        m_dlg_tools->move(pos().x(), pos().y() + (geometry().height() / 2) - (m_dlg_tools->geometry().height() / 2));
 
-    if(m_dlg_brushSettings)
+        m_dlg_colorPicker->move(geometry().right() - m_dlg_colorPicker->geometry().width(), pos().y() + (geometry().height() / 2) - (m_dlg_colorPicker->geometry().height() / 2));
+
         m_dlg_brushSettings->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
 
-    if(m_dlg_sensitivity)
-    {
         m_dlg_sensitivity->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
-    }
 
-    if(m_dlg_shapes)
-    {
         m_dlg_shapes->move(m_dlg_brushSettings->geometry().right(), geometry().top());
-    }
 
-    if(m_dlg_textSettings)
-    {
         m_dlg_textSettings->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
     }
 }

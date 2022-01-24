@@ -97,5 +97,9 @@ private:
 
     QString getSaveAsPath(QString name);
     void saveCanvas(Canvas* canvas, QString path);
+
+    //Positioning
+    void repositionDialogs();
+    bool m_bDialogsCreated = false;
 };
 #endif // MAINWINDOW_H
