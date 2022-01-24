@@ -81,7 +81,7 @@ private:
 
     //Zooming
     float m_zoomFactor = 1;
-    const float m_cZoomIncrement = 0.1;
+    const float m_cZoomIncrement = 1.1;
 
     //Panning
     const QPoint m_c_nullPanPos = QPoint(-1,-1);
