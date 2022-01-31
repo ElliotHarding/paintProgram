@@ -144,15 +144,6 @@ bool MainWindow::getIsFillShape()
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());
-
-    if(m_dlg_tools->getCurrentTool() == TOOL_TEXT)
-    {
-        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
-        if(c)
-        {
-            c->writeText(event->text(), m_dlg_textSettings->getFont());
-        }
-    }
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
@@ -203,6 +194,20 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         else if(m_pressedKeys.find(Qt::Key_Z) != m_pressedKeys.end())
         {
             on_btn_undo_clicked();
+        }
+    }
+    else
+    {
+        if(m_dlg_tools->getCurrentTool() == TOOL_TEXT)
+        {
+            if(m_pressedKeys.find(event->key()) != m_pressedKeys.end())
+            {
+                Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+                if(c)
+                {
+                    c->writeText(event->text(), m_dlg_textSettings->getFont());
+                }
+            }
         }
     }
 
