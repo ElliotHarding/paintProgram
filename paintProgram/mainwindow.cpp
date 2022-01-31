@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QFileDialog>
 #include <QDebug>
+#include <QColor>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -57,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_btn_addTab_clicked()));
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), this, SLOT(updatedCurrentTool(Tool)));
     connect(m_dlg_textSettings, SIGNAL(updateFont(QFont)), this, SLOT(on_update_font(QFont)));
+    connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(on_color_changed(const QColor&)));
 
     showMaximized();
 
@@ -342,6 +344,18 @@ void MainWindow::on_btn_canvasSettings_clicked()
 
         m_bMakingNewCanvas = false;
         m_dlg_canvasSettings->show();
+    }
+}
+
+void MainWindow::on_color_changed(const QColor &color)
+{
+    if(m_dlg_tools->getCurrentTool() == TOOL_TEXT)
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+        if(c)
+        {
+            c->updateText(m_dlg_textSettings->getFont());
+        }
     }
 }
 

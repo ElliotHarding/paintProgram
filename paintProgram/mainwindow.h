@@ -80,6 +80,8 @@ private slots:
 
     void on_btn_canvasSettings_clicked();
 
+    void on_color_changed(const QColor& color);
+
 private:
     Ui::MainWindow *ui;
 
