@@ -739,6 +739,16 @@ bool isSelectedPixelClicked(QList<QPoint>& selectedPixels, QPoint& mouseLocation
     return false;
 }
 
+void Canvas::mouseMouseOnParentEvent(QMouseEvent *event)
+{
+    m_canvasMutex.lock();
+
+    QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
+    emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
+
+    m_canvasMutex.unlock();
+}
+
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
     m_canvasMutex.lock();

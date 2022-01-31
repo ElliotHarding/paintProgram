@@ -120,7 +120,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->mouseMoveEvent(dynamic_cast<QMouseEvent*>(event));
+            c->mouseMouseOnParentEvent(dynamic_cast<QMouseEvent*>(event));
         }
     }
     return QObject::eventFilter( watched, event );
