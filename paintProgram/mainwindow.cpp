@@ -109,11 +109,17 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::KeyPress)
     {
-        keyPressEvent(dynamic_cast<QKeyEvent*>(event));
+        if(!m_dlg_textSettings->spinBoxHasFocus())
+        {
+            keyPressEvent(dynamic_cast<QKeyEvent*>(event));
+        }
     }
     else if(event->type() == QEvent::KeyRelease)
     {
-        keyReleaseEvent(dynamic_cast<QKeyEvent*>(event));
+        if(!m_dlg_textSettings->spinBoxHasFocus())
+        {
+            keyReleaseEvent(dynamic_cast<QKeyEvent*>(event));
+        }
     }
     if(event->type() == QEvent::MouseMove)
     {

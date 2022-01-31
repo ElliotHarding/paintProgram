@@ -37,6 +37,11 @@ void DLG_TextSettings::show()
     QDialog::show();
 }
 
+bool DLG_TextSettings::spinBoxHasFocus()
+{
+    ui->spinBox_fontSize->hasFocus();
+}
+
 void DLG_TextSettings::on_btn_bold_clicked()
 {
     m_font.setBold(!m_font.bold());

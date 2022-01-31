@@ -18,6 +18,8 @@ public:
     QFont getFont();
     void show();
 
+    bool spinBoxHasFocus();
+
 signals:
     void updateFont(QFont font);
 
