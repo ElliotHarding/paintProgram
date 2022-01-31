@@ -70,7 +70,14 @@ void Canvas::writeText(QString letter, QFont font)
 {
     if(m_tool == TOOL_TEXT)
     {
-        m_textToDraw += letter;
+        if(letter == "\010")//backspace
+        {
+            m_textToDraw.chop(1);
+        }
+        else
+        {
+            m_textToDraw += letter;
+        }
 
         m_canvasMutex.lock();
 
