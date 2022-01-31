@@ -8,6 +8,7 @@ DLG_BrushSettings::DLG_BrushSettings(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    setFixedWidth(70);
 }
 
 DLG_BrushSettings::~DLG_BrushSettings()

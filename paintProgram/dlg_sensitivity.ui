@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Sensitivity</string>
   </property>
   <widget class="QSpinBox" name="spin_spreadSensitivity">
    <property name="geometry">

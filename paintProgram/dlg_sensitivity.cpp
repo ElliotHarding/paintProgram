@@ -6,6 +6,8 @@ DLG_Sensitivity::DLG_Sensitivity(QWidget *parent) :
     ui(new Ui::DLG_Sensitivity)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    setFixedWidth(70);
 }
 
 DLG_Sensitivity::~DLG_Sensitivity()
