@@ -191,6 +191,8 @@ void Canvas::updateCurrentTool(Tool t)
         m_previousDragPos = Constants::NullDragPoint;
         m_dragOffsetX = 0;
         m_dragOffsetY = 0;
+        //Clear selected pixels
+        m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
 
         canvasMutexLocker.unlock();
 
@@ -423,7 +425,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
             if(m_selectedPixels[x][y])
             {
                 //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-                painter.fillRect(QRect(x + m_panOffsetX, y + m_panOffsetY, 1, 1), m_c_selectionAreaColor);
+                painter.fillRect(QRect(x + m_panOffsetX + m_dragOffsetX, y + m_panOffsetY + m_dragOffsetY, 1, 1), m_c_selectionAreaColor);
             }
         }
     }
@@ -670,6 +672,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         m_previousDragPos = Constants::NullDragPoint;
         m_dragOffsetX = 0;
         m_dragOffsetY = 0;
+        //Clear selected pixels
+        m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
 
         m_drawShapeOrigin = mouseLocation;
     }
