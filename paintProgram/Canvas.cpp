@@ -133,6 +133,9 @@ void Canvas::updateSettings(int width, int height, QString name)
 
     emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
 
+    //Clear selected pixels
+    m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+
     m_canvasMutex.unlock();
 
     if(m_savePath != "")
@@ -420,7 +423,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
             if(m_selectedPixels[x][y])
             {
                 //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-                painter.fillRect(QRect(x + m_panOffsetX + m_dragOffsetX, y + m_panOffsetY + m_dragOffsetY, 1, 1), m_c_selectionAreaColor);
+                painter.fillRect(QRect(x + m_panOffsetX, y + m_panOffsetY, 1, 1), m_c_selectionAreaColor);
             }
         }
     }
