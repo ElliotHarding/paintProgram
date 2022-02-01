@@ -91,7 +91,7 @@ private:
     float m_panOffsetY = 0;
 
     //Selecting
-    QList<QPoint> m_selectedPixels;
+    std::vector<std::vector<bool>> m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
     const QColor m_c_selectionBorderColor = Qt::blue; //todo ~ not const because future cahnges planned (if highlight color and background color are the same)
