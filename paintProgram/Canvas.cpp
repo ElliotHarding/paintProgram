@@ -758,30 +758,6 @@ void Canvas::mouseMouseOnParentEvent(QMouseEvent *event)
     m_canvasMutex.unlock();
 }
 
-void offsetSelectedPixelsVector(std::vector<std::vector<bool>>& selectedPixels, const int& offsetX, const int& offsetY)
-{
-    if(selectedPixels.size() == 0)
-        return;
-
-    std::vector<std::vector<bool>> offsetSelectedPixels = std::vector<std::vector<bool>>(selectedPixels.size(), std::vector<bool>(selectedPixels[0].size(), false));
-    for(int x = 0; x < selectedPixels.size(); x++)
-    {
-        for(int y = 0; y < selectedPixels[x].size(); y++)
-        {
-            if(selectedPixels[x][y])
-            {
-                if(x + offsetX > -1 && x + offsetX < selectedPixels.size() &&
-                   y + offsetY > -1 && y + offsetY < selectedPixels[x].size())
-                {
-                    offsetSelectedPixels[x + offsetX][y + offsetY] = true;
-                }
-            }
-        }
-    }
-
-    selectedPixels = offsetSelectedPixels;
-}
-
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
     m_canvasMutex.lock();
@@ -843,13 +819,25 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
             else //If currently dragging
             {
-                const int offsetX = (mouseLocation.x() - m_previousDragPos.x());
-                const int offsetY = (mouseLocation.y() - m_previousDragPos.y());
+                m_dragOffsetX += (mouseLocation.x() - m_previousDragPos.x());
+                m_dragOffsetY += (mouseLocation.y() - m_previousDragPos.y());
 
-                m_dragOffsetX += offsetX;
-                m_dragOffsetY += offsetY;
-
-                offsetSelectedPixelsVector(m_selectedPixels, offsetX, offsetY);
+                //Clear selected pixels and set to clipboard pixels
+                m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+                for(int x = 0; x < m_clipboardImage.width(); x++)
+                {
+                    for(int y = 0; y < m_clipboardImage.height(); y++)
+                    {
+                        if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
+                        {
+                            if(x + m_dragOffsetX > -1 && x + m_dragOffsetX < m_selectedPixels.size() &&
+                               y + m_dragOffsetY > -1 && y + m_dragOffsetY < m_selectedPixels[x].size())
+                            {
+                                m_selectedPixels[x + m_dragOffsetX][y + m_dragOffsetY] = true;
+                            }
+                        }
+                    }
+                }
 
                 update();
 
