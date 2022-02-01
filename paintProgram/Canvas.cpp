@@ -271,27 +271,43 @@ void Canvas::cutKeysPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Copy cut pixels to clipboard
-    QImage clipBoard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    QImage clipBoard;
 
-    QPainter dragPainter(&clipBoard);
-    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-    dragPainter.fillRect(clipBoard.rect(), Qt::transparent);
-
-    QPainter painter(&m_canvasImage);
-    painter.setCompositionMode (QPainter::CompositionMode_Clear);
-
-    for(int x = 0; x < m_selectedPixels.size(); x++)
+    //What if already dragging something around?
+    if(m_previousDragPos != Constants::NullDragPoint)
     {
-        for(int y = 0; y < m_selectedPixels[x].size(); y++)
+        clipBoard = m_clipboardImage;
+    }
+    else
+    {
+        //Copy cut pixels to clipboard
+        clipBoard = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+
+        QPainter dragPainter(&clipBoard);
+        dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+        dragPainter.fillRect(clipBoard.rect(), Qt::transparent);
+
+        QPainter painter(&m_canvasImage);
+        painter.setCompositionMode (QPainter::CompositionMode_Clear);
+
+        for(int x = 0; x < m_selectedPixels.size(); x++)
         {
-            if(m_selectedPixels[x][y])
+            for(int y = 0; y < m_selectedPixels[x].size(); y++)
             {
-                dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasImage.pixelColor(x, y));
-                painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
+                if(m_selectedPixels[x][y])
+                {
+                    dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasImage.pixelColor(x, y));
+                    painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
+                }
             }
         }
     }
+
+    //Reset
+    m_clipboardImage = QImage();
+    m_previousDragPos = Constants::NullDragPoint;
+    m_dragOffsetX = 0;
+    m_dragOffsetY = 0;
 
     //Clear selected pixels
     m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
