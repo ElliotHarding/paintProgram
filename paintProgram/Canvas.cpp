@@ -214,7 +214,7 @@ void Canvas::deleteKeyPressed()
 
         for(int x = 0; x < m_selectedPixels.size(); x++)
         {
-            for(int y = 0; y < m_selectedPixels[y].size(); y++)
+            for(int y = 0; y < m_selectedPixels[x].size(); y++)
             {
                 if(m_selectedPixels[x][y])
                 {
@@ -246,7 +246,7 @@ QImage generateClipBoard(QImage& canvas, std::vector<std::vector<bool>>& selecte
 
     for(int x = 0; x < selectedPixels.size(); x++)
     {
-        for(int y = 0; y < selectedPixels[y].size(); y++)
+        for(int y = 0; y < selectedPixels[x].size(); y++)
         {
             if(selectedPixels[x][y])
             {
@@ -283,7 +283,7 @@ void Canvas::cutKeysPressed()
 
     for(int x = 0; x < m_selectedPixels.size(); x++)
     {
-        for(int y = 0; y < m_selectedPixels[y].size(); y++)
+        for(int y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
@@ -410,7 +410,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
 
     //Draw current image
-
     QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
@@ -420,7 +419,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     //Draw highlighed pixels
     for(int x = 0; x < m_selectedPixels.size(); x++)
     {
-        for(int y = 0; y < m_selectedPixels[y].size(); y++)
+        for(int y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
