@@ -148,34 +148,12 @@ void Canvas::updateSettings(int width, int height, QString name)
 
 void Canvas::updateCurrentTool(Tool t)
 {
+    bool doUpdate = false;
+
     if(m_tool == TOOL_TEXT && t != TOOL_TEXT)
         m_textToDraw = "";
 
-    m_tool = t;
-
-    bool doUpdate = false;
-
-    if(m_tool != TOOL_SELECT)
-    {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
-        //Reset selection rectangle tool        
-        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
-
-        emit selectionAreaResize(0,0);
-
-        if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
-        {
-            //Clear selected pixels
-            m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
-        }
-
-        canvasMutexLocker.unlock();
-
-        doUpdate = true;
-    }
-
-    if(m_tool != TOOL_DRAG)
+    if(m_tool == TOOL_DRAG && t != TOOL_DRAG)
     {
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -193,6 +171,28 @@ void Canvas::updateCurrentTool(Tool t)
         m_dragOffsetY = 0;
         //Clear selected pixels
         m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+
+        canvasMutexLocker.unlock();
+
+        doUpdate = true;
+    }
+
+    m_tool = t;
+
+    if(m_tool != TOOL_SELECT)
+    {
+        QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+        //Reset selection rectangle tool        
+        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
+
+        emit selectionAreaResize(0,0);
+
+        if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
+        {
+            //Clear selected pixels
+            m_selectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+        }
 
         canvasMutexLocker.unlock();
 
