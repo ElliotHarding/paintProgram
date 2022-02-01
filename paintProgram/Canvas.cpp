@@ -704,7 +704,7 @@ void combineSelections(std::vector<std::vector<bool>>& selectedPixels, QRubberBa
     {
         for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
         {
-            if(y > -1 && y < selectedPixels[x].size() && x > -1 && y < selectedPixels.size())
+            if(y > -1 && y < selectedPixels[x].size() && x > -1 && x < selectedPixels.size())
                 selectedPixels[x][y] = true;
         }
     }
