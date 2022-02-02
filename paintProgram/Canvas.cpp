@@ -431,6 +431,8 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(QRect(m_dragOffsetX + m_panOffsetX, m_dragOffsetY + m_panOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Draw highlighed pixels
+    QPen selectionPenBlack = QPen(Qt::black, 1/m_zoomFactor);
+    QPen selectionPenWhite = QPen(Qt::white, 1/m_zoomFactor);
     for(int x = 0; x < m_selectedPixels.size(); x++)
     {
         for(int y = 0; y < m_selectedPixels[x].size(); y++)
@@ -439,6 +441,39 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
             {
                 //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
                 painter.fillRect(QRect(x + m_panOffsetX, y + m_panOffsetY, 1, 1), m_c_selectionAreaColor);
+
+                if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
+                {
+                    //border right
+                    painter.setPen(selectionPenBlack);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX) + 1.0, float(y) + int(m_panOffsetY)), QPointF(float(x) + int(m_panOffsetX) + 1.0, float(y) + int(m_panOffsetY) + 0.5));
+                    painter.setPen(selectionPenWhite);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX) + 1.0, float(y) + int(m_panOffsetY) + 0.5), QPointF(float(x) + int(m_panOffsetX) + 1.0, float(y) + int(m_panOffsetY) + 1.0));
+                }
+                if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
+                {
+                    //border left
+                    painter.setPen(selectionPenBlack);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX), float(y) + int(m_panOffsetY)), QPointF(float(x) + int(m_panOffsetX), float(y) + int(m_panOffsetY) + 0.5));
+                    painter.setPen(selectionPenWhite);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX), float(y) + int(m_panOffsetY) + 0.5), QPointF(float(x) + int(m_panOffsetX), float(y) + int(m_panOffsetY) + 1.0));
+                }
+                if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
+                {
+                    //border bottom
+                    painter.setPen(selectionPenBlack);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX), float(y) + int(m_panOffsetY) + 1.0), QPointF(float(x) + int(m_panOffsetX) + 0.5, float(y) + int(m_panOffsetY) + 1.0));
+                    painter.setPen(selectionPenWhite);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX) + 0.5, float(y) + int(m_panOffsetY) + 1.0), QPointF(float(x) + int(m_panOffsetX) + 1.0, float(y) + int(m_panOffsetY) + 1.0));
+                }
+                if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
+                {
+                    //border top
+                    painter.setPen(selectionPenBlack);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX), float(y) + int(m_panOffsetY)), QPointF(float(x) + int(m_panOffsetX) + 0.5, float(y) + int(m_panOffsetY)));
+                    painter.setPen(selectionPenWhite);
+                    painter.drawLine(QPointF(float(x) + int(m_panOffsetX) + 0.5, float(y) + int(m_panOffsetY)), QPointF(float(x) + int(m_panOffsetX) + 1.0, float(y) + int(m_panOffsetY)));
+                }
             }
         }
     }
