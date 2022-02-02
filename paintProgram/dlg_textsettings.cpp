@@ -39,7 +39,7 @@ void DLG_TextSettings::show()
 
 bool DLG_TextSettings::spinBoxHasFocus()
 {
-    ui->spinBox_fontSize->hasFocus();
+    return ui->spinBox_fontSize->hasFocus();
 }
 
 void DLG_TextSettings::on_btn_bold_clicked()
