@@ -146,8 +146,6 @@ void Canvas::updateSettings(int width, int height, QString name)
     }
 }
 
-//spread select, drag, change tool select, looses selection.
-//spread select, change tool select, dosent loose selection.
 void Canvas::updateCurrentTool(Tool t)
 {
     bool doUpdate = false;
