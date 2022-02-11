@@ -91,8 +91,6 @@ private:
     std::vector<std::vector<bool>> m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
-    const QColor m_c_selectionBorderColor = Qt::blue; //todo ~ not const because future cahnges planned (if highlight color and background color are the same)
-    const QColor m_c_selectionAreaColor = QColor(0,40,100, 50);
 
     //Dragging/copy/paste
     QPoint m_previousDragPos;
@@ -109,6 +107,32 @@ private:
     MainWindow* m_pParent;
 
     QString m_savePath = "";
+};
+
+class SelectedPixels
+{
+private:
+    std::vector<std::vector<bool>> m_selectedPixels;
+    QImage m_image;
+
+public:
+    SelectedPixels(int width, int height);
+
+    void clearAndResize(int width, int height);
+    void clear();
+
+    void addPixels(QRubberBand* newSelectionArea);
+    void addNonAlpha0Pixels(QImage& image);
+    void addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, int offsetY);
+
+    void redraw();
+    QImage& getImage();
+
+    void fillColor(QPainter painter, QColor color);
+
+    bool isHighlighted(int x, int y);
+    std::vector<std::vector<bool>>& getPixels();
+
 };
 
 #endif // CANVAS_H
