@@ -9,6 +9,32 @@
 
 #include "mainwindow.h"
 
+class SelectedPixels
+{
+private:
+    std::vector<std::vector<bool>> m_selectedPixels;
+    QImage m_image;
+
+public:
+    SelectedPixels(int width, int height);
+
+    void clearAndResize(int width, int height);
+    void clear();
+
+    void addPixels(QRubberBand* newSelectionArea);
+    void addNonAlpha0Pixels(QImage& image);
+    void addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, int offsetY);
+
+    void redraw();
+    QImage& getImage();
+
+    void fillColor(QPainter& painter, QColor color);
+
+    bool isHighlighted(int x, int y);
+    std::vector<std::vector<bool>>& getPixels();
+
+};
+
 class Canvas: public QTabWidget
 {
     Q_OBJECT
@@ -88,7 +114,7 @@ private:
     float m_panOffsetY = 0;
 
     //Selecting
-    std::vector<std::vector<bool>> m_selectedPixels;
+    SelectedPixels m_selectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
 
@@ -107,32 +133,6 @@ private:
     MainWindow* m_pParent;
 
     QString m_savePath = "";
-};
-
-class SelectedPixels
-{
-private:
-    std::vector<std::vector<bool>> m_selectedPixels;
-    QImage m_image;
-
-public:
-    SelectedPixels(int width, int height);
-
-    void clearAndResize(int width, int height);
-    void clear();
-
-    void addPixels(QRubberBand* newSelectionArea);
-    void addNonAlpha0Pixels(QImage& image);
-    void addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, int offsetY);
-
-    void redraw();
-    QImage& getImage();
-
-    void fillColor(QPainter painter, QColor color);
-
-    bool isHighlighted(int x, int y);
-    std::vector<std::vector<bool>>& getPixels();
-
 };
 
 #endif // CANVAS_H
