@@ -435,8 +435,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(QRect(m_dragOffsetX + m_panOffsetX, m_dragOffsetY + m_panOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Draw selected pixels
-    QImage& selectedPixels = m_selectedPixels.getImage();
-    painter.drawImage(QRect(m_panOffsetX, m_panOffsetY, selectedPixels.width(), selectedPixels.height()), selectedPixels);
+    m_selectedPixels.draw(painter, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
     //Draw selection tool
     if(m_tool == TOOL_SELECT)
@@ -884,21 +883,11 @@ void Canvas::updateCenter()
 SelectedPixels::SelectedPixels(int width, int height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-
-    m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
-    QPainter painter(&m_image);
-    painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    painter.fillRect(QRect(0, 0, m_image.width(), m_image.height()), Qt::transparent);
 }
 
 void SelectedPixels::clearAndResize(int width, int height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-
-    m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
-    QPainter painter(&m_image);
-    painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    painter.fillRect(QRect(0, 0, m_image.width(), m_image.height()), Qt::transparent);
 }
 
 void SelectedPixels::clear()
@@ -906,10 +895,6 @@ void SelectedPixels::clear()
     if(m_selectedPixels.size() > 0)
     {
         m_selectedPixels = std::vector<std::vector<bool>>(m_selectedPixels.size(), std::vector<bool>(m_selectedPixels[0].size(), false));
-
-        QPainter painter(&m_image);
-        painter.setCompositionMode (QPainter::CompositionMode_Clear);
-        painter.fillRect(QRect(0, 0, m_image.width(), m_image.height()), Qt::transparent);
     }
     else
     {
@@ -938,8 +923,6 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
             }
         }
     }
-
-    redraw();
 }
 
 void SelectedPixels::addNonAlpha0Pixels(QImage &image)
@@ -961,8 +944,6 @@ void SelectedPixels::addNonAlpha0Pixels(QImage &image)
             }
         }
     }
-
-    redraw();
 }
 
 void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, int offsetY)
@@ -985,69 +966,56 @@ void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, in
             }
         }
     }
-
-    redraw();
 }
 
-void SelectedPixels::redraw()
+void SelectedPixels::draw(QPainter& painter, float zoomFactor, int offsetX, int offsetY)
 {
-    QPainter painter(&m_image);
-    //painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    //painter.fillRect(m_image.rect(), Qt::transparent);
-    //painter.setCompositionMode (QPainter::CompositionMode_Source);
-
     //Draw highlighed pixels
-    QPen selectionPenBlack = QPen(Qt::black, 0.1);
-    QPen selectionPenWhite = QPen(Qt::white, 0.1);
+    QPen selectionPenBlack = QPen(Qt::black, 1/zoomFactor);
+    QPen selectionPenWhite = QPen(Qt::white, 1/zoomFactor);
     for(int x = 0; x < m_selectedPixels.size(); x++)
     {
         for(int y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
-                //TODO ~ If highlight selection color and background color are the same we wont see highlighted area...
-                //painter.fillRect(QRect(x, y, 1, 1), Constants::SelectionAreaColor);
+                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColor);
 
                 if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
                 {
                     //border right
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(float(x) + 1.0, float(y)), QPointF(float(x) + 1.0, float(y) + 0.5));
+                    painter.drawLine(QPointF(float(x) + offsetX + 1.0, float(y) + offsetY), QPointF(float(x) + offsetX + 1.0, float(y) + offsetY + 0.5));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(float(x) + 1.0, float(y) + 0.5), QPointF(float(x) + 1.0, float(y) + 1.0));
+                    painter.drawLine(QPointF(float(x) + offsetX + 1.0, float(y) + offsetY + 0.5), QPointF(float(x) + offsetX + 1.0, float(y) + offsetY + 1.0));
                 }
                 if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
                 {
                     //border left
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(float(x), float(y)), QPointF(float(x), float(y) + 0.5));
+                    painter.drawLine(QPointF(float(x) + offsetX, float(y) + offsetY), QPointF(float(x) + offsetX, float(y) + offsetY + 0.5));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(float(x), float(y) + 0.5), QPointF(float(x), float(y) + 1.0));
+                    painter.drawLine(QPointF(float(x) + offsetX, float(y) + offsetY + 0.5), QPointF(float(x) + offsetX, float(y) + offsetY + 1.0));
                 }
                 if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
                 {
                     //border bottom
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(float(x), float(y) + 1.0), QPointF(float(x) + 0.5, float(y) + 1.0));
+                    painter.drawLine(QPointF(float(x) + offsetX, float(y) + offsetY + 1.0), QPointF(float(x) + offsetX + 0.5, float(y) + offsetY + 1.0));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(float(x) + 0.5, float(y) + 1.0), QPointF(float(x) + 1.0, float(y) + 1.0));
+                    painter.drawLine(QPointF(float(x) + offsetX + 0.5, float(y) + offsetY + 1.0), QPointF(float(x) + offsetX + 1.0, float(y) + offsetY + 1.0));
                 }
                 if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
                 {
                     //border top
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(float(x), float(y)), QPointF(float(x) + 0.5, float(y)));
+                    painter.drawLine(QPointF(float(x) + offsetX, float(y) + offsetY), QPointF(float(x) + offsetX + 0.5, float(y) + offsetY));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(float(x) + 0.5, float(y)), QPointF(float(x) + 1.0, float(y)));
+                    painter.drawLine(QPointF(float(x) + offsetX + 0.5, float(y) + offsetY), QPointF(float(x) + offsetX + 1.0, float(y) + offsetY));
                 }
             }
         }
     }
-}
-
-QImage &SelectedPixels::getImage()
-{
-    return m_image;
 }
 
 void SelectedPixels::fillColor(QPainter& painter, QColor color)
