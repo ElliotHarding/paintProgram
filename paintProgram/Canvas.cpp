@@ -10,6 +10,8 @@ namespace Constants
 {
 const QPoint NullDragPoint = QPoint(0,0);
 const QColor ImageBorderColor = QColor(200,200,200,255);
+const QColor TransparentGrey = QColor(190,190,190,255);
+const QColor TransparentWhite = QColor(255,255,255,255);
 }
 
 Canvas::Canvas(MainWindow* parent, QImage image) :
@@ -407,6 +409,25 @@ void Canvas::recordImageHistory()
     m_imageHistoryIndex = m_imageHistory.size() - 1;
 }
 
+void drawTransparentPixels(QPainter& painter, QImage& canvas, float offsetX, float offsetY)
+{
+    for(int x = 0; x < canvas.width(); x++)
+    {
+        for(int y = 0; y < canvas.height(); y++)
+        {
+            if(canvas.pixelColor(x,y).alpha() < 255)
+            {
+                const QColor col = (x % 2 == 0) ?
+                            (y % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
+                                         :
+                            (y % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
+
+                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
+            }
+        }
+    }
+}
+
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     m_canvasMutex.lock();
@@ -421,7 +442,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.translate(-m_center);
 
     //Switch out transparent pixels for grey-white pattern
-    drawTransparentPixels(painter, m_panOffsetX, m_panOffsetY);
+    drawTransparentPixels(painter, m_canvasImage, m_panOffsetX, m_panOffsetY);
 
     //Draw current image
     QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
@@ -490,26 +511,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
 
     m_canvasMutex.unlock();
-}
-
-//Called when m_canvasMutex is locked
-void Canvas::drawTransparentPixels(QPainter& painter, float offsetX, float offsetY)
-{
-    for(int x = 0; x < m_canvasImage.width(); x++)
-    {
-        for(int y = 0; y < m_canvasImage.height(); y++)
-        {
-            if(m_canvasImage.pixelColor(x,y).alpha() < 255)
-            {
-                const QColor col = (x % 2 == 0) ?
-                            (y % 2 == 0) ? m_c_transparentWhite : m_c_transparentGrey
-                                         :
-                            (y % 2 == 0) ? m_c_transparentGrey : m_c_transparentWhite;
-
-                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
-            }
-        }
-    }
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)

@@ -63,11 +63,8 @@ private:
     bool m_bMouseDown = false;
 
     //Drawing
-    void drawTransparentPixels(QPainter& painter, float offsetX, float offsetY);//Called when m_canvasMutex is locked
     QImage m_canvasImage;
     QMutex m_canvasMutex;
-    const QColor m_c_transparentGrey = QColor(190,190,190,255);
-    const QColor m_c_transparentWhite = QColor(255,255,255,255);
     QString m_textToDraw = "";
     QPoint m_textDrawLocation;
 
