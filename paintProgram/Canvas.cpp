@@ -411,9 +411,21 @@ void drawTransparentPixels(QPainter& painter, QImage& canvas, float offsetX, flo
     }
 }
 
+/* Empty 2000x2000 zoom repaint (Make drawTransparentPixels an image...)
+Step 2-1 :  0
+Step 3-2 :  525 --> drawTransparentPixels
+Step 4-3 :  1
+Step 5-4 :  0
+Step 6-5 :  107 --> m_selectedPixels.draw
+Step 7-6 :  0
+Step 8-7 :  0
+ */
+
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     m_canvasMutex.lock();
+
+    clock_t step1 = clock();
 
     //Setup painter
     QPainter painter(this);
@@ -424,18 +436,28 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.scale(m_zoomFactor, m_zoomFactor);
     painter.translate(-m_center);
 
+    clock_t step2 = clock();
+
     //Switch out transparent pixels for grey-white pattern
     drawTransparentPixels(painter, m_canvasImage, m_panOffsetX, m_panOffsetY);
+
+    clock_t step3 = clock();
 
     //Draw current image
     QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
     painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
 
+    clock_t step4 = clock();
+
     //Draw dragging pixels
     painter.drawImage(QRect(m_dragOffsetX + m_panOffsetX, m_dragOffsetY + m_panOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
+    clock_t step5 = clock();
+
     //Draw selected pixels
     m_selectedPixels.draw(painter, m_zoomFactor, m_panOffsetX, m_panOffsetY);
+
+    clock_t step6 = clock();
 
     //Draw selection tool
     if(m_tool == TOOL_SELECT)
@@ -445,9 +467,21 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
         painter.drawRect(m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY));
     }
 
+    clock_t step7 = clock();
+
     //Draw border
     painter.setPen(QPen(Constants::ImageBorderColor, 1/m_zoomFactor));
     painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
+
+    clock_t step8 = clock();
+
+    qDebug() << "Step 2-1 : " << ((double)step2 - step1);
+    qDebug() << "Step 3-2 : " << ((double)step3 - step2);
+    qDebug() << "Step 4-3 : " << ((double)step4 - step3);
+    qDebug() << "Step 5-4 : " << ((double)step5 - step4);
+    qDebug() << "Step 6-5 : " << ((double)step6 - step5);
+    qDebug() << "Step 7-6 : " << ((double)step7 - step6);
+    qDebug() << "Step 8-7 : " << ((double)step8 - step7);
 
     m_canvasMutex.unlock();
 }
