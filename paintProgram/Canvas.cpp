@@ -993,25 +993,25 @@ void SelectedPixels::draw(QPainter& painter, float zoomFactor, int offsetX, int 
                 {
                     //border left
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(x + offsetX, (y) + offsetY), QPointF(x + offsetX, (y) + offsetY + 0.5));
+                    painter.drawLine(QPointF(x + offsetX, y + offsetY), QPointF(x + offsetX, y + offsetY + 0.5));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(x + offsetX, (y) + offsetY + 0.5), QPointF(x + offsetX, (y) + offsetY + 1.0));
+                    painter.drawLine(QPointF(x + offsetX, y + offsetY + 0.5), QPointF(x + offsetX, y + offsetY + 1.0));
                 }
                 if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
                 {
                     //border bottom
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF((x) + offsetX, (y) + offsetY + 1.0), QPointF((x) + offsetX + 0.5, (y) + offsetY + 1.0));
+                    painter.drawLine(QPointF(x + offsetX, y + offsetY + 1.0), QPointF(x + offsetX + 0.5, y + offsetY + 1.0));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF((x) + offsetX + 0.5, (y) + offsetY + 1.0), QPointF((x) + offsetX + 1.0, (y) + offsetY + 1.0));
+                    painter.drawLine(QPointF(x + offsetX + 0.5, y + offsetY + 1.0), QPointF(x + offsetX + 1.0, y + offsetY + 1.0));
                 }
                 if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
                 {
                     //border top
                     painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF((x) + offsetX, (y) + offsetY), QPointF((x) + offsetX + 0.5, (y) + offsetY));
+                    painter.drawLine(QPointF(x + offsetX, y + offsetY), QPointF(x + offsetX + 0.5, y + offsetY));
                     painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF((x) + offsetX + 0.5, (y) + offsetY), QPointF((x) + offsetX + 1.0, (y) + offsetY));
+                    painter.drawLine(QPointF(x + offsetX + 0.5, y + offsetY), QPointF(x + offsetX + 1.0, y + offsetY));
                 }
             }
         }
