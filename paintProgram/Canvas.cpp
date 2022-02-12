@@ -985,7 +985,7 @@ void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, in
                 if(x + offsetX > -1 && x + offsetX < m_selectedPixels.size() &&
                    y + offsetY > -1 && y + offsetY < m_selectedPixels[x].size())
                 {
-                    m_selectedPixels[x + offsetY][y + offsetY] = true;
+                    m_selectedPixels[x + offsetX][y + offsetY] = true;
                 }
                 else
                 {
