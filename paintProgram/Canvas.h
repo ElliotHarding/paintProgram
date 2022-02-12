@@ -25,7 +25,7 @@ public:
 
     void addPixels(QRubberBand* newSelectionArea);
     void addNonAlpha0Pixels(QImage& image);
-    void addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, int offsetY);
+    void addNonAlpha0PixelsWithOffset(QImage& image, const int offsetX, const int offsetY);
 
     void draw(QPainter& painter, float zoomFactor, int offsetX, int offsetY);
 

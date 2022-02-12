@@ -938,11 +938,11 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
         return;
 
     const QRect geometry = newSelectionArea->geometry();
-    for (uint x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
     {
-        for (uint y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
         {
-            if(x > -1 && x < m_selectedPixels.size() && y > -1 && y < m_selectedPixels[0].size())
+            if(x > -1 && x < (int)m_selectedPixels.size() && y > -1 && y < (int)m_selectedPixels[0].size())
             {
                 m_selectedPixels[x][y] = true;
             }
@@ -956,13 +956,13 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
 
 void SelectedPixels::addNonAlpha0Pixels(QImage &image)
 {
-    for(uint x = 0; x < image.width(); x++)
+    for(uint x = 0; x < (uint)image.width(); x++)
     {
-        for(uint y = 0; y < image.height(); y++)
+        for(uint y = 0; y < (uint)image.height(); y++)
         {
             if(image.pixelColor(x,y).alpha() > 0)
             {
-                if(x > -1 && x < m_selectedPixels.size() && y > -1 && y < m_selectedPixels[0].size())
+                if((int)x > -1 && x < m_selectedPixels.size() && y > -1 && y < m_selectedPixels[0].size())
                 {
                     m_selectedPixels[x][y] = true;
                 }
@@ -975,7 +975,7 @@ void SelectedPixels::addNonAlpha0Pixels(QImage &image)
     }
 }
 
-void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, int offsetY)
+void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, const int offsetX, const int offsetY)
 {
     for(int x = 0; x < image.width(); x++)
     {
@@ -983,8 +983,8 @@ void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, int offsetX, in
         {
             if(image.pixelColor(x,y).alpha() > 0)
             {
-                if(x + offsetX > -1 && x + offsetX < m_selectedPixels.size() &&
-                   y + offsetY > -1 && y + offsetY < m_selectedPixels[x].size())
+                if(x + offsetX > -1 && x + offsetX < (int)m_selectedPixels.size() &&
+                   y + offsetY > -1 && y + offsetY < (int)m_selectedPixels[x].size())
                 {
                     m_selectedPixels[x + offsetX][y + offsetY] = true;
                 }
@@ -1071,6 +1071,7 @@ bool SelectedPixels::isHighlighted(const uint x, const uint y)
     {
         qDebug() << "SelectedPixels::isHighlighted - Out of range -" << x << ":" << y;
     }
+    return false;
 }
 
 std::vector<std::vector<bool>> &SelectedPixels::getPixels()
