@@ -236,7 +236,11 @@ void Canvas::deleteKeyPressed()
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
-        m_selectedPixels.fillColor(painter, Qt::transparent);
+        m_selectedPixels.operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
+        });
+
         m_selectedPixels.clear();
 
         recordImageHistory();
@@ -895,12 +899,12 @@ void Canvas::updateCenter()
 
 
 
-SelectedPixels::SelectedPixels(int width, int height)
+SelectedPixels::SelectedPixels(const uint width, const uint height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
 }
 
-void SelectedPixels::clearAndResize(int width, int height)
+void SelectedPixels::clearAndResize(const uint width, const uint height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
 }
@@ -997,7 +1001,7 @@ void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, const int offse
     }
 }
 
-void SelectedPixels::draw(QPainter& painter, float zoomFactor, int offsetX, int offsetY)
+void SelectedPixels::draw(QPainter& painter, const float zoomFactor, const int offsetX, const int offsetY)
 {
     //Draw highlighed pixels
     QPen selectionPenBlack = QPen(Qt::black, 1/zoomFactor);
@@ -1042,20 +1046,6 @@ void SelectedPixels::draw(QPainter& painter, float zoomFactor, int offsetX, int 
                     painter.setPen(selectionPenWhite);
                     painter.drawLine(QPointF(x + offsetX + 0.5, y + offsetY), QPointF(x + offsetX + 1.0, y + offsetY));
                 }
-            }
-        }
-    }
-}
-
-void SelectedPixels::fillColor(QPainter& painter, QColor color)
-{
-    for(uint x = 0; x < m_selectedPixels.size(); x++)
-    {
-        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
-        {
-            if(m_selectedPixels[x][y])
-            {
-                painter.fillRect(QRect(x, y, 1, 1), color);
             }
         }
     }

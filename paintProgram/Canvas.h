@@ -16,9 +16,9 @@ private:
     std::vector<std::vector<bool>> m_selectedPixels;
 
 public:
-    SelectedPixels(int width, int height);
+    SelectedPixels(const uint width, const uint height);
 
-    void clearAndResize(int width, int height);
+    void clearAndResize(const uint width, const uint height);
     void clear();
 
     void operateOnSelectedPixels(std::function<void(int, int)> func);
@@ -27,9 +27,7 @@ public:
     void addNonAlpha0Pixels(QImage& image);
     void addNonAlpha0PixelsWithOffset(QImage& image, const int offsetX, const int offsetY);
 
-    void draw(QPainter& painter, float zoomFactor, int offsetX, int offsetY);
-
-    void fillColor(QPainter& painter, QColor color);
+    void draw(QPainter& painter, const float zoomFactor, const int offsetX, const int offsetY);
 
     bool isHighlighted(const uint x, const uint y);
     std::vector<std::vector<bool>>& getPixels();
