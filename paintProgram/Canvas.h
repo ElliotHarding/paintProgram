@@ -31,7 +31,7 @@ public:
 
     void fillColor(QPainter& painter, QColor color);
 
-    bool isHighlighted(int x, int y);
+    bool isHighlighted(const uint x, const uint y);
     std::vector<std::vector<bool>>& getPixels();
 
 };
@@ -103,7 +103,7 @@ private:
     void recordImageHistory();//Function called when m_canvasMutex is locked
     std::vector<QImage> m_imageHistory;
     int m_imageHistoryIndex = 0;
-    const int m_c_maxHistory = 20;
+    const uint m_c_maxHistory = 20;
 
     //Zooming
     float m_zoomFactor = 1;

@@ -18,6 +18,7 @@ const QColor SelectionAreaColor = QColor(0,40,100, 50);
 
 QImage genTransparentPixelsBackground(const int width, const int height)
 {
+    //TODO ~ Test if quicker to paint all white, then fill grey squares after
     QImage transparentBackground = QImage(QSize(width, height), QImage::Format_ARGB32);
     QPainter painter(&transparentBackground);
     for(int x = 0; x < width; x++)
@@ -402,7 +403,7 @@ void Canvas::recordImageHistory()
 }
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
-{
+{   
     m_canvasMutex.lock();
 
     clock_t step1 = clock();
@@ -511,7 +512,7 @@ QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& cente
 
 void paintRect(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight)
 {
-    if(x <= canvas.width() && y <= canvas.height())
+    if(x <= (uint)canvas.width() && y <= (uint)canvas.height())
     {
         QPainter painter(&canvas);
         painter.setCompositionMode (QPainter::CompositionMode_Source);
@@ -919,9 +920,9 @@ void SelectedPixels::clear()
 
 void SelectedPixels::operateOnSelectedPixels(std::function<void (int, int)> func)
 {
-    for(int x = 0; x < m_selectedPixels.size(); x++)
+    for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
-        for(int y = 0; y < m_selectedPixels[x].size(); y++)
+        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
@@ -937,9 +938,9 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
         return;
 
     const QRect geometry = newSelectionArea->geometry();
-    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+    for (uint x = geometry.x(); x < geometry.x() + geometry.width(); x++)
     {
-        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+        for (uint y = geometry.y(); y < geometry.y() + geometry.height(); y++)
         {
             if(x > -1 && x < m_selectedPixels.size() && y > -1 && y < m_selectedPixels[0].size())
             {
@@ -955,9 +956,9 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
 
 void SelectedPixels::addNonAlpha0Pixels(QImage &image)
 {
-    for(int x = 0; x < image.width(); x++)
+    for(uint x = 0; x < image.width(); x++)
     {
-        for(int y = 0; y < image.height(); y++)
+        for(uint y = 0; y < image.height(); y++)
         {
             if(image.pixelColor(x,y).alpha() > 0)
             {
@@ -1001,9 +1002,9 @@ void SelectedPixels::draw(QPainter& painter, float zoomFactor, int offsetX, int 
     //Draw highlighed pixels
     QPen selectionPenBlack = QPen(Qt::black, 1/zoomFactor);
     QPen selectionPenWhite = QPen(Qt::white, 1/zoomFactor);
-    for(int x = 0; x < m_selectedPixels.size(); x++)
+    for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
-        for(int y = 0; y < m_selectedPixels[x].size(); y++)
+        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
@@ -1048,9 +1049,9 @@ void SelectedPixels::draw(QPainter& painter, float zoomFactor, int offsetX, int 
 
 void SelectedPixels::fillColor(QPainter& painter, QColor color)
 {
-    for(int x = 0; x < m_selectedPixels.size(); x++)
+    for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
-        for(int y = 0; y < m_selectedPixels[x].size(); y++)
+        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
@@ -1060,9 +1061,9 @@ void SelectedPixels::fillColor(QPainter& painter, QColor color)
     }
 }
 
-bool SelectedPixels::isHighlighted(int x, int y)
+bool SelectedPixels::isHighlighted(const uint x, const uint y)
 {
-    if(x > -1 && x < m_selectedPixels.size() && y > -1 && y < m_selectedPixels[0].size())
+    if((int)x > -1 && x < m_selectedPixels.size() && (int)y > -1 && y < m_selectedPixels[0].size())
     {
         return m_selectedPixels[x][y];
     }
