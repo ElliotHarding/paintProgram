@@ -88,6 +88,7 @@ private:
 
     //Drawing
     QImage m_canvasImage;
+    QImage m_canvasBackgroundImage;
     QMutex m_canvasMutex;
     QString m_textToDraw = "";
     QPoint m_textDrawLocation;

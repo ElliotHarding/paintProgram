@@ -16,6 +16,26 @@ const QColor SelectionBorderColor = Qt::blue;
 const QColor SelectionAreaColor = QColor(0,40,100, 50);
 }
 
+QImage genTransparentPixelsBackground(const int width, const int height)
+{
+    QImage transparentBackground = QImage(QSize(width, height), QImage::Format_ARGB32);
+    QPainter painter(&transparentBackground);
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            const QColor col = (x % 2 == 0) ?
+                        (y % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
+                                     :
+                        (y % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
+
+            painter.fillRect(QRect(x, y, 1, 1), col);
+        }
+    }
+
+    return transparentBackground;
+}
+
 Canvas::Canvas(MainWindow* parent, QImage image) :
     QTabWidget(),
     m_selectedPixels(image.width(), image.height()),
@@ -23,6 +43,7 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     m_pParent(parent)
 {
     m_canvasImage = image;    
+    m_canvasBackgroundImage = genTransparentPixelsBackground(image.width(), image.height());
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
@@ -133,6 +154,7 @@ void Canvas::updateSettings(int width, int height, QString name)
     painter.end();
 
     m_canvasImage = newImage;
+    m_canvasBackgroundImage = genTransparentPixelsBackground(width, height);
 
     emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
 
@@ -392,43 +414,6 @@ void Canvas::recordImageHistory()
     m_imageHistoryIndex = m_imageHistory.size() - 1;
 }
 
-void drawTransparentPixels(QPainter& painter, QImage& canvas, float offsetX, float offsetY)
-{
-    painter.fillRect(QRect(offsetX, offsetY, canvas.width(), canvas.height()), Constants::TransparentGrey);
-
-    for(int x = 0; x < canvas.width(); x++)
-    {
-        for(int y = 0; y < canvas.height(); y++)
-        {
-            if(x % 2 == 0)
-            {
-                if(y % 2 == 0)
-                {
-                    painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::TransparentWhite);
-                }
-            }
-            else
-            {
-                if(y % 2 != 0)
-                {
-                    painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::TransparentWhite);
-                }
-            }
-
-        }
-    }
-}
-
-/* Empty 2000x2000 zoom repaint (Make drawTransparentPixels an image...)
-Step 2-1 :  0
-Step 3-2 :  525 --> drawTransparentPixels
-Step 4-3 :  1
-Step 5-4 :  0
-Step 6-5 :  107 --> m_selectedPixels.draw
-Step 7-6 :  0
-Step 8-7 :  0
- */
-
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
     m_canvasMutex.lock();
@@ -439,33 +424,35 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     QPainter painter(this);
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
+    clock_t step2 = clock();
+
     //Zoom painter    
     painter.translate(m_center);
     painter.scale(m_zoomFactor, m_zoomFactor);
     painter.translate(-m_center);
 
-    clock_t step2 = clock();
-
-    //Switch out transparent pixels for grey-white pattern
-    drawTransparentPixels(painter, m_canvasImage, m_panOffsetX, m_panOffsetY);
-
     clock_t step3 = clock();
 
-    //Draw current image
-    QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
-    painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
+    //Switch out transparent pixels for grey-white pattern
+    painter.drawImage(m_panOffsetX, m_panOffsetY, m_canvasBackgroundImage);
 
     clock_t step4 = clock();
+
+    //Draw current image
+    QRect canvasRect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
+    painter.drawImage(canvasRect, m_canvasImage, m_canvasImage.rect());
+
+    clock_t step5 = clock();
 
     //Draw dragging pixels
     painter.drawImage(QRect(m_dragOffsetX + m_panOffsetX, m_dragOffsetY + m_panOffsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
-    clock_t step5 = clock();
+    clock_t step6 = clock();
 
     //Draw selected pixels
     m_selectedPixels.draw(painter, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
-    clock_t step6 = clock();
+    clock_t step7 = clock();
 
     //Draw selection tool
     if(m_tool == TOOL_SELECT)
@@ -474,8 +461,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
         painter.setPen(QPen(Constants::SelectionBorderColor, 1/m_zoomFactor));
         painter.drawRect(m_selectionTool->geometry().translated(m_panOffsetX, m_panOffsetY));
     }
-
-    clock_t step7 = clock();
 
     //Draw border
     painter.setPen(QPen(Constants::ImageBorderColor, 1/m_zoomFactor));
@@ -513,7 +498,7 @@ void Canvas::wheelEvent(QWheelEvent* event)
     }
     else if(event->angleDelta().y() < 0)
     {
-        if(m_zoomFactor > 1)
+        if(m_zoomFactor > 0.1)
             m_zoomFactor /= (m_cZoomIncrement);
     }
 
