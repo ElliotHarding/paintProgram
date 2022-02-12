@@ -444,13 +444,13 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     clock_t step3 = clock();
 
     //Switch out transparent pixels for grey-white pattern
-    QRect rect = QRect(m_panOffsetX, m_panOffsetY, m_canvasBackgroundImage.width(), m_canvasBackgroundImage.height());
-    painter.drawImage(rect, m_canvasBackgroundImage, m_canvasBackgroundImage.rect());
+    painter.drawImage(m_panOffsetX, m_panOffsetY, m_canvasBackgroundImage);
 
     clock_t step4 = clock();
 
-    //Draw current image    
-    painter.drawImage(rect, m_canvasImage, m_canvasImage.rect());
+    //Draw current image
+    QRect canvasRect = QRect(m_panOffsetX, m_panOffsetY, m_canvasImage.width(), m_canvasImage.height());
+    painter.drawImage(canvasRect, m_canvasImage, m_canvasImage.rect());
 
     clock_t step5 = clock();
 
