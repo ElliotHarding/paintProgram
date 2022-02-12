@@ -394,19 +394,27 @@ void Canvas::recordImageHistory()
 
 void drawTransparentPixels(QPainter& painter, QImage& canvas, float offsetX, float offsetY)
 {
+    painter.fillRect(QRect(offsetX, offsetY, canvas.width(), canvas.height()), Constants::TransparentGrey);
+
     for(int x = 0; x < canvas.width(); x++)
     {
         for(int y = 0; y < canvas.height(); y++)
         {
-            if(canvas.pixelColor(x,y).alpha() < 255)
+            if(x % 2 == 0)
             {
-                const QColor col = (x % 2 == 0) ?
-                            (y % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
-                                         :
-                            (y % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
-
-                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
+                if(y % 2 == 0)
+                {
+                    painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::TransparentWhite);
+                }
             }
+            else
+            {
+                if(y % 2 != 0)
+                {
+                    painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::TransparentWhite);
+                }
+            }
+
         }
     }
 }
