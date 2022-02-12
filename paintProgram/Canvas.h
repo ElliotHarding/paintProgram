@@ -6,6 +6,7 @@
 #include <QMutex>
 #include <vector>
 #include <QPainter>
+#include <functional>
 
 #include "mainwindow.h"
 
@@ -19,6 +20,8 @@ public:
 
     void clearAndResize(int width, int height);
     void clear();
+
+    void operateOnSelectedPixels(std::function<void(int, int)> func);
 
     void addPixels(QRubberBand* newSelectionArea);
     void addNonAlpha0Pixels(QImage& image);

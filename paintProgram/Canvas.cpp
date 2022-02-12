@@ -303,18 +303,11 @@ void Canvas::cutKeysPressed()
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
         //Go through selected pixels cutting from canvas and copying to clipboard
-        std::vector<std::vector<bool>>& selectedPixels = m_selectedPixels.getPixels();
-        for(int x = 0; x < selectedPixels.size(); x++)
+        m_selectedPixels.operateOnSelectedPixels([&](int x, int y)-> void
         {
-            for(int y = 0; y < selectedPixels[x].size(); y++)
-            {
-                if(selectedPixels[x][y])
-                {
-                    dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasImage.pixelColor(x, y));
-                    painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
-                }
-            }
-        }
+            dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasImage.pixelColor(x, y));
+            painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
+        });
     }
 
     //Reset
@@ -928,6 +921,20 @@ void SelectedPixels::clear()
         qDebug() << "SelectedPixels::clear - No pixels to clear";
     }
 
+}
+
+void SelectedPixels::operateOnSelectedPixels(std::function<void (int, int)> func)
+{
+    for(int x = 0; x < m_selectedPixels.size(); x++)
+    {
+        for(int y = 0; y < m_selectedPixels[x].size(); y++)
+        {
+            if(m_selectedPixels[x][y])
+            {
+                func(x,y);
+            }
+        }
+    }
 }
 
 void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
