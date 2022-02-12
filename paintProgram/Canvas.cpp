@@ -246,7 +246,7 @@ void Canvas::deleteKeyPressed()
     }
 }
 
-QImage generateClipBoard(QImage& canvas, std::vector<std::vector<bool>>& selectedPixels)
+QImage generateClipBoard(QImage& canvas, SelectedPixels& selectedPixels)
 {
     //Prep selected pixels for dragging
     QImage clipboard = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
@@ -256,16 +256,10 @@ QImage generateClipBoard(QImage& canvas, std::vector<std::vector<bool>>& selecte
 
     dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
 
-    for(int x = 0; x < selectedPixels.size(); x++)
+    selectedPixels.operateOnSelectedPixels([&](int x, int y)-> void
     {
-        for(int y = 0; y < selectedPixels[x].size(); y++)
-        {
-            if(selectedPixels[x][y])
-            {
-                dragPainter.fillRect(QRect(x, y, 1, 1), canvas.pixelColor(x,y));
-            }
-        }
-    }
+        dragPainter.fillRect(QRect(x, y, 1, 1), canvas.pixelColor(x,y));
+    });
 
     return clipboard;
 }
@@ -273,7 +267,7 @@ QImage generateClipBoard(QImage& canvas, std::vector<std::vector<bool>>& selecte
 void Canvas::copyKeysPressed()
 {   
     m_canvasMutex.lock();
-    m_pParent->setCopyBuffer(generateClipBoard(m_canvasImage, m_selectedPixels.getPixels()));
+    m_pParent->setCopyBuffer(generateClipBoard(m_canvasImage, m_selectedPixels));
     m_canvasMutex.unlock();
 
     update();
@@ -775,7 +769,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 if(m_selectedPixels.isHighlighted(mouseLocation.x(), mouseLocation.y()))
                 {
                     if(m_clipboardImage == QImage())
-                        m_clipboardImage = generateClipBoard(m_canvasImage, m_selectedPixels.getPixels());
+                        m_clipboardImage = generateClipBoard(m_canvasImage, m_selectedPixels);
 
                     m_previousDragPos = mouseLocation;
                     m_dragOffsetX = 0;
