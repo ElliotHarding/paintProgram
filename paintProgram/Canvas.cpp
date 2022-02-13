@@ -758,6 +758,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     {
                         m_pClipboardPixels->startDragging(mouseLocation);
                     }
+                    else
                     {
                         m_pClipboardPixels->startDragging(generateClipBoard(m_canvasImage, m_pSelectedPixels), mouseLocation);
                     }
