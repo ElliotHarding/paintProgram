@@ -754,7 +754,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 //check if mouse is over selection area
                 if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                 {
-                    if(m_pClipboardPixels->getImage() == QImage())
+                    if(m_pClipboardPixels->getImage() != QImage())
                     {
                         m_pClipboardPixels->startDragging(mouseLocation);
                     }
