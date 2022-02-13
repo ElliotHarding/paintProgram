@@ -457,7 +457,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     clock_t step5 = clock();
 
     //Draw dragging pixels
-    painter.drawImage(m_panOffsetX, m_panOffsetY, m_clipboardImage);
+    painter.drawImage(m_panOffsetX + m_dragOffsetX, m_panOffsetY + m_dragOffsetY, m_clipboardImage);
 
     clock_t step6 = clock();
     clock_t step7 = clock();
