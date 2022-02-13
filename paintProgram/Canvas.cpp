@@ -15,7 +15,6 @@ const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
 
 const QColor SelectionAreaColorA = QColor(0,40,100,50);
-const QColor SelectionAreaColorB = QColor(0,100,40,50);
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -404,6 +403,8 @@ void Canvas::resizeEvent(QResizeEvent *event)
 
     updateCenter();
 
+    m_pSelectedPixels->setGeometry(geometry());
+
     m_panOffsetX = m_center.x() - (m_canvasImage.width() / 2);
     m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
 
@@ -459,7 +460,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(m_panOffsetX, m_panOffsetY, m_clipboardImage);
 
     clock_t step6 = clock();
-
     clock_t step7 = clock();
 
     //Draw selection tool
@@ -929,8 +929,6 @@ SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint heig
 void SelectedPixels::clearAndResize(const uint width, const uint height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-
-    //setGeometry(0,0,width,height);
 }
 
 void SelectedPixels::clear()
@@ -1065,11 +1063,10 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
 {
     QPainter painter(this);
 
-    setGeometry(0,0,m_pParentCanvas->geometry().width(), m_pParentCanvas->geometry().height());
-
-    painter.translate(QPoint(geometry().width() / 2, geometry().height() / 2));
+    const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+    painter.translate(center);
     painter.scale(m_pParentCanvas->getZoom(), m_pParentCanvas->getZoom());
-    painter.translate(-QPoint(geometry().width() / 2, geometry().height() / 2));
+    painter.translate(-center);
 
     float offsetX = 0;
     float offsetY = 0;
