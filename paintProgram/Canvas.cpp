@@ -431,36 +431,23 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 {   
     m_canvasMutex.lock();
 
-    clock_t step1 = clock();
-
     //Setup painter
     QPainter painter(this);
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-
-    clock_t step2 = clock();
 
     //Zoom painter    
     painter.translate(m_center);
     painter.scale(m_zoomFactor, m_zoomFactor);
     painter.translate(-m_center);
 
-    clock_t step3 = clock();
-
     //Switch out transparent pixels for grey-white pattern
     painter.drawImage(m_panOffsetX, m_panOffsetY, m_canvasBackgroundImage);
-
-    clock_t step4 = clock();
 
     //Draw current image
     painter.drawImage(m_panOffsetX, m_panOffsetY, m_canvasImage);
 
-    clock_t step5 = clock();
-
     //Draw dragging pixels
     painter.drawImage(m_panOffsetX + m_dragOffsetX, m_panOffsetY + m_dragOffsetY, m_clipboardImage);
-
-    clock_t step6 = clock();
-    clock_t step7 = clock();
 
     //Draw selection tool
     if(m_tool == TOOL_SELECT)
@@ -473,16 +460,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     //Draw border
     painter.setPen(QPen(Constants::ImageBorderColor, 1/m_zoomFactor));
     painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
-
-    clock_t step8 = clock();
-
-    qDebug() << "Step 2-1 : " << ((double)step2 - step1);
-    qDebug() << "Step 3-2 : " << ((double)step3 - step2);
-    qDebug() << "Step 4-3 : " << ((double)step4 - step3);
-    qDebug() << "Step 5-4 : " << ((double)step5 - step4);
-    qDebug() << "Step 6-5 : " << ((double)step6 - step5);
-    qDebug() << "Step 7-6 : " << ((double)step7 - step6);
-    qDebug() << "Step 8-7 : " << ((double)step8 - step7);
 
     m_canvasMutex.unlock();
 }
