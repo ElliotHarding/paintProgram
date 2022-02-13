@@ -638,8 +638,9 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
             m_selectedPixels.clear();
         }
 
-        spreadSelectSimilarColor(m_canvasImage, m_selectedPixels.getPixels(), mouseLocation, m_pParent->getSpreadSensitivity());
-        m_selectedPixels.redraw();
+        std::vector<std::vector<bool>> newSelectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
+        spreadSelectSimilarColor(m_canvasImage, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
+        m_selectedPixels.addPixels(newSelectedPixels);
 
         update();
     }
@@ -969,6 +970,22 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
     redraw();
 }
 
+void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
+{
+    for(uint x = 0; x < m_selectedPixels.size(); x++)
+    {
+        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
+        {
+            if(!m_selectedPixels[x][y])
+            {
+                m_selectedPixels[x][y] = selectedPixels[x][y];
+            }
+        }
+    }
+
+    redraw();
+}
+
 void SelectedPixels::addNonAlpha0Pixels(QImage &image)
 {
     for(uint x = 0; x < (uint)image.width(); x++)
@@ -1086,9 +1103,4 @@ bool SelectedPixels::isHighlighted(const uint x, const uint y)
         qDebug() << "SelectedPixels::isHighlighted - Out of range -" << x << ":" << y;
     }
     return false;
-}
-
-std::vector<std::vector<bool>> &SelectedPixels::getPixels()
-{
-    return m_selectedPixels;
 }
