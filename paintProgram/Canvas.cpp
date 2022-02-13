@@ -595,6 +595,15 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
+    //If were not dragging, and the clipboard shows something. Dump it
+    if(m_tool != TOOL_DRAG && m_pClipboardPixels->getImage() != QImage())
+    {
+        QPainter painter(&m_canvasImage);
+        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
+        m_pClipboardPixels->dumpImage(painter);
+        painter.end();
+    }
+
     if(m_tool == TOOL_PAINT)
     {
         paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize());
