@@ -186,7 +186,9 @@ void Canvas::updateCurrentTool(Tool t)
     if(m_tool == TOOL_TEXT && t != TOOL_TEXT)
         m_textToDraw = "";
 
-    if(m_tool == TOOL_DRAG && t != TOOL_DRAG)
+    m_tool = t;
+
+    if(m_tool != TOOL_DRAG)
     {
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -202,8 +204,6 @@ void Canvas::updateCurrentTool(Tool t)
 
         doUpdate = true;
     }
-
-    m_tool = t;
 
     if(m_tool != TOOL_SELECT)
     {
@@ -338,9 +338,9 @@ void Canvas::pasteKeysPressed()
     m_pSelectedPixels->clear();
     m_pSelectedPixels->addPixelsNonAlpha0(m_pClipboardPixels->getImage()); //todo ~ set from list in m_pClipboardPixels... (there might be alpha 0 pixels we want selected..)
 
-    canvasMutexLocker.unlock();
+    m_pSelectedPixels->raise();
 
-    update();
+    canvasMutexLocker.unlock();
 }
 
 void Canvas::undoPressed()
