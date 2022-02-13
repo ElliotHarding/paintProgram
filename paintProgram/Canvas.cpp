@@ -493,10 +493,10 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
     const int direction = event->angleDelta().y() > 0 ? 1 : -1;
 
-    const int xFromCenter = event->x() - m_center.x();
+    const int xFromCenter = event->position().x() - m_center.x();
     m_panOffsetX -= xFromCenter * 0.05 * direction / m_zoomFactor;
 
-    const int yFromCenter = event->y() - m_center.y();
+    const int yFromCenter = event->position().y() - m_center.y();
     m_panOffsetY -= yFromCenter * 0.05 * direction / m_zoomFactor;
 
     if(event->angleDelta().y() > 0)
@@ -1009,7 +1009,7 @@ void SelectedPixels::addPixelsNonAlpha0(QImage &image)
         {
             if(image.pixelColor(x,y).alpha() > 0)
             {
-                if((int)x > -1 && x < m_selectedPixels.size() && y > -1 && y < m_selectedPixels[0].size())
+                if((int)x > -1 && x < m_selectedPixels.size() && (int)y > -1 && y < m_selectedPixels[0].size())
                 {
                     m_selectedPixels[x][y] = true;
                 }
