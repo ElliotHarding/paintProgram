@@ -11,16 +11,10 @@
 
 #include "mainwindow.h"
 
-class SelectedPixels
+class SelectedPixels : public QWidget
 {
-private:
-    std::vector<std::vector<bool>> m_selectedPixels;
-
-    QImage m_image;
-    void redraw();
-
 public:
-    SelectedPixels(const uint width, const uint height);
+    SelectedPixels(Canvas* parent, const uint width, const uint height);
 
     void clearAndResize(const uint width, const uint height);
     void clear();
@@ -35,6 +29,13 @@ public:
     QImage& getImage();
 
     bool isHighlighted(const uint x, const uint y);
+
+private:
+    std::vector<std::vector<bool>> m_selectedPixels;
+
+    void paintEvent(QPaintEvent* paintEvent) override;
+    QImage m_image;
+    void redraw();
 };
 
 class Canvas: public QTabWidget
@@ -117,7 +118,7 @@ private:
     float m_panOffsetY = 0;
 
     //Selecting
-    SelectedPixels m_selectedPixels;
+    SelectedPixels* m_pSelectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
 

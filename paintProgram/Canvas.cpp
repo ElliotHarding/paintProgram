@@ -41,7 +41,6 @@ QImage genTransparentPixelsBackground(const int width, const int height)
 
 Canvas::Canvas(MainWindow* parent, QImage image) :
     QTabWidget(),
-    m_selectedPixels(image.width(), image.height()),
     m_previousDragPos(Constants::NullDragPoint),
     m_pParent(parent)
 {
@@ -51,6 +50,9 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
+    m_pSelectedPixels = new SelectedPixels(this, image.width(), image.height());
+    m_pSelectedPixels->raise();
+
     setMouseTracking(true);
 }
 
@@ -58,6 +60,9 @@ Canvas::~Canvas()
 {
     if(m_selectionTool)
         delete m_selectionTool;
+
+    if(m_pSelectedPixels)
+        delete m_pSelectedPixels;
 }
 
 void Canvas::addedToTab()
@@ -162,7 +167,7 @@ void Canvas::updateSettings(int width, int height, QString name)
     emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
 
     //Clear selected pixels
-    m_selectedPixels.clearAndResize(m_canvasImage.width(), m_canvasImage.height());
+    m_pSelectedPixels->clearAndResize(m_canvasImage.width(), m_canvasImage.height());
 
     m_canvasMutex.unlock();
 
@@ -217,7 +222,7 @@ void Canvas::updateCurrentTool(Tool t)
         if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
         {
             //Clear selected pixels
-            m_selectedPixels.clear();
+            m_pSelectedPixels->clear();
         }
 
         canvasMutexLocker.unlock();
@@ -238,12 +243,12 @@ void Canvas::deleteKeyPressed()
         QPainter painter(&m_canvasImage);
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
-        m_selectedPixels.operateOnSelectedPixels([&](int x, int y)-> void
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
         });
 
-        m_selectedPixels.clear();
+        m_pSelectedPixels->clear();
 
         recordImageHistory();
 
@@ -253,7 +258,7 @@ void Canvas::deleteKeyPressed()
     }
 }
 
-QImage generateClipBoard(QImage& canvas, SelectedPixels& selectedPixels)
+QImage generateClipBoard(QImage& canvas, SelectedPixels* pSelectedPixels)
 {
     //Prep selected pixels for dragging
     QImage clipboard = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
@@ -263,7 +268,7 @@ QImage generateClipBoard(QImage& canvas, SelectedPixels& selectedPixels)
 
     dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
 
-    selectedPixels.operateOnSelectedPixels([&](int x, int y)-> void
+    pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
     {
         dragPainter.fillRect(QRect(x, y, 1, 1), canvas.pixelColor(x,y));
     });
@@ -274,7 +279,7 @@ QImage generateClipBoard(QImage& canvas, SelectedPixels& selectedPixels)
 void Canvas::copyKeysPressed()
 {   
     m_canvasMutex.lock();
-    m_pParent->setCopyBuffer(generateClipBoard(m_canvasImage, m_selectedPixels));
+    m_pParent->setCopyBuffer(generateClipBoard(m_canvasImage, m_pSelectedPixels));
     m_canvasMutex.unlock();
 
     update();
@@ -304,7 +309,7 @@ void Canvas::cutKeysPressed()
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
         //Go through selected pixels cutting from canvas and copying to clipboard
-        m_selectedPixels.operateOnSelectedPixels([&](int x, int y)-> void
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasImage.pixelColor(x, y));
             painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
@@ -317,7 +322,7 @@ void Canvas::cutKeysPressed()
     m_dragOffsetX = 0;
     m_dragOffsetY = 0;
 
-    m_selectedPixels.clear();
+    m_pSelectedPixels->clear();
 
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
@@ -335,7 +340,7 @@ void Canvas::pasteKeysPressed()
 
     m_clipboardImage = m_pParent->getCopyBuffer();
 
-    m_selectedPixels.clear();
+    m_pSelectedPixels->clear();
 
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
@@ -343,7 +348,7 @@ void Canvas::pasteKeysPressed()
     m_dragOffsetX = 0;
     m_dragOffsetY = 0;
 
-    m_selectedPixels.addPixelsNonAlpha0(m_clipboardImage);
+    m_pSelectedPixels->addPixelsNonAlpha0(m_clipboardImage);
 
     canvasMutexLocker.unlock();
 
@@ -443,7 +448,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     clock_t step6 = clock();
 
     //Draw selected pixels
-    painter.drawImage(m_panOffsetX, m_panOffsetY, m_selectedPixels.getImage());
+    //painter.drawImage(m_panOffsetX, m_panOffsetY, m_pSelectedPixels->getImage());
 
     clock_t step7 = clock();
 
@@ -628,7 +633,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         if(!m_pParent->isCtrlPressed())
         {
-            m_selectedPixels.clear();
+            m_pSelectedPixels->clear();
         }
 
         m_selectionToolOrigin = mouseLocation;
@@ -638,12 +643,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {        
         if(!m_pParent->isCtrlPressed())
         {
-            m_selectedPixels.clear();
+            m_pSelectedPixels->clear();
         }
 
         std::vector<std::vector<bool>> newSelectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
         spreadSelectSimilarColor(m_canvasImage, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
-        m_selectedPixels.addPixels(newSelectedPixels);
+        m_pSelectedPixels->addPixels(newSelectedPixels);
 
         update();
     }
@@ -682,7 +687,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         m_dragOffsetX = 0;
         m_dragOffsetY = 0;
 
-        m_selectedPixels.clear();
+        m_pSelectedPixels->clear();
 
         m_drawShapeOrigin = mouseLocation;
     }
@@ -695,7 +700,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
     if(m_tool == TOOL_SELECT)
     {
-        m_selectedPixels.addPixels(m_selectionTool);
+        m_pSelectedPixels->addPixels(m_selectionTool);
         update();
     }
     else if(m_tool == TOOL_PAN)
@@ -708,9 +713,9 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if(m_tool == TOOL_SHAPE)
     {
-        m_selectedPixels.clear();
+        m_pSelectedPixels->clear();
 
-        m_selectedPixels.addPixelsNonAlpha0(m_clipboardImage);
+        m_pSelectedPixels->addPixelsNonAlpha0(m_clipboardImage);
 
         update();
     }
@@ -775,10 +780,10 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             if(m_previousDragPos == Constants::NullDragPoint)
             {
                 //check if mouse is over selection area
-                if(m_selectedPixels.isHighlighted(mouseLocation.x(), mouseLocation.y()))
+                if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                 {
                     if(m_clipboardImage == QImage())
-                        m_clipboardImage = generateClipBoard(m_canvasImage, m_selectedPixels);
+                        m_clipboardImage = generateClipBoard(m_canvasImage, m_pSelectedPixels);
 
                     m_previousDragPos = mouseLocation;
                     m_dragOffsetX = 0;
@@ -791,8 +796,8 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 m_dragOffsetY += (mouseLocation.y() - m_previousDragPos.y());
 
                 //Clear selected pixels and set to clipboard pixels
-                m_selectedPixels.clear();
-                m_selectedPixels.addPixelsNonAlpha0WithOffset(m_clipboardImage, m_dragOffsetX, m_dragOffsetY);
+                m_pSelectedPixels->clear();
+                m_pSelectedPixels->addPixelsNonAlpha0WithOffset(m_clipboardImage, m_dragOffsetX, m_dragOffsetY);
 
                 update();
 
@@ -903,11 +908,13 @@ void Canvas::updateCenter()
 
 
 
-SelectedPixels::SelectedPixels(const uint width, const uint height)
+SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint height) : QWidget(parent)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
     m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
     m_image.fill(Qt::transparent);
+
+    setGeometry(0,0,parent->width(), parent->height());
 }
 
 void SelectedPixels::clearAndResize(const uint width, const uint height)
@@ -915,6 +922,7 @@ void SelectedPixels::clearAndResize(const uint width, const uint height)
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
     m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
     m_image.fill(Qt::transparent);
+    setGeometry(0,0,width,height);
 }
 
 void SelectedPixels::clear()
@@ -971,6 +979,7 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
     }
 
     redraw();
+    update();
 }
 
 void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
@@ -987,6 +996,7 @@ void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
     }
 
     redraw();
+    update();
 }
 
 void SelectedPixels::addPixelsNonAlpha0(QImage &image)
@@ -1010,6 +1020,7 @@ void SelectedPixels::addPixelsNonAlpha0(QImage &image)
     }
 
     redraw();
+    update();
 }
 
 void SelectedPixels::addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY)
@@ -1034,6 +1045,7 @@ void SelectedPixels::addPixelsNonAlpha0WithOffset(QImage& image, const int offse
     }
 
     redraw();
+    update();
 }
 
 QImage &SelectedPixels::getImage()
@@ -1043,8 +1055,9 @@ QImage &SelectedPixels::getImage()
 
 void SelectedPixels::redraw()
 {
+    /*
     m_image.fill(Qt::transparent);
-    QPainter painter(&m_image);
+    QPainter painter(this);
 
     for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
@@ -1057,7 +1070,7 @@ void SelectedPixels::redraw()
                 painter.fillRect(QRect(x, y, 1, 1), col);
             }
         }
-    }
+    }*/
 }
 
 bool SelectedPixels::isHighlighted(const uint x, const uint y)
@@ -1071,4 +1084,23 @@ bool SelectedPixels::isHighlighted(const uint x, const uint y)
         qDebug() << "SelectedPixels::isHighlighted - Out of range -" << x << ":" << y;
     }
     return false;
+}
+
+void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
+{
+    m_image.fill(Qt::transparent);
+    QPainter painter(this);
+
+    for(uint x = 0; x < m_selectedPixels.size(); x++)
+    {
+        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
+        {
+            if(m_selectedPixels[x][y])
+            {
+                const QColor col = Constants::SelectionAreaColorA;
+
+                painter.fillRect(QRect(x, y, 1, 1), col);
+            }
+        }
+    }
 }
