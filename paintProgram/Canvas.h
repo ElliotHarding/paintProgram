@@ -14,8 +14,9 @@ class SelectedPixels
 {
 private:
     std::vector<std::vector<bool>> m_selectedPixels;
-    QImage m_image;
 
+    bool m_invertColors = false;
+    QImage m_image;
     void redraw();
 
 public:

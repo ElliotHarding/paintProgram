@@ -13,7 +13,9 @@ const QColor ImageBorderColor = QColor(200,200,200,255);
 const QColor TransparentGrey = QColor(190,190,190,255);
 const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
-const QColor SelectionAreaColor = QColor(0,40,100, 50);
+
+const QColor SelectionAreaColorA = QColor(0,40,100,50);
+const QColor SelectionAreaColorB = QColor(190,190,190,50);
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -1043,6 +1045,8 @@ void SelectedPixels::redraw()
     m_image.fill(Qt::transparent);
     QPainter painter(&m_image);
 
+    m_invertColors = !m_invertColors;
+
     //Draw highlighed pixels
     QPen selectionPenBlack = QPen(Qt::black, 0.5);
     QPen selectionPenWhite = QPen(Qt::white, 0.5);
@@ -1052,7 +1056,19 @@ void SelectedPixels::redraw()
         {
             if(m_selectedPixels[x][y])
             {
-                painter.fillRect(QRect(x, y, 1, 1), Constants::SelectionAreaColor);
+                const QColor col = m_invertColors ?
+                            (x % 2 == 0) ?
+                                (y % 2 == 0) ? Constants::SelectionAreaColorA : Constants::SelectionAreaColorB
+                                :
+                                (y % 2 == 0) ? Constants::SelectionAreaColorB : Constants::SelectionAreaColorA
+                            :
+                            (x % 2 == 0) ?
+                                (y % 2 == 0) ? Constants::SelectionAreaColorB : Constants::SelectionAreaColorA
+                                :
+                                (y % 2 == 0) ? Constants::SelectionAreaColorA : Constants::SelectionAreaColorB;
+
+
+                painter.fillRect(QRect(x, y, 1, 1), col);
 
                 /*
                 if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
