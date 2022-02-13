@@ -158,7 +158,6 @@ void Canvas::updateSettings(int width, int height, QString name)
     //Paint old image onto new image
     painter.setCompositionMode (QPainter::CompositionMode_Source);
     painter.drawImage(m_canvasImage.rect(), m_canvasImage);
-
     painter.end();
 
     m_canvasImage = newImage;
@@ -449,8 +448,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
 
     m_canvasMutex.unlock();
-
-    qDebug() << "Canvas paint";
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)
@@ -602,6 +599,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
         m_pClipboardPixels->dumpImage(painter);
         painter.end();
+        update();
     }
 
     if(m_tool == TOOL_PAINT)
@@ -699,6 +697,10 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
         m_pSelectedPixels->addPixelsNonAlpha0(m_pClipboardPixels->getImage()); // ~ todo make so alpha 0 pixels aswell...
 
         update();
+    }
+    else if(m_tool == TOOL_DRAG)
+    {
+        m_pClipboardPixels->raise();
     }
 }
 
@@ -1147,6 +1149,4 @@ void ClipboardPixels::paintEvent(QPaintEvent *paintEvent)
     m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
     painter.drawImage(QRect(m_dragX + offsetX, m_dragY + offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
-
-    qDebug() << "Clipboard paint";
 }
