@@ -383,6 +383,19 @@ QImage Canvas::getImageCopy()
     return m_canvasImage;
 }
 
+float Canvas::getZoom()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    return m_zoomFactor;
+}
+
+void Canvas::getPanOffset(float& offsetX, float& offsetY)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    offsetX = m_panOffsetX;
+    offsetY = m_panOffsetY;
+}
+
 void Canvas::resizeEvent(QResizeEvent *event)
 {
     QTabWidget::resizeEvent(event);
@@ -446,9 +459,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(m_panOffsetX, m_panOffsetY, m_clipboardImage);
 
     clock_t step6 = clock();
-
-    //Draw selected pixels
-    //painter.drawImage(m_panOffsetX, m_panOffsetY, m_pSelectedPixels->getImage());
 
     clock_t step7 = clock();
 
@@ -908,21 +918,19 @@ void Canvas::updateCenter()
 
 
 
-SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint height) : QWidget(parent)
+SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint height) : QWidget(parent),
+    m_pParentCanvas(parent)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-    m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
-    m_image.fill(Qt::transparent);
 
-    setGeometry(0,0,parent->width(), parent->height());
+    setGeometry(0, 0, parent->width(), parent->height());
 }
 
 void SelectedPixels::clearAndResize(const uint width, const uint height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-    m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
-    m_image.fill(Qt::transparent);
-    setGeometry(0,0,width,height);
+
+    //setGeometry(0,0,width,height);
 }
 
 void SelectedPixels::clear()
@@ -930,11 +938,7 @@ void SelectedPixels::clear()
     if(m_selectedPixels.size() > 0)
     {
         m_selectedPixels = std::vector<std::vector<bool>>(m_selectedPixels.size(), std::vector<bool>(m_selectedPixels[0].size(), false));
-
-        m_image = QImage(QSize(m_selectedPixels.size(), m_selectedPixels[0].size()), QImage::Format_ARGB32);
-        m_image.fill(Qt::transparent);
-
-        redraw();
+        update();
     }
     else
     {
@@ -978,7 +982,6 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
         }
     }
 
-    redraw();
     update();
 }
 
@@ -995,7 +998,6 @@ void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
         }
     }
 
-    redraw();
     update();
 }
 
@@ -1019,7 +1021,6 @@ void SelectedPixels::addPixelsNonAlpha0(QImage &image)
         }
     }
 
-    redraw();
     update();
 }
 
@@ -1044,33 +1045,7 @@ void SelectedPixels::addPixelsNonAlpha0WithOffset(QImage& image, const int offse
         }
     }
 
-    redraw();
     update();
-}
-
-QImage &SelectedPixels::getImage()
-{
-    return m_image;
-}
-
-void SelectedPixels::redraw()
-{
-    /*
-    m_image.fill(Qt::transparent);
-    QPainter painter(this);
-
-    for(uint x = 0; x < m_selectedPixels.size(); x++)
-    {
-        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
-        {
-            if(m_selectedPixels[x][y])
-            {
-                const QColor col = Constants::SelectionAreaColorA;
-
-                painter.fillRect(QRect(x, y, 1, 1), col);
-            }
-        }
-    }*/
 }
 
 bool SelectedPixels::isHighlighted(const uint x, const uint y)
@@ -1088,8 +1063,17 @@ bool SelectedPixels::isHighlighted(const uint x, const uint y)
 
 void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
 {
-    m_image.fill(Qt::transparent);
     QPainter painter(this);
+
+    setGeometry(0,0,m_pParentCanvas->geometry().width(), m_pParentCanvas->geometry().height());
+
+    painter.translate(QPoint(geometry().width() / 2, geometry().height() / 2));
+    painter.scale(m_pParentCanvas->getZoom(), m_pParentCanvas->getZoom());
+    painter.translate(-QPoint(geometry().width() / 2, geometry().height() / 2));
+
+    float offsetX = 0;
+    float offsetY = 0;
+    m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
     for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
@@ -1099,7 +1083,7 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
             {
                 const QColor col = Constants::SelectionAreaColorA;
 
-                painter.fillRect(QRect(x, y, 1, 1), col);
+                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
             }
         }
     }

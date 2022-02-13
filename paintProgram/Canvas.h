@@ -26,16 +26,14 @@ public:
     void addPixelsNonAlpha0(QImage& image);
     void addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY);
 
-    QImage& getImage();
-
     bool isHighlighted(const uint x, const uint y);
 
 private:
     std::vector<std::vector<bool>> m_selectedPixels;
 
+    Canvas* m_pParentCanvas;
+
     void paintEvent(QPaintEvent* paintEvent) override;
-    QImage m_image;
-    void redraw();
 };
 
 class Canvas: public QTabWidget
@@ -67,6 +65,9 @@ public:
     void redoPressed();
 
     QImage getImageCopy();
+
+    float getZoom();
+    void getPanOffset(float& offsetX, float& offsetY);
 
     void resizeEvent(QResizeEvent* event) override;
 
