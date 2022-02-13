@@ -52,6 +52,7 @@ public:
 
     bool isDragging();
     void startDragging(QImage image, QPoint mouseLocation);
+    void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
     int getDragX();//todo ~ should be able to get rid of this soon
     int getDragY();//todo ~ should be able to get rid of this soon

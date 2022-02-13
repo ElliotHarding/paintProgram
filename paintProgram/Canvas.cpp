@@ -449,6 +449,8 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
 
     m_canvasMutex.unlock();
+
+    qDebug() << "Canvas paint";
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)
@@ -752,7 +754,13 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 //check if mouse is over selection area
                 if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                 {
-                     m_pClipboardPixels->startDragging(generateClipBoard(m_canvasImage, m_pSelectedPixels), mouseLocation);
+                    if(m_pClipboardPixels->getImage() == QImage())
+                    {
+                        m_pClipboardPixels->startDragging(mouseLocation);
+                    }
+                    {
+                        m_pClipboardPixels->startDragging(generateClipBoard(m_canvasImage, m_pSelectedPixels), mouseLocation);
+                    }
                 }
             }
             else //If currently dragging
@@ -1051,6 +1059,7 @@ ClipboardPixels::ClipboardPixels(Canvas *parent) : QWidget(parent),
 void ClipboardPixels::setImage(QImage image)
 {
     m_clipboardImage = image;
+    update();
 }
 
 QImage &ClipboardPixels::getImage()
@@ -1074,6 +1083,13 @@ bool ClipboardPixels::isDragging()
 void ClipboardPixels::startDragging(QImage image, QPoint mouseLocation)
 {
     m_clipboardImage = image;
+    m_previousDragPos = mouseLocation;
+    m_dragX = 0;
+    m_dragY = 0;
+}
+
+void ClipboardPixels::startDragging(QPoint mouseLocation)
+{
     m_previousDragPos = mouseLocation;
     m_dragX = 0;
     m_dragY = 0;
@@ -1121,4 +1137,6 @@ void ClipboardPixels::paintEvent(QPaintEvent *paintEvent)
     m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
     painter.drawImage(QRect(m_dragX + offsetX, m_dragY + offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+
+    qDebug() << "Clipboard paint";
 }
