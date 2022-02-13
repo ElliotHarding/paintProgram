@@ -14,6 +14,7 @@ class SelectedPixels
 {
 private:
     std::vector<std::vector<bool>> m_selectedPixels;
+    QImage m_image;
 
 public:
     SelectedPixels(const uint width, const uint height);
@@ -27,10 +28,13 @@ public:
     void addNonAlpha0Pixels(QImage& image);
     void addNonAlpha0PixelsWithOffset(QImage& image, const int offsetX, const int offsetY);
 
-    void draw(QPainter& painter, const float zoomFactor, const int offsetX, const int offsetY);
+    //void draw(QPainter& painter, const float zoomFactor, const int offsetX, const int offsetY);
+    QImage& getImage();
 
     bool isHighlighted(const uint x, const uint y);
     std::vector<std::vector<bool>>& getPixels();
+
+    void redraw();
 
 };
 
