@@ -29,8 +29,8 @@ public:
 
     void addPixels(QRubberBand* newSelectionArea);
     void addPixels(std::vector<std::vector<bool>>& selectedPixels);
-    void addNonAlpha0Pixels(QImage& image);
-    void addNonAlpha0PixelsWithOffset(QImage& image, const int offsetX, const int offsetY);
+    void addPixelsNonAlpha0(QImage& image);
+    void addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY);
 
     QImage& getImage();
 

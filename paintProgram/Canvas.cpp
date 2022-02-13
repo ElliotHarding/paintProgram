@@ -15,7 +15,7 @@ const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
 
 const QColor SelectionAreaColorA = QColor(0,40,100,50);
-const QColor SelectionAreaColorB = QColor(190,190,190,50);
+const QColor SelectionAreaColorB = QColor(0,100,40,50);
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -343,7 +343,7 @@ void Canvas::pasteKeysPressed()
     m_dragOffsetX = 0;
     m_dragOffsetY = 0;
 
-    m_selectedPixels.addNonAlpha0Pixels(m_clipboardImage);
+    m_selectedPixels.addPixelsNonAlpha0(m_clipboardImage);
 
     canvasMutexLocker.unlock();
 
@@ -709,7 +709,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         m_selectedPixels.clear();
 
-        m_selectedPixels.addNonAlpha0Pixels(m_clipboardImage);
+        m_selectedPixels.addPixelsNonAlpha0(m_clipboardImage);
 
         update();
     }
@@ -791,7 +791,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
                 //Clear selected pixels and set to clipboard pixels
                 m_selectedPixels.clear();
-                m_selectedPixels.addNonAlpha0PixelsWithOffset(m_clipboardImage, m_dragOffsetX, m_dragOffsetY);
+                m_selectedPixels.addPixelsNonAlpha0WithOffset(m_clipboardImage, m_dragOffsetX, m_dragOffsetY);
 
                 update();
 
@@ -988,7 +988,7 @@ void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
     redraw();
 }
 
-void SelectedPixels::addNonAlpha0Pixels(QImage &image)
+void SelectedPixels::addPixelsNonAlpha0(QImage &image)
 {
     for(uint x = 0; x < (uint)image.width(); x++)
     {
@@ -1011,7 +1011,7 @@ void SelectedPixels::addNonAlpha0Pixels(QImage &image)
     redraw();
 }
 
-void SelectedPixels::addNonAlpha0PixelsWithOffset(QImage& image, const int offsetX, const int offsetY)
+void SelectedPixels::addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY)
 {
     for(int x = 0; x < image.width(); x++)
     {
@@ -1067,42 +1067,7 @@ void SelectedPixels::redraw()
                                 :
                                 (y % 2 == 0) ? Constants::SelectionAreaColorA : Constants::SelectionAreaColorB;
 
-
                 painter.fillRect(QRect(x, y, 1, 1), col);
-
-                /*
-                if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
-                {
-                    //border right
-                    painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(x + 1.0, y), QPointF(x + 1.0, y + 0.5));
-                    painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(x + 1.0, y + 0.5), QPointF(x + 1.0, y + 1.0));
-                }
-                if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
-                {
-                    //border left
-                    painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(x, y), QPointF(x, y + 0.5));
-                    painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(x, y + 0.5), QPointF(x, y + 1.0));
-                }
-                if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
-                {
-                    //border bottom
-                    painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(x, y + 1.0), QPointF(x + 0.5, y + 1.0));
-                    painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(x + 0.5, y + 1.0), QPointF(x + 1.0, y + 1.0));
-                }
-                if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
-                {
-                    //border top
-                    painter.setPen(selectionPenBlack);
-                    painter.drawLine(QPointF(x, y), QPointF(x + 0.5, y));
-                    painter.setPen(selectionPenWhite);
-                    painter.drawLine(QPointF(x + 0.5, y), QPointF(x + 1.0, y));
-                }*/
             }
         }
     }
