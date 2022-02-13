@@ -1045,27 +1045,13 @@ void SelectedPixels::redraw()
     m_image.fill(Qt::transparent);
     QPainter painter(&m_image);
 
-    m_invertColors = !m_invertColors;
-
-    //Draw highlighed pixels
-    QPen selectionPenBlack = QPen(Qt::black, 0.5);
-    QPen selectionPenWhite = QPen(Qt::white, 0.5);
     for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
         for(uint y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
-                const QColor col = m_invertColors ?
-                            (x % 2 == 0) ?
-                                (y % 2 == 0) ? Constants::SelectionAreaColorA : Constants::SelectionAreaColorB
-                                :
-                                (y % 2 == 0) ? Constants::SelectionAreaColorB : Constants::SelectionAreaColorA
-                            :
-                            (x % 2 == 0) ?
-                                (y % 2 == 0) ? Constants::SelectionAreaColorB : Constants::SelectionAreaColorA
-                                :
-                                (y % 2 == 0) ? Constants::SelectionAreaColorA : Constants::SelectionAreaColorB;
+                const QColor col = Constants::SelectionAreaColorA;
 
                 painter.fillRect(QRect(x, y, 1, 1), col);
             }

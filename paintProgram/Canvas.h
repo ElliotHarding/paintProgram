@@ -6,6 +6,7 @@
 #include <QMutex>
 #include <vector>
 #include <QPainter>
+#include <QTimer>
 #include <functional>
 
 #include "mainwindow.h"
@@ -15,7 +16,6 @@ class SelectedPixels
 private:
     std::vector<std::vector<bool>> m_selectedPixels;
 
-    bool m_invertColors = false;
     QImage m_image;
     void redraw();
 
