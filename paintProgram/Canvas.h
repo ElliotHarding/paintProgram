@@ -36,6 +36,42 @@ private:
     void paintEvent(QPaintEvent* paintEvent) override;
 };
 
+/*
+make dragging pixels an image + list so that we can set highlighted pixels even on transparent pixels
+if make list of pixels in dragging can iterate through and set selected pixels on move.
+instead of just selecting the non alpha 0 pixels
+ */
+class ClipboardPixels : public QWidget
+{
+public:
+    ClipboardPixels(Canvas* parent);
+
+    void setImage(QImage image);
+    QImage& getImage();
+    void dumpImage(QPainter& painter);
+
+    bool isDragging();
+    void startDragging(QImage image, QPoint mouseLocation);
+    void doDragging(QPoint mouseLocation);
+    int getDragX();//todo ~ should be able to get rid of this soon
+    int getDragY();//todo ~ should be able to get rid of this soon
+
+    void reset();
+
+private:
+
+    QImage m_clipboardImage;
+    void paintEvent(QPaintEvent* paintEvent) override;
+
+    QList<QPoint> m_pixels;
+
+    int m_dragX = 0;
+    int m_dragY = 0;
+    QPoint m_previousDragPos;
+
+    Canvas* m_pParentCanvas;
+};
+
 class Canvas: public QTabWidget
 {
     Q_OBJECT
@@ -124,10 +160,7 @@ private:
     QPoint m_selectionToolOrigin = QPoint(0,0);
 
     //Dragging/copy/paste
-    QPoint m_previousDragPos;
-    QImage m_clipboardImage;
-    int m_dragOffsetX = 0;
-    int m_dragOffsetY = 0;
+    ClipboardPixels* m_pClipboardPixels;
 
     //Geometry
     QPoint m_center;
