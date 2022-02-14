@@ -894,6 +894,16 @@ SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint heig
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
 
     setGeometry(0, 0, parent->width(), parent->height());
+
+    m_pOutlineDrawTimer = new QTimer(this);
+    connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
+    m_pOutlineDrawTimer->start(200);
+}
+
+SelectedPixels::~SelectedPixels()
+{
+    if(m_pOutlineDrawTimer)
+        delete m_pOutlineDrawTimer;
 }
 
 void SelectedPixels::clearAndResize(const uint width, const uint height)
@@ -1038,21 +1048,24 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
     painter.scale(m_pParentCanvas->getZoom(), m_pParentCanvas->getZoom());
     painter.translate(-center);
 
+    //Offsets
     float offsetX = 0;
     float offsetY = 0;
     m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
-    QPen selectionOutlinePen = QPen(Qt::black, 1/m_pParentCanvas->getZoom());
+    //Outline
+    m_bOutlineColorToggle = !m_bOutlineColorToggle;
+    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
     painter.setPen(selectionOutlinePen);
+
+    //Paint pixels and outline
     for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
         for(uint y = 0; y < m_selectedPixels[x].size(); y++)
         {
             if(m_selectedPixels[x][y])
             {
-                const QColor col = Constants::SelectionAreaColorA;
-
-                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
+                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColorA);
 
                 //border right
                 if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))

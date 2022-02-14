@@ -15,6 +15,7 @@ class SelectedPixels : public QWidget
 {
 public:
     SelectedPixels(Canvas* parent, const uint width, const uint height);
+    ~SelectedPixels();
 
     void clearAndResize(const uint width, const uint height);
     void clear();
@@ -33,7 +34,9 @@ private:
 
     Canvas* m_pParentCanvas;
 
+    bool m_bOutlineColorToggle = false;
     void paintEvent(QPaintEvent* paintEvent) override;
+    QTimer* m_pOutlineDrawTimer;
 };
 
 /*
