@@ -18,11 +18,11 @@
 #include "dlg_shapes.h"
 #include "dlg_info.h"
 
+#include "Canvas.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-class Canvas;
 
 class MainWindow : public QMainWindow
 {
@@ -44,8 +44,8 @@ public:
     Shape getCurrentShape();
     bool getIsFillShape();
 
-    void setCopyBuffer(QImage image);
-    QImage getCopyBuffer();
+    void setCopyBuffer(Clipboard clipboard);
+    Clipboard getCopyBuffer();
 
     QFont getTextFont();
 
@@ -97,7 +97,7 @@ private:
 
     QSet<int> m_pressedKeys;
 
-    QImage m_copyBuffer;
+    Clipboard m_copyBuffer;
 
     void loadNewCanvas(QImage image, QString name, QString savePath = "");
     bool m_bMakingNewCanvas = false;

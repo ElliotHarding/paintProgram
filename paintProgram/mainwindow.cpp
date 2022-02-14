@@ -91,12 +91,12 @@ int MainWindow::getSpreadSensitivity()
     return m_dlg_sensitivity->getSensitivity();
 }
 
-void MainWindow::setCopyBuffer(QImage image)
+void MainWindow::setCopyBuffer(Clipboard clipboard)
 {
-    m_copyBuffer = image;
+    m_copyBuffer = clipboard;
 }
 
-QImage MainWindow::getCopyBuffer()
+Clipboard MainWindow::getCopyBuffer()
 {
     return m_copyBuffer;
 }

@@ -9,7 +9,10 @@
 #include <QTimer>
 #include <functional>
 
-#include "mainwindow.h"
+#include "tools.h"
+
+class Canvas;
+class MainWindow;
 
 class SelectedPixels : public QWidget
 {
@@ -24,6 +27,7 @@ public:
 
     void addPixels(QRubberBand* newSelectionArea);
     void addPixels(std::vector<std::vector<bool>>& selectedPixels);
+    void addPixels(QList<QPoint> pixels);
     void addPixelsNonAlpha0(QImage& image);
     void addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY);
 
@@ -44,17 +48,33 @@ make dragging pixels an image + list so that we can set highlighted pixels even 
 if make list of pixels in dragging can iterate through and set selected pixels on move.
 instead of just selecting the non alpha 0 pixels
  */
-class ClipboardPixels : public QWidget
+class Clipboard
 {
 public:
-    ClipboardPixels(Canvas* parent);
+    void generateClipboard(QImage& canvas, SelectedPixels* pSelectedPixels);
 
+    QList<QPoint> m_pixels;
+    QImage m_clipboardImage;
+};
+
+class PaintableClipboard : public Clipboard, public QWidget
+{
+public:
+    PaintableClipboard(Canvas* parent);
+
+    //Image
+    void generateClipboard(QImage& canvas, SelectedPixels* pSelectedPixels);
+    void setClipboard(Clipboard clipboard);
     void setImage(QImage image);
-    QImage& getImage();
+    Clipboard getClipboard();
     void dumpImage(QPainter& painter);
+    bool isImageDefault();
 
+    QList<QPoint> getPixels();
+    QList<QPoint> getPixelsOffset();
+
+    //Dragging
     bool isDragging();
-    void startDragging(QImage image, QPoint mouseLocation);
     void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
     int getDragX();//todo ~ should be able to get rid of this soon
@@ -64,10 +84,7 @@ public:
 
 private:
 
-    QImage m_clipboardImage;
     void paintEvent(QPaintEvent* paintEvent) override;
-
-    QList<QPoint> m_pixels;
 
     int m_dragX = 0;
     int m_dragY = 0;
@@ -76,7 +93,7 @@ private:
     Canvas* m_pParentCanvas;
 };
 
-class Canvas: public QTabWidget
+class Canvas : public QTabWidget
 {
     Q_OBJECT
 
@@ -164,7 +181,7 @@ private:
     QPoint m_selectionToolOrigin = QPoint(0,0);
 
     //Dragging/copy/paste
-    ClipboardPixels* m_pClipboardPixels;
+    PaintableClipboard* m_pClipboardPixels;
 
     //Geometry
     QPoint m_center;
