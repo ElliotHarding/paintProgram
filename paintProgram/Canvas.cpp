@@ -1042,6 +1042,8 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
     float offsetY = 0;
     m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
+    QPen selectionOutlinePen = QPen(Qt::black, 1/m_pParentCanvas->getZoom());
+    painter.setPen(selectionOutlinePen);
     for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
         for(uint y = 0; y < m_selectedPixels[x].size(); y++)
@@ -1051,6 +1053,30 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
                 const QColor col = Constants::SelectionAreaColorA;
 
                 painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), col);
+
+                //border right
+                if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
+                {
+                    painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
+                }
+
+                //border left
+                if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
+                {
+                    painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
+                }
+
+                //border bottom
+                if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
+                {
+                    painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
+                }
+
+                //border top
+                if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
+                {
+                    painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
+                }
             }
         }
     }
