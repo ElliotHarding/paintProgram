@@ -41,11 +41,6 @@ private:
     QTimer* m_pOutlineDrawTimer;
 };
 
-/*
-make dragging pixels an image + list so that we can set highlighted pixels even on transparent pixels
-if make list of pixels in dragging can iterate through and set selected pixels on move.
-instead of just selecting the non alpha 0 pixels
- */
 class Clipboard
 {
 public:

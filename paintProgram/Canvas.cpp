@@ -195,8 +195,6 @@ void Canvas::updateCurrentTool(Tool t)
 
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
-
         m_pClipboardPixels->dumpImage(painter);
 
         recordImageHistory();
@@ -583,9 +581,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     if(m_tool != TOOL_DRAG && !m_pClipboardPixels->isImageDefault())
     {
         QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
         m_pClipboardPixels->dumpImage(painter);
-        painter.end();
         update();
     }
 
@@ -646,10 +642,10 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         //Dump dragged contents onto m_canvasImage
         QPainter painter(&m_canvasImage);
-        painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
-
         m_pClipboardPixels->dumpImage(painter);
         painter.end();
+
+        update();
 
         recordImageHistory();
 
@@ -1120,7 +1116,20 @@ void PaintableClipboard::setImage(QImage image)
 
 void PaintableClipboard::dumpImage(QPainter &painter)
 {
+    //Draw image part of clipboard
     painter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+
+    //Draw transparent part of clipboard
+    painter.setCompositionMode (QPainter::CompositionMode_Clear);
+    for(QPoint p : m_pixels)
+    {
+        if(p.x() > 0 && p.x() < (int)m_clipboardImage.width() &&
+           p.y()> 0 && p.y() < (int)m_clipboardImage.height() &&
+           m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
+        {
+            painter.fillRect(QRect(p.x() + m_dragX, p.y() + m_dragY, 1, 1), Qt::transparent);
+        }
+    }
 
     reset();
     update();
