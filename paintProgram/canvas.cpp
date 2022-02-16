@@ -450,7 +450,7 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
     if(event->angleDelta().y() > 0)
     {
-        if(m_zoomFactor < m_canvasImage.width())
+        if(m_zoomFactor < geometry().width())
             m_zoomFactor *= (m_cZoomIncrement);
     }
     else if(event->angleDelta().y() < 0)
