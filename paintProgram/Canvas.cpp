@@ -1227,11 +1227,14 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw transparent selected pixels ~ So inneficient! look for something else
     for(QPoint p : m_pixels)
     {
-        const QColor col = (p.x() % 2 == 0) ?
-                    (p.y() % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
-                                 :
-                    (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
+        if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
+        {
+            const QColor col = (p.x() % 2 == 0) ?
+                        (p.y() % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
+                                     :
+                        (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
 
-        painter.fillRect(QRect(p.x() + m_dragX + offsetX, p.y() + m_dragY + offsetY, 1, 1), col);
+            painter.fillRect(QRect(p.x() + m_dragX + offsetX, p.y() + m_dragY + offsetY, 1, 1), col);
+        }
     }
 }
