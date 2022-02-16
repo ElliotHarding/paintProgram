@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "Canvas.h"
+#include "canvas.h"
 
 #include <QDesktopWidget>
 #include <QKeyEvent>

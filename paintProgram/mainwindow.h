@@ -18,7 +18,7 @@
 #include "dlg_shapes.h"
 #include "dlg_info.h"
 
-#include "Canvas.h"
+#include "canvas.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

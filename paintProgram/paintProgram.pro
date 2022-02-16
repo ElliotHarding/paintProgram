@@ -10,7 +10,7 @@ CONFIG += resources_big
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    Canvas.cpp \
+    canvas.cpp \
     dlg_brushsettings.cpp \
     dlg_info.cpp \
     dlg_sensitivity.cpp \
@@ -22,7 +22,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
-    Canvas.h \
+    canvas.h \
     dlg_brushsettings.h \
     dlg_info.h \
     dlg_sensitivity.h \
