@@ -23,6 +23,8 @@ signals:
 private slots:
     void on_btn_okay_clicked();
 
+    void on_btn_cancel_clicked();
+
 private:
     Ui::DLG_SetCanvasSettings *ui;
 };
