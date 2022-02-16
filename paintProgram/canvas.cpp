@@ -40,6 +40,10 @@ QImage genTransparentPixelsBackground(const int width, const int height)
     return transparentBackground;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Canvas
+///
 Canvas::Canvas(MainWindow* parent, QImage image) :
     QTabWidget(),
     m_pParent(parent)
@@ -894,7 +898,9 @@ void Canvas::updateCenter()
 
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// SelectedPixels
+///
 SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint height) : QWidget(parent),
     m_pParentCanvas(parent)
 {
@@ -1070,7 +1076,9 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
 }
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Clipboard
+///
 void Clipboard::generateClipboard(QImage &canvas, SelectedPixels* pSelectedPixels)
 {
     //Prep selected pixels for dragging
@@ -1090,7 +1098,9 @@ void Clipboard::generateClipboard(QImage &canvas, SelectedPixels* pSelectedPixel
     });
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// PaintableClipboard
+///
 PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
     m_previousDragPos(Constants::NullDragPoint),
     m_pParentCanvas(parent)
@@ -1141,6 +1151,7 @@ void PaintableClipboard::setImage(QImage image)
     update();
 }
 
+//Returns false if no image dumped
 bool PaintableClipboard::dumpImage(QPainter &painter)
 {
     if(m_clipboardImage == QImage() && m_pixels.size() == 0)

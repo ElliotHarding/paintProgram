@@ -128,7 +128,15 @@
     <property name="title">
      <string>Image</string>
     </property>
+    <widget class="QMenu" name="menuChanges">
+     <property name="title">
+      <string>Changes</string>
+     </property>
+     <addaction name="actionBlack_and_white"/>
+     <addaction name="actionInvert"/>
+    </widget>
     <addaction name="actionImageSettings"/>
+    <addaction name="menuChanges"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMenu"/>
@@ -168,6 +176,16 @@
   <action name="actionNew">
    <property name="text">
     <string>New</string>
+   </property>
+  </action>
+  <action name="actionBlack_and_white">
+   <property name="text">
+    <string>Black and white</string>
+   </property>
+  </action>
+  <action name="actionInvert">
+   <property name="text">
+    <string>Invert</string>
    </property>
   </action>
  </widget>
