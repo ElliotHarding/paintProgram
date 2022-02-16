@@ -16,7 +16,7 @@ DLG_Tools::~DLG_Tools()
     delete ui;
 }
 
-void DLG_Tools::setCurrentTool(Tool tool)
+void DLG_Tools::setCurrentTool(const Tool tool)
 {
     m_currentTool = tool;
     emit currentToolUpdated(tool);

@@ -20,7 +20,7 @@ public:
     Tool getCurrentTool() { return m_currentTool; }
 
 signals:
-    void currentToolUpdated(Tool tool);
+    void currentToolUpdated(const Tool tool);
 
 private slots:
     void on_btn_selectTool_clicked();
@@ -31,15 +31,13 @@ private slots:
     void on_btn_bucketTool_clicked();
     void on_btn_colorPickerTool_clicked();
     void on_btn_panTool_clicked();
-
     void on_btn_textTool_clicked();
-
     void on_btn_shapeTool_clicked();
 
 private:
     Ui::dlg_tools *ui;
 
-    void setCurrentTool(Tool tool);
+    void setCurrentTool(const Tool tool);
     Tool m_currentTool = TOOL_PAINT;
 };
 

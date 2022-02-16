@@ -122,7 +122,7 @@ public:
     void mouseMouseOnParentEvent(QMouseEvent* event);
 
 public slots:
-    void updateCurrentTool(Tool t);
+    void updateCurrentTool(const Tool t);
 
 signals:
     void selectionAreaResize(const int x, const int y);

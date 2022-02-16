@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
     connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(on_save_as()));
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_btn_addTab_clicked()));
-    connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), this, SLOT(updatedCurrentTool(Tool)));
+    connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), this, SLOT(updatedCurrentTool(const Tool)));
     connect(m_dlg_textSettings, SIGNAL(updateFont(QFont)), this, SLOT(on_update_font(QFont)));
     connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(on_color_changed(const QColor&)));
 
@@ -366,7 +366,7 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
     c->setSavePath(savePath);
 
     c->updateCurrentTool(m_dlg_tools->getCurrentTool());    
-    connect(m_dlg_tools, SIGNAL(currentToolUpdated(Tool)), c, SLOT(updateCurrentTool(Tool)));
+    connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), c, SLOT(updateCurrentTool(const Tool)));
     connect(c, SIGNAL(selectionAreaResize(const int, const int)), m_dlg_info, SLOT(onSelectionAreaResize(const int, const int)));
     connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
     connect(c, SIGNAL(canvasSizeChange(const int, const int)), m_dlg_info, SLOT(onCanvasSizeChange(const int, const int)));
