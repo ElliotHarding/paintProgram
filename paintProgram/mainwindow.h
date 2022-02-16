@@ -62,7 +62,7 @@ protected: //todo - can remove the key events because event filter handles them.
 private slots:
     void on_get_canvas_settings(int width, int height, QString name);
 
-    void updatedCurrentTool(Tool tool);
+    void onCurrentToolUpdated(Tool tool);
 
     void on_update_font(QFont font);
 

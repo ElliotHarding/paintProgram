@@ -181,7 +181,7 @@ void Canvas::updateSettings(int width, int height, QString name)
     }
 }
 
-void Canvas::updateCurrentTool(const Tool t)
+void Canvas::onCurrentToolUpdated(const Tool t)
 {
     bool doUpdate = false;
 
