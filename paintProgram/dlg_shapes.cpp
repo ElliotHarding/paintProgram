@@ -27,19 +27,35 @@ bool DLG_Shapes::fillShape()
 void DLG_Shapes::on_btn_shapeRect_clicked()
 {
     m_shape = SHAPE_RECT;
+    ui->btn_shapeCircle->setFlat(true);
+    ui->btn_shapeRect->setFlat(false);
+    ui->btn_shapeLine->setFlat(true);
+    ui->btn_shapeTriangle->setFlat(true);
 }
 
 void DLG_Shapes::on_btn_shapeCircle_clicked()
 {
     m_shape = SHAPE_CIRCLE;
+    ui->btn_shapeCircle->setFlat(false);
+    ui->btn_shapeRect->setFlat(true);
+    ui->btn_shapeLine->setFlat(true);
+    ui->btn_shapeTriangle->setFlat(true);
 }
 
 void DLG_Shapes::on_btn_shapeTriangle_clicked()
 {
     m_shape = SHAPE_TRIANGLE;
+    ui->btn_shapeCircle->setFlat(true);
+    ui->btn_shapeRect->setFlat(true);
+    ui->btn_shapeLine->setFlat(true);
+    ui->btn_shapeTriangle->setFlat(false);
 }
 
 void DLG_Shapes::on_btn_shapeLine_clicked()
 {
     m_shape = SHAPE_LINE;
+    ui->btn_shapeCircle->setFlat(true);
+    ui->btn_shapeRect->setFlat(false);
+    ui->btn_shapeLine->setFlat(false);
+    ui->btn_shapeTriangle->setFlat(true);
 }

@@ -149,6 +149,11 @@ bool MainWindow::getIsFillShape()
     return m_dlg_shapes->fillShape();
 }
 
+BrushShape MainWindow::getCurrentBrushShape()
+{
+    return m_dlg_brushSettings->getBrushShape();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());

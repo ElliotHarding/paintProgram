@@ -479,14 +479,35 @@ QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& cente
     return QPoint(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
 }
 
-void paintRect(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight)
+void paintRect(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight, const BrushShape brushShape)
 {
     if(x <= (uint)canvas.width() && y <= (uint)canvas.height())
     {
         QPainter painter(&canvas);
         painter.setCompositionMode (QPainter::CompositionMode_Source);
-        QRect rect = QRect(x - widthHeight/2, y - widthHeight/2, widthHeight, widthHeight);
-        painter.fillRect(rect, col);
+
+        QRect rect;
+        if(widthHeight > 1)
+        {
+            rect = QRect(x - widthHeight/2, y - widthHeight/2, widthHeight, widthHeight);
+        }
+        else
+        {
+            rect = QRect(x, y, widthHeight, widthHeight);
+        }
+
+        if(brushShape == BrushShape::BRUSHSHAPE_CIRCLE && widthHeight > 1)
+        {
+            QPen p;
+            p.setColor(col);
+            painter.setPen(p);
+            painter.setBrush(col);
+            painter.drawEllipse(rect);
+        }
+        else if(brushShape == BrushShape::BRUSHSHAPE_RECT || (widthHeight <= 1 && brushShape == BrushShape::BRUSHSHAPE_CIRCLE))
+        {
+            painter.fillRect(rect, col);
+        }
     }
 }
 
@@ -588,12 +609,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
     if(m_tool == TOOL_PAINT)
     {
-        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize());
+        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
         update();
     }
     else if(m_tool == TOOL_ERASER)
     {
-        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize());
+        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
         update();
     }
     else if(m_tool == TOOL_SELECT)
@@ -708,12 +729,12 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
     {
         if(m_tool == TOOL_PAINT)
         {
-            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize());
+            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
             update();
         }
         else if(m_tool == TOOL_ERASER)
         {
-            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize());
+            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
             update();
         }
         else if(m_tool == TOOL_SELECT)

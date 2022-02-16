@@ -44,6 +44,8 @@ public:
     Shape getCurrentShape();
     bool getIsFillShape();
 
+    BrushShape getCurrentBrushShape();
+
     void setCopyBuffer(Clipboard clipboard);
     Clipboard getCopyBuffer();
 

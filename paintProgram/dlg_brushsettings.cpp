@@ -8,7 +8,11 @@ DLG_BrushSettings::DLG_BrushSettings(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    setFixedWidth(70);
+    setFixedWidth(139);
+
+    ui->btn_shapeCircle->setFlat(true);
+    ui->btn_shapeRect->setFlat(false);
+    m_brushShape = BRUSHSHAPE_RECT;
 }
 
 DLG_BrushSettings::~DLG_BrushSettings()
@@ -19,4 +23,23 @@ DLG_BrushSettings::~DLG_BrushSettings()
 int DLG_BrushSettings::getBrushSize()
 {
     return ui->spin_brushSize->value();
+}
+
+BrushShape DLG_BrushSettings::getBrushShape()
+{
+    return m_brushShape;
+}
+
+void DLG_BrushSettings::on_btn_shapeRect_clicked()
+{
+    ui->btn_shapeCircle->setFlat(true);
+    ui->btn_shapeRect->setFlat(false);
+    m_brushShape = BRUSHSHAPE_RECT;
+}
+
+void DLG_BrushSettings::on_btn_shapeCircle_clicked()
+{
+    ui->btn_shapeCircle->setFlat(false);
+    ui->btn_shapeRect->setFlat(true);
+    m_brushShape = BRUSHSHAPE_CIRCLE;
 }
