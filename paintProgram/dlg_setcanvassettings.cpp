@@ -6,6 +6,7 @@ DLG_SetCanvasSettings::DLG_SetCanvasSettings(QWidget *parent) :
     ui(new Ui::DLG_SetCanvasSettings)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 }
 
 DLG_SetCanvasSettings::~DLG_SetCanvasSettings()
@@ -30,5 +31,10 @@ void DLG_SetCanvasSettings::on_btn_okay_clicked()
 
     emit confirmCanvasSettings(ui->spinBox_width->value(), ui->spinBox_height->value(), name);
 
+    hide();
+}
+
+void DLG_SetCanvasSettings::on_btn_cancel_clicked()
+{
     hide();
 }

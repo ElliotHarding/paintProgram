@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>DLG_SetCanvasSettings</class>
  <widget class="QDialog" name="DLG_SetCanvasSettings">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Settings</string>
   </property>
   <widget class="QLabel" name="lbl_height">
    <property name="geometry">
@@ -29,9 +32,9 @@
   <widget class="QPushButton" name="btn_okay">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>80</x>
      <y>110</y>
-     <width>75</width>
+     <width>60</width>
      <height>23</height>
     </rect>
    </property>
@@ -62,10 +65,13 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>1</number>
+    <number>2</number>
    </property>
    <property name="maximum">
     <number>8192</number>
+   </property>
+   <property name="value">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QSpinBox" name="spinBox_height">
@@ -78,10 +84,13 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>1</number>
+    <number>2</number>
    </property>
    <property name="maximum">
     <number>8192</number>
+   </property>
+   <property name="value">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLineEdit" name="textEdit_name">
@@ -105,6 +114,19 @@
    </property>
    <property name="text">
     <string>Name</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_cancel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>110</y>
+     <width>60</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
    </property>
   </widget>
  </widget>
