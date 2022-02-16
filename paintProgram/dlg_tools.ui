@@ -96,6 +96,9 @@
      <height>32</height>
     </size>
    </property>
+   <property name="default">
+    <bool>false</bool>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>

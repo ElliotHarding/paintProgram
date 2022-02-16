@@ -9,6 +9,9 @@ DLG_Tools::DLG_Tools(QWidget *parent) :
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     setFixedWidth(64);
     setFixedHeight(195);
+
+    m_currentTool == TOOL_PAINT;
+    ui->btn_paintTool->setFlat(false);
 }
 
 DLG_Tools::~DLG_Tools()
@@ -19,6 +22,18 @@ DLG_Tools::~DLG_Tools()
 void DLG_Tools::setCurrentTool(const Tool tool)
 {
     m_currentTool = tool;
+
+    ui->btn_bucketTool->setFlat(tool!=TOOL_BUCKET);
+    ui->btn_colorPickerTool->setFlat(tool!=TOOL_COLOR_PICKER);
+    ui->btn_dragTool->setFlat(tool!=TOOL_DRAG);
+    ui->btn_eraserTool->setFlat(tool!=TOOL_ERASER);
+    ui->btn_paintTool->setFlat(tool!=TOOL_PAINT);
+    ui->btn_panTool->setFlat(tool!=TOOL_PAN);
+    ui->btn_selectSpreadTool->setFlat(tool!=TOOL_SPREAD_ON_SIMILAR);
+    ui->btn_selectTool->setFlat(tool!=TOOL_SELECT);
+    ui->btn_shapeTool->setFlat(tool!=TOOL_SHAPE);
+    ui->btn_textTool->setFlat(tool!=TOOL_TEXT);
+
     emit currentToolUpdated(tool);
 }
 
