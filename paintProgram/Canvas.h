@@ -119,7 +119,7 @@ public:
 
     void resizeEvent(QResizeEvent* event) override;
 
-    void mouseMouseOnParentEvent(QMouseEvent* event);
+    void onParentMouseMove(QMouseEvent* event);
 
 public slots:
     void onCurrentToolUpdated(const Tool t);

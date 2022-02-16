@@ -708,7 +708,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
 }
 
-void Canvas::mouseMouseOnParentEvent(QMouseEvent *event)
+void Canvas::onParentMouseMove(QMouseEvent *event)
 {
     m_canvasMutex.lock();
 
