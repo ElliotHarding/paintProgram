@@ -967,55 +967,10 @@ void SelectedPixels::addPixels(QList<QPoint> pixels)
 {
     for(QPoint p : pixels)
     {
-        if(p.x() < m_selectedPixels.size() && p.x() > -1 &&
-           p.y() < m_selectedPixels[0].size() && p.y() > -1)
+        if(p.x() < (int)m_selectedPixels.size() && p.x() > -1 &&
+           p.y() < (int)m_selectedPixels[0].size() && p.y() > -1)
         {
             m_selectedPixels[p.x()][p.y()] = true;
-        }
-    }
-}
-
-void SelectedPixels::addPixelsNonAlpha0(QImage &image)
-{
-    for(uint x = 0; x < (uint)image.width(); x++)
-    {
-        for(uint y = 0; y < (uint)image.height(); y++)
-        {
-            if(image.pixelColor(x,y).alpha() > 0)
-            {
-                if((int)x > -1 && x < m_selectedPixels.size() && (int)y > -1 && y < m_selectedPixels[0].size())
-                {
-                    m_selectedPixels[x][y] = true;
-                }
-                else
-                {
-                    qDebug() << "SelectedPixels::addNonAlpha0Pixels - Out of range -" << x << ":" << y;
-                }
-            }
-        }
-    }
-
-    update();
-}
-
-void SelectedPixels::addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY)
-{
-    for(int x = 0; x < image.width(); x++)
-    {
-        for(int y = 0; y < image.height(); y++)
-        {
-            if(image.pixelColor(x,y).alpha() > 0)
-            {
-                if(x + offsetX > -1 && x + offsetX < (int)m_selectedPixels.size() &&
-                   y + offsetY > -1 && y + offsetY < (int)m_selectedPixels[x].size())
-                {
-                    m_selectedPixels[x + offsetX][y + offsetY] = true;
-                }
-                else
-                {
-                    qDebug() << "SelectedPixels::addNonAlpha0PixelsWithOffset - out of range - " << (x + offsetX) << ":" << (y + offsetY);
-                }
-            }
         }
     }
 
@@ -1122,7 +1077,7 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 
 void PaintableClipboard::generateClipboard(QImage &canvas, SelectedPixels *pSelectedPixels)
 {
-    generateClipboard(canvas, pSelectedPixels);
+    Clipboard::generateClipboard(canvas, pSelectedPixels);
     update();
 }
 
@@ -1183,7 +1138,13 @@ QList<QPoint> PaintableClipboard::getPixels()
 
 QList<QPoint> PaintableClipboard::getPixelsOffset()
 {
-    // todo ~ Implement
+    QList<QPoint> pixels = m_pixels;
+    for(QPoint& p : pixels)
+    {
+        p.setX(p.x() + m_dragX);
+        p.setY(p.y() + m_dragY);
+    }
+    return pixels;
 }
 
 bool PaintableClipboard::isDragging()

@@ -28,8 +28,6 @@ public:
     void addPixels(QRubberBand* newSelectionArea);
     void addPixels(std::vector<std::vector<bool>>& selectedPixels);
     void addPixels(QList<QPoint> pixels);
-    void addPixelsNonAlpha0(QImage& image);
-    void addPixelsNonAlpha0WithOffset(QImage& image, const int offsetX, const int offsetY);
 
     bool isHighlighted(const uint x, const uint y);
 
@@ -77,8 +75,6 @@ public:
     bool isDragging();
     void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
-    int getDragX();//todo ~ should be able to get rid of this soon
-    int getDragY();//todo ~ should be able to get rid of this soon
 
     void reset();
 
