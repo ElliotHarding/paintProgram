@@ -48,22 +48,25 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     //Connections
-    connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(on_get_canvas_settings(int,int,QString)));
-    connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(on_open_color_picker()));
-    connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(on_open_tools()));
-    connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(on_load()));
-    connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(on_save()));
-    connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(on_btn_canvasSettings_clicked()));
-    connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(on_save_as()));
-    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_btn_addTab_clicked()));
+    connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(onGetCanvasSettings(int,int,QString)));
+
+    connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(onOpenColorPicker()));
+    connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(onOpenTools()));
+    connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(onLoad()));
+    connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(onSave()));
+    connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(onSaveAs()));
+    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(onAddTabClicked()));
+
+    connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(onShowCanvasSettings()));
+
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), this, SLOT(onCurrentToolUpdated(const Tool)));
-    connect(m_dlg_textSettings, SIGNAL(updateFont(QFont)), this, SLOT(on_update_font(QFont)));
-    connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(on_color_changed(const QColor&)));
+    connect(m_dlg_textSettings, SIGNAL(updateFont(const QFont)), this, SLOT(onUpdateFont(const QFont)));
+    connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
 
     showMaximized();
 
     m_bMakingNewCanvas = true;
-    on_get_canvas_settings(200, 200, "New");
+    onGetCanvasSettings(200, 200, "New");
 }
 
 MainWindow::~MainWindow()
@@ -201,7 +204,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
         else if(m_pressedKeys.find(Qt::Key_S) != m_pressedKeys.end())
         {
-            on_save();
+            onSave();
         }
 
         else if(m_pressedKeys.find(Qt::Key_Z) != m_pressedKeys.end())
@@ -263,7 +266,7 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
     }
 }
 
-void MainWindow::on_get_canvas_settings(int width, int height, QString name)
+void MainWindow::onGetCanvasSettings(int width, int height, QString name)
 {
     if(m_bMakingNewCanvas)
     {
@@ -325,7 +328,7 @@ void MainWindow::onCurrentToolUpdated(Tool tool)
     }
 }
 
-void MainWindow::on_update_font(QFont font)
+void MainWindow::onUpdateFont(const QFont font)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
@@ -334,13 +337,13 @@ void MainWindow::on_update_font(QFont font)
     }
 }
 
-void MainWindow::on_btn_addTab_clicked()
+void MainWindow::onAddTabClicked()
 {
     m_bMakingNewCanvas = true;
     m_dlg_canvasSettings->show();
 }
 
-void MainWindow::on_btn_canvasSettings_clicked()
+void MainWindow::onShowCanvasSettings()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
@@ -352,7 +355,7 @@ void MainWindow::on_btn_canvasSettings_clicked()
     }
 }
 
-void MainWindow::on_color_changed(const QColor &color)
+void MainWindow::onColorChanged(const QColor &color)
 {
     if(m_dlg_tools->getCurrentTool() == TOOL_TEXT)
     {
@@ -380,7 +383,7 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
     c->addedToTab();
 }
 
-void MainWindow::on_load()
+void MainWindow::onLoad()
 {
     QFileDialog loadDialog;
     const QUrl fileUrl = loadDialog.getOpenFileUrl(this);
@@ -394,7 +397,7 @@ void MainWindow::on_load()
     loadNewCanvas(image, fileName, filePath);
 }
 
-void MainWindow::on_save()
+void MainWindow::onSave()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
@@ -409,7 +412,7 @@ void MainWindow::on_save()
     }
 }
 
-void MainWindow::on_save_as()
+void MainWindow::onSaveAs()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
@@ -433,12 +436,12 @@ void MainWindow::saveCanvas(Canvas *canvas, QString path)
     qDebug() << (canvas->getImageCopy().save(path) ? "Saved image" : "Failed to save image");
 }
 
-void MainWindow::on_open_color_picker()
+void MainWindow::onOpenColorPicker()
 {
     m_dlg_colorPicker->show();
 }
 
-void MainWindow::on_open_tools()
+void MainWindow::onOpenTools()
 {
     m_dlg_tools->show();
 }

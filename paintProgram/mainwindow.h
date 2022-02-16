@@ -32,57 +32,54 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    ///Color picker dlg to/from canvas
     QColor getSelectedColor();
     void setSelectedColor(QColor col);
 
-    int getBrushSize();
-
-    int getSpreadSensitivity();
-
-    bool isCtrlPressed();
-
+    ///Shape dlg to/from canvas
     Shape getCurrentShape();
     bool getIsFillShape();
 
+    ///Brush dlg to canvas
     BrushShape getCurrentBrushShape();
+    int getBrushSize();
 
+    ///Sensitivity dlg to canvas
+    int getSpreadSensitivity();
+
+    ///Test settings dlg to canvas
+    QFont getTextFont();
+
+    ///Access mainwindow properties
+    bool isCtrlPressed();
     void setCopyBuffer(Clipboard clipboard);
     Clipboard getCopyBuffer();
-
-    QFont getTextFont();
 
 protected: //todo - can remove the key events because event filter handles them....
     bool eventFilter(QObject* watched, QEvent* event ) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
-
     void resizeEvent(QResizeEvent* event) override;
     void moveEvent(QMoveEvent* moveEvent) override;
 
 private slots:
-    void on_get_canvas_settings(int width, int height, QString name);
 
     void onCurrentToolUpdated(Tool tool);
+    void onGetCanvasSettings(int width, int height, QString name);
+    void onShowCanvasSettings();
+    void onUpdateFont(const QFont font);
+    void onOpenColorPicker();
+    void onOpenTools();
+    void onLoad();
+    void onSave();
+    void onSaveAs();
+    void onAddTabClicked();
+    void onColorChanged(const QColor& color);
 
-    void on_update_font(QFont font);
-
-    void on_open_color_picker();
-    void on_open_tools();
-
-    void on_load();
-    void on_save();
-    void on_save_as();
-
-    void on_btn_addTab_clicked();
-
+    //Mainwindow control slots
     void on_btn_undo_clicked();
     void on_btn_redo_clicked();
-
     void on_c_tabWidget_tabCloseRequested(int index);
-
-    void on_btn_canvasSettings_clicked();
-
-    void on_color_changed(const QColor& color);
 
 private:
     Ui::MainWindow *ui;
@@ -101,13 +98,15 @@ private:
 
     Clipboard m_copyBuffer;
 
+    ///Loading
     void loadNewCanvas(QImage image, QString name, QString savePath = "");
     bool m_bMakingNewCanvas = false;
 
+    ///Saving
     QString getSaveAsPath(QString name);
     void saveCanvas(Canvas* canvas, QString path);
 
-    //Positioning
+    ///Positioning
     void repositionDialogs();
     bool m_bDialogsCreated = false;
 };
