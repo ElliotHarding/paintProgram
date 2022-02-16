@@ -1169,16 +1169,6 @@ void PaintableClipboard::doDragging(QPoint mouseLocation)
     update();
 }
 
-int PaintableClipboard::getDragX()
-{
-    return m_dragX;
-}
-
-int PaintableClipboard::getDragY()
-{
-    return m_dragY;
-}
-
 void PaintableClipboard::reset()
 {
     m_clipboardImage = QImage();
