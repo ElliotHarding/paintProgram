@@ -479,7 +479,7 @@ QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& cente
     return QPoint(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
 }
 
-void paintRect(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight, const BrushShape brushShape)
+void paintBrush(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight, const BrushShape brushShape)
 {
     if(x <= (uint)canvas.width() && y <= (uint)canvas.height())
     {
@@ -609,12 +609,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
     if(m_tool == TOOL_PAINT)
     {
-        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+        paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
         update();
     }
     else if(m_tool == TOOL_ERASER)
     {
-        paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+        paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
         update();
     }
     else if(m_tool == TOOL_SELECT)
@@ -729,12 +729,12 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
     {
         if(m_tool == TOOL_PAINT)
         {
-            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+            paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
             update();
         }
         else if(m_tool == TOOL_ERASER)
         {
-            paintRect(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+            paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
             update();
         }
         else if(m_tool == TOOL_SELECT)
