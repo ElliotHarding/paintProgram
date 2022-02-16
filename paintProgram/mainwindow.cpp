@@ -169,7 +169,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->deleteKeyPressed();
+            c->onDeleteKeyPressed();
         }
     }
 
@@ -180,7 +180,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
             if(c)
             {
-                c->copyKeysPressed();
+                c->onCopyKeysPressed();
             }
         }
 
@@ -189,7 +189,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
             if(c)
             {
-                c->pasteKeysPressed();
+                c->onPasteKeysPressed();
             }
         }
 
@@ -198,7 +198,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
             if(c)
             {
-                c->cutKeysPressed();
+                c->onCutKeysPressed();
             }
         }
 
@@ -221,7 +221,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
                 Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
                 if(c)
                 {
-                    c->writeText(event->text(), m_dlg_textSettings->getFont());
+                    c->onWriteText(event->text(), m_dlg_textSettings->getFont());
                 }
             }
         }
@@ -283,7 +283,7 @@ void MainWindow::onGetCanvasSettings(int width, int height, QString name)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->updateSettings(width, height, name);
+            c->onUpdateSettings(width, height, name);
         }
     }
 }
@@ -326,6 +326,15 @@ void MainWindow::onCurrentToolUpdated(Tool tool)
     {
         m_dlg_shapes->hide();
     }
+
+    for(int i = 0; i < ui->c_tabWidget->count(); i++)
+    {
+        Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->widget(i));
+        if(c)
+        {
+            c->onCurrentToolUpdated(tool);
+        }
+    }
 }
 
 void MainWindow::onUpdateFont(const QFont font)
@@ -333,7 +342,7 @@ void MainWindow::onUpdateFont(const QFont font)
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->updateText(font);
+        c->onUpdateText(font);
     }
 }
 
@@ -362,7 +371,7 @@ void MainWindow::onColorChanged(const QColor &color)
         Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
         if(c)
         {
-            c->updateText(m_dlg_textSettings->getFont());
+            c->onUpdateText(m_dlg_textSettings->getFont());
         }
     }
 }
@@ -374,13 +383,12 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
     c->setSavePath(savePath);
 
     c->onCurrentToolUpdated(m_dlg_tools->getCurrentTool());
-    connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), c, SLOT(onCurrentToolUpdated(const Tool)));
     connect(c, SIGNAL(selectionAreaResize(const int, const int)), m_dlg_info, SLOT(onSelectionAreaResize(const int, const int)));
     connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
     connect(c, SIGNAL(canvasSizeChange(const int, const int)), m_dlg_info, SLOT(onCanvasSizeChange(const int, const int)));
 
     ui->c_tabWidget->addTab(c, name);
-    c->addedToTab();
+    c->onAddedToTab();
 }
 
 void MainWindow::onLoad()
@@ -451,7 +459,7 @@ void MainWindow::on_btn_undo_clicked()
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->undoPressed();
+        c->onUndoPressed();
     }
 }
 
@@ -460,7 +468,7 @@ void MainWindow::on_btn_redo_clicked()
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->redoPressed();
+        c->onRedoPressed();
     }
 }
 

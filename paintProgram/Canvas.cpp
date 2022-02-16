@@ -68,7 +68,7 @@ Canvas::~Canvas()
         delete m_pSelectedPixels;
 }
 
-void Canvas::addedToTab()
+void Canvas::onAddedToTab()
 {
     updateCenter();
 
@@ -98,12 +98,12 @@ int Canvas::height()
     return m_canvasImage.height();
 }
 
-void Canvas::updateText(QFont font)
+void Canvas::onUpdateText(QFont font)
 {
-    writeText("", font);
+    onWriteText("", font);
 }
 
-void Canvas::writeText(QString letter, QFont font)
+void Canvas::onWriteText(QString letter, QFont font)
 {
     if(m_tool == TOOL_TEXT)
     {
@@ -146,7 +146,7 @@ void Canvas::setSavePath(QString path)
     m_savePath = path;
 }
 
-void Canvas::updateSettings(int width, int height, QString name)
+void Canvas::onUpdateSettings(int width, int height, QString name)
 {
     //Create new image based on new settings
     QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
@@ -229,7 +229,7 @@ void Canvas::onCurrentToolUpdated(const Tool t)
         update();
 }
 
-void Canvas::deleteKeyPressed()
+void Canvas::onDeleteKeyPressed()
 {
     if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
@@ -253,7 +253,7 @@ void Canvas::deleteKeyPressed()
     }
 }
 
-void Canvas::copyKeysPressed()
+void Canvas::onCopyKeysPressed()
 {   
     m_canvasMutex.lock();
     Clipboard clipboard;
@@ -264,7 +264,7 @@ void Canvas::copyKeysPressed()
     update();
 }
 
-void Canvas::cutKeysPressed()
+void Canvas::onCutKeysPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -310,7 +310,7 @@ void Canvas::cutKeysPressed()
     update();
 }
 
-void Canvas::pasteKeysPressed()
+void Canvas::onPasteKeysPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -328,7 +328,7 @@ void Canvas::pasteKeysPressed()
     canvasMutexLocker.unlock();
 }
 
-void Canvas::undoPressed()
+void Canvas::onUndoPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_imageHistoryIndex > 0)
@@ -339,7 +339,7 @@ void Canvas::undoPressed()
     }
 }
 
-void Canvas::redoPressed()
+void Canvas::onRedoPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_imageHistoryIndex < int(m_imageHistory.size() - 1))
@@ -656,7 +656,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         canvasMutexLocker.unlock();
 
-        updateText(m_pParent->getTextFont());
+        onUpdateText(m_pParent->getTextFont());
 
         canvasMutexLocker.relock();
     }

@@ -14,33 +14,41 @@
 class Canvas;
 class MainWindow;
 
+///Holds selected pixels of parent canvas (also paints these pixels)
 class SelectedPixels : public QWidget
 {
 public:
     SelectedPixels(Canvas* parent, const uint width, const uint height);
     ~SelectedPixels();
 
+    ///Clearing
     void clearAndResize(const uint width, const uint height);
     void clear();
 
+    ///Pixel operations
     void operateOnSelectedPixels(std::function<void(int, int)> func);
 
+    ///Adding pixels
     void addPixels(QRubberBand* newSelectionArea);
     void addPixels(std::vector<std::vector<bool>>& selectedPixels);
     void addPixels(QList<QPoint> pixels);
 
+    ///Pixel info
     bool isHighlighted(const uint x, const uint y);
 
 private:
+    //2d array of selected pixels
     std::vector<std::vector<bool>> m_selectedPixels;
 
     Canvas* m_pParentCanvas;
 
+    ///Painting
     bool m_bOutlineColorToggle = false;
     void paintEvent(QPaintEvent* paintEvent) override;
-    QTimer* m_pOutlineDrawTimer;
+    QTimer* m_pOutlineDrawTimer;//Calls draw of outline of selected pixels every interval
 };
 
+///Clipboard (Image + Pixel info) used for copying/cutting/pasting
 class Clipboard
 {
 public:
@@ -50,31 +58,35 @@ public:
     QImage m_clipboardImage;
 };
 
+///A clipboard that also paints. Used for dragging around or cutting/pasting
 class PaintableClipboard : public Clipboard, public QWidget
 {
 public:
     PaintableClipboard(Canvas* parent);
 
-    //Image
+    ///Clipboard (image + pixels)
     void generateClipboard(QImage& canvas, SelectedPixels* pSelectedPixels);
     void setClipboard(Clipboard clipboard);
-    void setImage(QImage image);
     Clipboard getClipboard();
+
+    ///Image
+    void setImage(QImage image);    
     void dumpImage(QPainter& painter);
     bool isImageDefault();
 
+    ///Pixels
     QList<QPoint> getPixels();
     QList<QPoint> getPixelsOffset();
 
-    //Dragging
+    ///Dragging
     bool isDragging();
     void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
 
+    ///Reset/clear
     void reset();
 
 private:
-
     void paintEvent(QPaintEvent* paintEvent) override;
 
     int m_dragX = 0;
@@ -84,6 +96,8 @@ private:
     Canvas* m_pParentCanvas;
 };
 
+
+///Tab widget in charge of displaying & interacting with the image edited by paint program
 class Canvas : public QTabWidget
 {
     Q_OBJECT
@@ -92,37 +106,33 @@ public:
     Canvas(MainWindow* parent, QImage image);
     ~Canvas();
 
-    void addedToTab();
-
+    ///Image stuff & Saving/loading
     int width();
     int height();
-
-    void updateText(QFont font);
-    void writeText(QString letter, QFont font);
-
-    QString getSavePath();
-    void setSavePath(QString path);
-
-    void updateSettings(int width, int height, QString name);
-
-    void deleteKeyPressed();
-    void copyKeysPressed();
-    void cutKeysPressed();
-    void pasteKeysPressed();
-    void undoPressed();
-    void redoPressed();
-
     QImage getImageCopy();
+    QString getSavePath();
+    void setSavePath(QString path);   
 
-    float getZoom();
-    void getPanOffset(float& offsetX, float& offsetY);
+    ///Events
+    void onAddedToTab();
+    void onUpdateSettings(int width, int height, QString name);
+    void onCurrentToolUpdated(const Tool t);
+    void onParentMouseMove(QMouseEvent* event);
+    void onUpdateText(QFont font);
+    void onWriteText(QString letter, QFont font);
+    void onDeleteKeyPressed();
+    void onCopyKeysPressed();
+    void onCutKeysPressed();
+    void onPasteKeysPressed();
+    void onUndoPressed();
+    void onRedoPressed();
 
+    ///Qt events
     void resizeEvent(QResizeEvent* event) override;
 
-    void onParentMouseMove(QMouseEvent* event);
-
-public slots:
-    void onCurrentToolUpdated(const Tool t);
+    ///Stuff called by childen
+    float getZoom();
+    void getPanOffset(float& offsetX, float& offsetY);
 
 signals:
     void selectionAreaResize(const int x, const int y);
@@ -134,47 +144,47 @@ private:
     void wheelEvent(QWheelEvent* event) override;
     void showEvent(QShowEvent *) override;
 
-    //Mouse events and members
+    ///Mouse events and members
     void mousePressEvent(QMouseEvent* mouseEvent) override;
     void mouseReleaseEvent(QMouseEvent *releaseEvent) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     bool m_bMouseDown = false;
 
-    //Drawing
+    ///Drawing
     QImage m_canvasImage;
     QImage m_canvasBackgroundImage;
     QMutex m_canvasMutex;
     QString m_textToDraw = "";
     QPoint m_textDrawLocation;
 
-    //Draw shape
+    ///Draw shape
     QPoint m_drawShapeOrigin = QPoint(0,0);
 
-    //Undo/redo
+    ///Undo/redo
     void recordImageHistory();//Function called when m_canvasMutex is locked
     std::vector<QImage> m_imageHistory;
     int m_imageHistoryIndex = 0;
     const uint m_c_maxHistory = 20;
 
-    //Zooming
+    ///Zooming
     float m_zoomFactor = 1;
     const float m_cZoomIncrement = 1.1;
 
-    //Panning
+    ///Panning
     const QPoint m_c_nullPanPos = QPoint(-1,-1);
     QPoint m_previousPanPos = m_c_nullPanPos;
     float m_panOffsetX = 0;
     float m_panOffsetY = 0;
 
-    //Selecting
+    ///Selecting
     SelectedPixels* m_pSelectedPixels;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
 
-    //Dragging/copy/paste
+    ///Dragging/copy/paste
     PaintableClipboard* m_pClipboardPixels;
 
-    //Geometry
+    ///Geometry
     QPoint m_center;
     void updateCenter();
 
