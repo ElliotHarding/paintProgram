@@ -128,6 +128,7 @@ void Canvas::writeText(QString letter, QFont font)
         textPainter.drawText(m_textDrawLocation, m_textToDraw);
 
         m_pClipboardPixels->setImage(textImage);
+        m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixels());
 
         m_canvasMutex.unlock();
 
