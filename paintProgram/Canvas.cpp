@@ -1223,4 +1223,15 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
     painter.drawImage(QRect(m_dragX + offsetX, m_dragY + offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+
+    //Draw transparent selected pixels ~ So inneficient! look for something else
+    for(QPoint p : m_pixels)
+    {
+        const QColor col = (p.x() % 2 == 0) ?
+                    (p.y() % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
+                                 :
+                    (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
+
+        painter.fillRect(QRect(p.x() + m_dragX + offsetX, p.y() + m_dragY + offsetY, 1, 1), col);
+    }
 }
