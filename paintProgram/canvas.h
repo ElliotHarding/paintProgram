@@ -71,7 +71,7 @@ public:
 
     ///Image
     void setImage(QImage image);    
-    void dumpImage(QPainter& painter);
+    bool dumpImage(QPainter& painter);
     bool isImageDefault();
 
     ///Pixels

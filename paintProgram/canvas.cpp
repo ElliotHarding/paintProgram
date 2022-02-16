@@ -195,10 +195,12 @@ void Canvas::onCurrentToolUpdated(const Tool t)
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
         //Dump dragged contents onto m_canvasImage
+        //If something actually dumps, record image history
         QPainter painter(&m_canvasImage);
-        m_pClipboardPixels->dumpImage(painter);
-
-        recordImageHistory();
+        if(m_pClipboardPixels->dumpImage(painter))
+        {
+            recordImageHistory();
+        }
 
         canvasMutexLocker.unlock();
 
@@ -299,12 +301,11 @@ void Canvas::onCutKeysPressed()
     //Reset
     m_pClipboardPixels->reset();
     m_pSelectedPixels->clear();
-
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    canvasMutexLocker.unlock();
-
     recordImageHistory();
+
+    canvasMutexLocker.unlock();
 
     m_pParent->setCopyBuffer(clipBoard);
     update();
@@ -602,8 +603,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     //If were not dragging, and the clipboard shows something. Dump it
     if(m_tool != TOOL_DRAG && !m_pClipboardPixels->isImageDefault())
     {
+        //Dump clipboard, if something actually dumped record image history
         QPainter painter(&m_canvasImage);
-        m_pClipboardPixels->dumpImage(painter);
+        if(m_pClipboardPixels->dumpImage(painter))
+        {
+            recordImageHistory();
+        }
         update();
     }
 
@@ -1136,8 +1141,15 @@ void PaintableClipboard::setImage(QImage image)
     update();
 }
 
-void PaintableClipboard::dumpImage(QPainter &painter)
+bool PaintableClipboard::dumpImage(QPainter &painter)
 {
+    if(m_clipboardImage == QImage() && m_pixels.size() == 0)
+    {
+        //Just in case
+        update();
+        return false;
+    }
+
     //Draw image part of clipboard
     painter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
@@ -1155,6 +1167,7 @@ void PaintableClipboard::dumpImage(QPainter &painter)
 
     reset();
     update();
+    return true;
 }
 
 bool PaintableClipboard::isImageDefault()
