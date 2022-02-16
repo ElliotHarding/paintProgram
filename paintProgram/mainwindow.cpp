@@ -42,26 +42,26 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_info = new DLG_Info(this);
     m_dlg_info->show();
 
+    //Dialog connections
+    connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), this, SLOT(onCurrentToolUpdated(const Tool)));
+    connect(m_dlg_textSettings, SIGNAL(updateFont(const QFont)), this, SLOT(onUpdateFont(const QFont)));
+    connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
+    connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(onGetCanvasSettings(int,int,QString)));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
 
 
-    //Connections
-    connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(onGetCanvasSettings(int,int,QString)));
-
+    //UI action connections
     connect(ui->actionColor_Picker, SIGNAL(triggered()), this, SLOT(onOpenColorPicker()));
     connect(ui->actionTools, SIGNAL(triggered()), this, SLOT(onOpenTools()));
     connect(ui->actionLoad_Image, SIGNAL(triggered()), this, SLOT(onLoad()));
     connect(ui->actionSave_Image, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(onAddTabClicked()));
-
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(onShowCanvasSettings()));
 
-    connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), this, SLOT(onCurrentToolUpdated(const Tool)));
-    connect(m_dlg_textSettings, SIGNAL(updateFont(const QFont)), this, SLOT(onUpdateFont(const QFont)));
-    connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
+
 
     showMaximized();
 

@@ -15,8 +15,8 @@ const QColor ImageBorderColor = QColor(200,200,200,255);
 const QColor TransparentGrey = QColor(190,190,190,255);
 const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
-
 const QColor SelectionAreaColorA = QColor(0,40,100,50);
+const int SelectedPixelsOutlineFlashFrequency = 200;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -899,7 +899,7 @@ SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint heig
 
     m_pOutlineDrawTimer = new QTimer(this);
     connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
-    m_pOutlineDrawTimer->start(200);
+    m_pOutlineDrawTimer->start(Constants::SelectedPixelsOutlineFlashFrequency);
 }
 
 SelectedPixels::~SelectedPixels()
