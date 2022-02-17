@@ -12,6 +12,7 @@ CONFIG += resources_big
 SOURCES += \
     canvas.cpp \
     dlg_brushsettings.cpp \
+    dlg_effectssliders.cpp \
     dlg_info.cpp \
     dlg_sensitivity.cpp \
     dlg_setcanvassettings.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     canvas.h \
     dlg_brushsettings.h \
+    dlg_effectssliders.h \
     dlg_info.h \
     dlg_sensitivity.h \
     dlg_setcanvassettings.h \
@@ -35,6 +37,7 @@ HEADERS += \
 
 FORMS += \
     dlg_brushsettings.ui \
+    dlg_effectssliders.ui \
     dlg_info.ui \
     dlg_sensitivity.ui \
     dlg_setcanvassettings.ui \
