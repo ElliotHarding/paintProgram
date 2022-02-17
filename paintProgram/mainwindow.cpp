@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionBlack_and_white, SIGNAL(triggered()), this, SLOT(onBlackAndWhite()));
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
+    connect(ui->actionInk_Sketch, SIGNAL(triggered()), this, SLOT(onInkSketch()));
 
     showMaximized();
 
@@ -452,6 +453,15 @@ void MainWindow::onGreenLimit(int value)
     if(c)
     {
         c->onGreenLimit(value);
+    }
+}
+
+void MainWindow::onInkSketch()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onInkSketch();
     }
 }
 

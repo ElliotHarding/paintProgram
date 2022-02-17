@@ -148,6 +148,7 @@ public:
     void onRedLimit(const int value);
     void onBlueLimit(const int value);
     void onGreenLimit(const int value);
+    void onInkSketch();
     void onConfirmEffects();
     void onCancelEffects();
 
