@@ -956,10 +956,12 @@ SelectedPixels::~SelectedPixels()
 void SelectedPixels::clearAndResize(const uint width, const uint height)
 {
     m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
+    m_selectedPixelsList.clear();
 }
 
 void SelectedPixels::clear()
 {
+    m_selectedPixelsList.clear();
     if(m_selectedPixels.size() > 0)
     {
         m_selectedPixels = std::vector<std::vector<bool>>(m_selectedPixels.size(), std::vector<bool>(m_selectedPixels[0].size(), false));
@@ -974,15 +976,9 @@ void SelectedPixels::clear()
 
 void SelectedPixels::operateOnSelectedPixels(std::function<void (int, int)> func)
 {
-    for(uint x = 0; x < m_selectedPixels.size(); x++)
+    for(QPoint p : m_selectedPixelsList)
     {
-        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
-        {
-            if(m_selectedPixels[x][y])
-            {
-                func(x,y);
-            }
-        }
+        func(p.x(), p.y());
     }
 }
 
@@ -998,7 +994,11 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
         {
             if(x > -1 && x < (int)m_selectedPixels.size() && y > -1 && y < (int)m_selectedPixels[0].size())
             {
-                m_selectedPixels[x][y] = true;
+                if(!m_selectedPixels[x][y])
+                {
+                    m_selectedPixelsList.push_back(QPoint(x,y));
+                    m_selectedPixels[x][y] = true;
+                }
             }
             else
             {
@@ -1012,13 +1012,28 @@ void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
 
 void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
 {
+    //Check m_selectedPixels is the same dimensions as selectedPixels
+    //Could implement a method to add sections of pixels to m_selectedPixels, not needed right now
+    if(!(m_selectedPixels.size() > 0 && selectedPixels.size() > 0 &&
+       m_selectedPixels.size() == selectedPixels.size() &&
+       m_selectedPixels[0].size() == selectedPixels[0].size()))
+    {
+        qDebug() << "SelectedPixels::addPixels - 2D vector added is not the same as m_selectedPixels vector";
+        return;
+    }
+
     for(uint x = 0; x < m_selectedPixels.size(); x++)
     {
         for(uint y = 0; y < m_selectedPixels[x].size(); y++)
         {
-            if(!m_selectedPixels[x][y])
+            if(selectedPixels[x][y])
             {
-                m_selectedPixels[x][y] = selectedPixels[x][y];
+                if(!m_selectedPixels[x][y])
+                {
+                    m_selectedPixelsList.push_back(QPoint(x,y));
+                    m_selectedPixels[x][y] = true;
+                }
+
             }
         }
     }
@@ -1033,7 +1048,11 @@ void SelectedPixels::addPixels(QList<QPoint> pixels)
         if(p.x() < (int)m_selectedPixels.size() && p.x() > -1 &&
            p.y() < (int)m_selectedPixels[0].size() && p.y() > -1)
         {
-            m_selectedPixels[p.x()][p.y()] = true;
+            if(!m_selectedPixels[p.x()][p.y()])
+            {
+                m_selectedPixelsList.push_back(QPoint(p.x(), p.y()));
+                m_selectedPixels[p.x()][p.y()] = true;
+            }
         }
     }
 
@@ -1073,38 +1092,35 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
     painter.setPen(selectionOutlinePen);
 
     //Paint pixels and outline
-    for(uint x = 0; x < m_selectedPixels.size(); x++)
+    for(QPoint p : m_selectedPixelsList)
     {
-        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
+        const uint x = p.x();
+        const uint y = p.y();
+
+        painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColorA);
+
+        //border right
+        if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
         {
-            if(m_selectedPixels[x][y])
-            {
-                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColorA);
+            painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
+        }
 
-                //border right
-                if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
-                {
-                    painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
-                }
+        //border left
+        if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
+        {
+            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
+        }
 
-                //border left
-                if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
-                {
-                    painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
-                }
+        //border bottom
+        if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
+        {
+            painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
+        }
 
-                //border bottom
-                if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
-                {
-                    painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
-                }
-
-                //border top
-                if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
-                {
-                    painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
-                }
-            }
+        //border top
+        if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
+        {
+            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
         }
     }
 }

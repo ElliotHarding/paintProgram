@@ -43,8 +43,10 @@ public:
     bool isHighlighted(const uint x, const uint y);
 
 private:
-    //2d array of selected pixels
-    std::vector<std::vector<bool>> m_selectedPixels;
+    ///Containers of selected pixels (two differnt for speed instead of memory)
+    /// (It is slower adding pixels to two containers but speed saved elsewhere outweighs it)
+    std::vector<std::vector<bool>> m_selectedPixels;//2d array for quick access to specific pixels
+    QList<QPoint> m_selectedPixelsList;//List for quick iteration of only selected pixels
 
     Canvas* m_pParentCanvas;
 
