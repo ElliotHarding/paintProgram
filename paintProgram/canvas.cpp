@@ -355,6 +355,17 @@ void Canvas::onRedoPressed()
     }
 }
 
+void operateOnCanvasPixels(QImage& canvas, std::function<void (int, int)> func)
+{
+    for(int x = 0; x < canvas.width(); x++)
+    {
+        for(int y = 0; y < canvas.height(); y++)
+        {
+            func(x, y);
+        }
+    }
+}
+
 QColor greyScaleColor(const QColor col)
 {
     const int grey = (col.red() + col.green() + col.blue())/3;
@@ -376,13 +387,10 @@ void Canvas::onBlackAndWhite()
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
+        });
     }
 
     recordImageHistory();
@@ -410,13 +418,10 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
+        });
     }
 
     recordImageHistory();
@@ -456,13 +461,10 @@ void Canvas::onBrightness(const int value)
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, changeBrightness(m_canvasImage.pixelColor(x,y), value));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, changeBrightness(m_canvasImage.pixelColor(x,y), value));
+        });
     }
 
     update();
@@ -526,13 +528,10 @@ void Canvas::onContrast(const int value)
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, changeContrast(m_canvasImage.pixelColor(x,y), value));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, changeContrast(m_canvasImage.pixelColor(x,y), value));
+        });
     }
 
     update();
@@ -570,13 +569,10 @@ void Canvas::onRedLimit(const int value)
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, limitRed(m_canvasImage.pixelColor(x,y), value));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, limitRed(m_canvasImage.pixelColor(x,y), value));
+        });
     }
 
     update();
@@ -605,13 +601,10 @@ void Canvas::onBlueLimit(const int value)
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, limitBlue(m_canvasImage.pixelColor(x,y), value));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, limitBlue(m_canvasImage.pixelColor(x,y), value));
+        });
     }
 
     update();
@@ -640,13 +633,10 @@ void Canvas::onGreenLimit(const int value)
     }
     else
     {
-        for(int x = 0; x < m_canvasImage.width(); x++)
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
-            for(int y = 0; y < m_canvasImage.height(); y++)
-            {
-                m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
-            }
-        }
+            m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
+        });
     }
 
     update();
