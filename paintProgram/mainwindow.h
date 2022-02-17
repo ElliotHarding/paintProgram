@@ -8,6 +8,7 @@
 
 #include <QMainWindow>
 #include <QColorDialog>
+#include <QFileDialog>
 #include <QSet>
 
 #include "dlg_setcanvassettings.h"
@@ -95,6 +96,7 @@ private:
     DLG_Shapes* m_dlg_shapes = nullptr;
     DLG_Info* m_dlg_info = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
+    QFileDialog* m_dlg_fileDlg = nullptr;
 
     QSet<int> m_pressedKeys;
 

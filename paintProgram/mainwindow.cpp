@@ -4,7 +4,6 @@
 
 #include <QDesktopWidget>
 #include <QKeyEvent>
-#include <QFileDialog>
 #include <QDebug>
 #include <QColor>
 
@@ -41,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_info = new DLG_Info(this);
     m_dlg_info->show();
+
+    m_dlg_fileDlg = new QFileDialog(this);
 
     //Dialog connections
     connect(m_dlg_tools, SIGNAL(currentToolUpdated(const Tool)), this, SLOT(onCurrentToolUpdated(const Tool)));
@@ -411,8 +412,7 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
 
 void MainWindow::onLoad()
 {
-    QFileDialog loadDialog;
-    const QUrl fileUrl = loadDialog.getOpenFileUrl(this);
+    const QUrl fileUrl = m_dlg_fileDlg->getOpenFileUrl(this);
     QString filePath = fileUrl.path();
     QString fileName = QFileInfo(fileUrl.fileName()).baseName();
 
@@ -451,7 +451,7 @@ void MainWindow::onSaveAs()
 
 QString MainWindow::getSaveAsPath(QString name)
 {
-    return QFileDialog::getSaveFileName(nullptr, name, ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );;
+    return m_dlg_fileDlg->getSaveFileName(this, name, ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );
 }
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
