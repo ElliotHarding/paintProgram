@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_info = new DLG_Info(this);
     m_dlg_info->show();
 
+    m_dlg_effectsSliders = new DLG_EffectsSliders(this);
+
     m_dlg_fileDlg = new QFileDialog(this);
 
     //Dialog connections
@@ -63,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(onShowCanvasSettings()));
     connect(ui->actionBlack_and_white, SIGNAL(triggered()), this, SLOT(onBlackAndWhite()));
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
+    connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
 
     showMaximized();
 
@@ -393,6 +396,11 @@ void MainWindow::onInvert()
     {
         c->onInvert();
     }
+}
+
+void MainWindow::onEffectsSliders()
+{
+    m_dlg_effectsSliders->show();
 }
 
 void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)

@@ -15,6 +15,14 @@ public:
     explicit DLG_EffectsSliders(QWidget *parent = nullptr);
     ~DLG_EffectsSliders();
 
+signals:
+    void onBrightness(int value);
+    void onContrast(int value);
+
+private slots:
+    void on_slider_brightness_sliderMoved(int value);
+    void on_spinBox_brightness_valueChanged(int value);
+
 private:
     Ui::DLG_EffectsSliders *ui;
 };

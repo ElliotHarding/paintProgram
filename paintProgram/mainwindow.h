@@ -18,6 +18,7 @@
 #include "dlg_sensitivity.h"
 #include "dlg_shapes.h"
 #include "dlg_info.h"
+#include "dlg_effectssliders.h"
 
 #include "canvas.h"
 
@@ -78,6 +79,7 @@ private slots:
     void onColorChanged(const QColor& color);
     void onBlackAndWhite();
     void onInvert();
+    void onEffectsSliders();
 
     //Mainwindow control slots
     void on_btn_undo_clicked();
@@ -95,6 +97,7 @@ private:
     DLG_Sensitivity* m_dlg_sensitivity = nullptr;
     DLG_Shapes* m_dlg_shapes = nullptr;
     DLG_Info* m_dlg_info = nullptr;
+    DLG_EffectsSliders* m_dlg_effectsSliders = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
     QFileDialog* m_dlg_fileDlg = nullptr;
 
