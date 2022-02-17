@@ -434,14 +434,14 @@ bool compareNeighbour(QImage& image, const int x, const int y, const int neighbo
 {
     const QColor pixelColor = image.pixelColor(x,y);
     const QColor neighbourPixel = image.pixelColor(neighbourX,neighbourY);
-    if ((pixelColor.red() >= neighbourPixel.red() + sensitivity && pixelColor.red() >= neighbourPixel.red() - sensitivity) ||
-        (pixelColor.red() <= neighbourPixel.red() + sensitivity && pixelColor.red() <= neighbourPixel.red() - sensitivity) ||
-        (pixelColor.green() <= neighbourPixel.green() + sensitivity && pixelColor.green() <= neighbourPixel.green() - sensitivity) ||
-        (pixelColor.green() >= neighbourPixel.green() + sensitivity && pixelColor.green() >= neighbourPixel.green() - sensitivity) ||
-        (pixelColor.blue() <= neighbourPixel.blue() + sensitivity && pixelColor.blue() <= neighbourPixel.blue() - sensitivity) ||
-        (pixelColor.blue() >= neighbourPixel.blue() + sensitivity && pixelColor.blue() >= neighbourPixel.blue() - sensitivity) ||
-        (pixelColor.alpha() <= neighbourPixel.alpha() + sensitivity && pixelColor.alpha() <= neighbourPixel.alpha() - sensitivity) ||
-        (pixelColor.alpha() >= neighbourPixel.alpha() + sensitivity && pixelColor.alpha() >= neighbourPixel.alpha() - sensitivity)
+    if ((pixelColor.red() >= neighbourPixel.red() + sensitivity) ||
+        (pixelColor.red() <= neighbourPixel.red() - sensitivity) ||
+        (pixelColor.green() <= neighbourPixel.green() - sensitivity) ||
+        (pixelColor.green() >= neighbourPixel.green() + sensitivity) ||
+        (pixelColor.blue() <= neighbourPixel.blue() - sensitivity) ||
+        (pixelColor.blue() >= neighbourPixel.blue() + sensitivity) ||
+        (pixelColor.alpha() <= neighbourPixel.alpha() - sensitivity) ||
+        (pixelColor.alpha() >= neighbourPixel.alpha() + sensitivity)
         )
     {
         return true;
@@ -449,19 +449,26 @@ bool compareNeighbour(QImage& image, const int x, const int y, const int neighbo
     return false;
 }
 
-void Canvas::onInkSketch()
+void Canvas::onSketchEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
+
+    if(sensitivity == 0)
+    {
+        update();
+        return;
+    }
+
     QImage inkSketch = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    const QColor sketchColor = m_pParent->getSelectedColor() != Qt::white ? m_pParent->getSelectedColor() : Qt::black;
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
     {
         inkSketch.fill(Qt::transparent);
-
-        const QColor sketchColor = m_pParent->getSelectedColor() != Qt::white ? m_pParent->getSelectedColor() : Qt::black;
-        const int sensitivity = m_pParent->getSpreadSensitivity();
 
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -495,9 +502,6 @@ void Canvas::onInkSketch()
     {
         inkSketch.fill(Qt::white);
 
-        const QColor sketchColor = m_pParent->getSelectedColor() != Qt::white ? m_pParent->getSelectedColor() : Qt::black;
-        const int sensitivity = m_pParent->getSpreadSensitivity();
-
         operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
             if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
@@ -521,25 +525,31 @@ void Canvas::onInkSketch()
         m_canvasImage = inkSketch;
     }
 
-    recordImageHistory();
-
     update();
 }
 
-void Canvas::onColorOutline()
+void Canvas::onOutlineEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
+
+    if(sensitivity == 0)
+    {
+        update();
+        return;
+    }
+
     QImage outlineSketch = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    //Laying this ontop of m_canvasImage so want most of it transparent
+    outlineSketch.fill(Qt::transparent);
+
+    const QColor sketchColor = m_pParent->getSelectedColor();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
     {
-        outlineSketch.fill(Qt::transparent);
-
-        const QColor sketchColor = m_pParent->getSelectedColor();
-        const int sensitivity = m_pParent->getSpreadSensitivity();
-
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -560,15 +570,10 @@ void Canvas::onColorOutline()
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
         });
-
-        QPainter sketchPainter(&m_canvasImage);
-        sketchPainter.drawImage(0,0,outlineSketch);
     }
     else
     {
-        const QColor sketchColor = m_pParent->getSelectedColor();
-        const int sensitivity = m_pParent->getSpreadSensitivity();
-
+        //Loop through pixels, if a border pixel set it to sketchColor
         operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
         {
             if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
@@ -588,11 +593,11 @@ void Canvas::onColorOutline()
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
         });
-
-        m_canvasImage = outlineSketch;
     }
 
-    recordImageHistory();
+    //Dump outline sketch onto m_canvasImage
+    QPainter sketchPainter(&m_canvasImage);
+    sketchPainter.drawImage(0,0,outlineSketch);
 
     update();
 }

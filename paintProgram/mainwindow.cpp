@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_effectsSliders = new DLG_EffectsSliders(this);
 
+    m_dlg_sketch = new DLG_Sketch(this);
+
     m_dlg_fileDlg = new QFileDialog(this);
 
     //Dialog connections
@@ -57,6 +59,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_effectsSliders, SIGNAL(onBlueLimit(const int)), this, SLOT(onBlueLimit(const int)));
     connect(m_dlg_effectsSliders, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_effectsSliders, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
+    connect(m_dlg_sketch, SIGNAL(onOutlineEffect(const int)), this, SLOT(onOutlineEffect(const int)));
+    connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
+    connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
+    connect(m_dlg_sketch, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -73,8 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionBlack_and_white, SIGNAL(triggered()), this, SLOT(onBlackAndWhite()));
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
-    connect(ui->actionInk_Sketch, SIGNAL(triggered()), this, SLOT(onInkSketch()));
-    connect(ui->actionColor_Outline, SIGNAL(triggered()), this, SLOT(onColorOutline()));
+    connect(ui->actionSketch_Outline, SIGNAL(triggered()), this, SLOT(onSketchAndOutline()));
 
     showMaximized();
 
@@ -412,6 +417,11 @@ void MainWindow::onEffectsSliders()
     m_dlg_effectsSliders->show();
 }
 
+void MainWindow::onSketchAndOutline()
+{
+    m_dlg_sketch->show();
+}
+
 void MainWindow::onBrightness(int value)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
@@ -457,21 +467,21 @@ void MainWindow::onGreenLimit(int value)
     }
 }
 
-void MainWindow::onInkSketch()
+void MainWindow::onOutlineEffect(const int value)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->onInkSketch();
+        c->onOutlineEffect(value);
     }
 }
 
-void MainWindow::onColorOutline()
+void MainWindow::onSketchEffect(const int value)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->onColorOutline();
+        c->onSketchEffect(value);
     }
 }
 

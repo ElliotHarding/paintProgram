@@ -19,6 +19,7 @@
 #include "dlg_shapes.h"
 #include "dlg_info.h"
 #include "dlg_effectssliders.h"
+#include "dlg_sketch.h"
 
 #include "canvas.h"
 
@@ -89,13 +90,14 @@ private slots:
     void onBlackAndWhite();
     void onInvert();
     void onEffectsSliders();
+    void onSketchAndOutline();
     void onBrightness(const int value);
     void onContrast(const int value);
     void onRedLimit(const int value);
     void onBlueLimit(const int value);
     void onGreenLimit(const int value);
-    void onInkSketch();
-    void onColorOutline();
+    void onOutlineEffect(const int value);
+    void onSketchEffect(const int value);
     void onConfirmEffects();
     void onCancelEffects();
 
@@ -116,6 +118,7 @@ private:
     DLG_Shapes* m_dlg_shapes = nullptr;
     DLG_Info* m_dlg_info = nullptr;
     DLG_EffectsSliders* m_dlg_effectsSliders = nullptr;
+    DLG_Sketch* m_dlg_sketch = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
     QFileDialog* m_dlg_fileDlg = nullptr;
 

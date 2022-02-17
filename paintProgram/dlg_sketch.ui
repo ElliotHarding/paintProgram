@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>DLG_Sketch</class>
  <widget class="QDialog" name="DLG_Sketch">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,7 +16,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QSlider" name="slider_brightness">
+  <widget class="QSlider" name="slider_outline">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -35,7 +38,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QSpinBox" name="spinBox_brightness">
+  <widget class="QSpinBox" name="spinBox_outline">
    <property name="geometry">
     <rect>
      <x>230</x>
@@ -77,7 +80,7 @@
     <string>Sketch</string>
    </property>
   </widget>
-  <widget class="QSlider" name="slider_contrast">
+  <widget class="QSlider" name="slider_sketch">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -96,7 +99,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QSpinBox" name="spinBox_contrast">
+  <widget class="QSpinBox" name="spinBox_sketch">
    <property name="geometry">
     <rect>
      <x>230</x>
