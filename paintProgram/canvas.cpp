@@ -424,6 +424,31 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
     update();
 }
 
+void Canvas::onBrightness(int value)
+{
+
+}
+
+void Canvas::onContrast(int value)
+{
+
+}
+
+void Canvas::onRedLimit(int value)
+{
+
+}
+
+void Canvas::onBlueLimit(int value)
+{
+
+}
+
+void Canvas::onGreenLimit(int value)
+{
+
+}
+
 QImage Canvas::getImageCopy()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);

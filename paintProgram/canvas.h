@@ -127,16 +127,27 @@ public:
     void onUpdateSettings(int width, int height, QString name);
     void onCurrentToolUpdated(const Tool t);
     void onParentMouseMove(QMouseEvent* event);
+
+    ///Text writing events
     void onUpdateText(QFont font);
     void onWriteText(QString letter, QFont font);
+
+    ///Shortcut/keyboard events
     void onDeleteKeyPressed();
     void onCopyKeysPressed();
     void onCutKeysPressed();
     void onPasteKeysPressed();
     void onUndoPressed();
     void onRedoPressed();
+
+    ///Effects events
     void onBlackAndWhite();
     void onInvert();
+    void onBrightness(int value);
+    void onContrast(int value);
+    void onRedLimit(int value);
+    void onBlueLimit(int value);
+    void onGreenLimit(int value);
 
     ///Qt events
     void resizeEvent(QResizeEvent* event) override;

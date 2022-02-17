@@ -66,22 +66,36 @@ protected: //todo - can remove the key events because event filter handles them.
 
 private slots:
 
-    void onCurrentToolUpdated(Tool tool);
-    void onGetCanvasSettings(int width, int height, QString name);
-    void onShowCanvasSettings();
-    void onUpdateFont(const QFont font);
-    void onOpenColorPicker();
+    ///Tool slots
     void onOpenTools();
+    void onCurrentToolUpdated(Tool tool);
+
+    ///DLG_TextSettings communication
+    void onUpdateFont(const QFont font);
+
+    ///Canvas save/load/change settings/add
     void onLoad();
     void onSave();
     void onSaveAs();
     void onAddTabClicked();
+    void onGetCanvasSettings(int width, int height, QString name);
+    void onShowCanvasSettings();
+
+    ///m_dlg_colorPicker commuincations
     void onColorChanged(const QColor& color);
+    void onOpenColorPicker();
+
+    ///Slots from effects dialog
     void onBlackAndWhite();
     void onInvert();
     void onEffectsSliders();
+    void onBrightness(int value);
+    void onContrast(int value);
+    void onRedLimit(int value);
+    void onBlueLimit(int value);
+    void onGreenLimit(int value);
 
-    //Mainwindow control slots
+    ///Mainwindow control slots
     void on_btn_undo_clicked();
     void on_btn_redo_clicked();
     void on_c_tabWidget_tabCloseRequested(int index);

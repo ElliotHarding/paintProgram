@@ -403,6 +403,51 @@ void MainWindow::onEffectsSliders()
     m_dlg_effectsSliders->show();
 }
 
+void MainWindow::onBrightness(int value)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onBrightness(value);
+    }
+}
+
+void MainWindow::onContrast(int value)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onContrast(value);
+    }
+}
+
+void MainWindow::onRedLimit(int value)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onRedLimit(value);
+    }
+}
+
+void MainWindow::onBlueLimit(int value)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onBlueLimit(value);
+    }
+}
+
+void MainWindow::onGreenLimit(int value)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onGreenLimit(value);
+    }
+}
+
 void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
 {
     Canvas* c = new Canvas(this, image);
