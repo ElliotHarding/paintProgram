@@ -87,6 +87,13 @@ private slots:
     void onColorChanged(const QColor& color);
     void onOpenColorPicker();
 
+    ///Showing tool dialogs
+    void onShowInfoDialog();
+    void onShowLayersDialog();
+    void onShowColorPickerDialog();
+    void onShowToolSelectorDialog();
+    void onShowToolSpecificDialogs();
+
     ///Slots from effects dialog
     void onBlackAndWhite();
     void onInvert();

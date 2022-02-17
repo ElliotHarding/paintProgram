@@ -140,9 +140,20 @@
     <addaction name="actionImageSettings"/>
     <addaction name="menuEffects"/>
    </widget>
+   <widget class="QMenu" name="menuTool_Bars">
+    <property name="title">
+     <string>Tool Bars</string>
+    </property>
+    <addaction name="action_showColorPicker"/>
+    <addaction name="action_showToolSelector"/>
+    <addaction name="action_showInfoDialog"/>
+    <addaction name="action_showLayersDialog"/>
+    <addaction name="action_showToolSpecificDialogs"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMenu"/>
    <addaction name="menuImage"/>
+   <addaction name="menuTool_Bars"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionColor_Picker">
@@ -208,6 +219,31 @@
   <action name="actionSketch_Outline">
    <property name="text">
     <string>Sketch And Outline</string>
+   </property>
+  </action>
+  <action name="action_showColorPicker">
+   <property name="text">
+    <string>Color Picker</string>
+   </property>
+  </action>
+  <action name="action_showToolSelector">
+   <property name="text">
+    <string>Tool Selector</string>
+   </property>
+  </action>
+  <action name="action_showInfoDialog">
+   <property name="text">
+    <string>Info Dialog</string>
+   </property>
+  </action>
+  <action name="action_showLayersDialog">
+   <property name="text">
+    <string>Layers Dialog</string>
+   </property>
+  </action>
+  <action name="action_showToolSpecificDialogs">
+   <property name="text">
+    <string>Tool Specific Dialogs</string>
    </property>
   </action>
  </widget>

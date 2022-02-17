@@ -83,6 +83,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
     connect(ui->actionSketch_Outline, SIGNAL(triggered()), this, SLOT(onSketchAndOutline()));
+    connect(ui->action_showInfoDialog, SIGNAL(triggered()), this, SLOT(onShowInfoDialog()));
+    connect(ui->action_showLayersDialog, SIGNAL(triggered()), this, SLOT(onShowLayersDialog()));
+    connect(ui->action_showColorPicker, SIGNAL(triggered()), this, SLOT(onShowColorPickerDialog()));
+    connect(ui->action_showToolSelector, SIGNAL(triggered()), this, SLOT(onShowToolSelectorDialog()));
+    connect(ui->action_showToolSpecificDialogs, SIGNAL(triggered()), this, SLOT(onShowToolSpecificDialogs()));
 
     showMaximized();
 
@@ -577,6 +582,31 @@ void MainWindow::saveCanvas(Canvas *canvas, QString path)
 void MainWindow::onOpenColorPicker()
 {
     m_dlg_colorPicker->show();
+}
+
+void MainWindow::onShowInfoDialog()
+{
+    m_dlg_info->show();
+}
+
+void MainWindow::onShowLayersDialog()
+{
+    m_dlg_layers->show();
+}
+
+void MainWindow::onShowColorPickerDialog()
+{
+    m_dlg_colorPicker->show();
+}
+
+void MainWindow::onShowToolSelectorDialog()
+{
+    m_dlg_tools->show();
+}
+
+void MainWindow::onShowToolSpecificDialogs()
+{
+    onCurrentToolUpdated(m_dlg_tools->getCurrentTool());
 }
 
 void MainWindow::onOpenTools()
