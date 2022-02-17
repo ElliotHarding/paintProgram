@@ -17,6 +17,7 @@ SOURCES += \
     dlg_sensitivity.cpp \
     dlg_setcanvassettings.cpp \
     dlg_shapes.cpp \
+    dlg_sketch.cpp \
     dlg_textsettings.cpp \
     dlg_tools.cpp \
     main.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     dlg_sensitivity.h \
     dlg_setcanvassettings.h \
     dlg_shapes.h \
+    dlg_sketch.h \
     dlg_textsettings.h \
     dlg_tools.h \
     mainwindow.h \
@@ -42,6 +44,7 @@ FORMS += \
     dlg_sensitivity.ui \
     dlg_setcanvassettings.ui \
     dlg_shapes.ui \
+    dlg_sketch.ui \
     dlg_textsettings.ui \
     dlg_tools.ui \
     mainwindow.ui

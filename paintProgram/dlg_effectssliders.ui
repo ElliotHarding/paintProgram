@@ -96,10 +96,10 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>-255</number>
+    <number>-127</number>
    </property>
    <property name="maximum">
-    <number>255</number>
+    <number>127</number>
    </property>
   </widget>
   <widget class="QLabel" name="lbl_contrast">
