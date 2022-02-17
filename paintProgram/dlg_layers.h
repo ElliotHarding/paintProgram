@@ -16,14 +16,22 @@ public:
     explicit DLG_Layers(QWidget *parent = nullptr);
     ~DLG_Layers();
 
+signals:
+    void onLayerAdded(const uint id);
+    void onLayerDeleted(const uint id);
+    void onLayerEnabledChanged(const uint id, const bool enabled);
+
 private slots:
     void on_btn_merge_clicked();
     void on_btn_add_clicked();
 
-    void onDelete(QListWidgetItem* pListWidgetItem);
+    void onDelete(QListWidgetItem* pListWidgetItem, const uint id);
+    void onEnabledChanged(const uint id, const bool enabled);
 
 private:
     Ui::DLG_Layers *ui;
+
+    uint m_idNumber = 0;
 };
 
 #endif // DLG_LAYERS_H

@@ -13,19 +13,22 @@ class WDG_LayerListItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit WDG_LayerListItem(QListWidgetItem* pListWidgetItem);
+    explicit WDG_LayerListItem(QListWidgetItem* pListWidgetItem, const uint id);
     ~WDG_LayerListItem();
 
 signals:
-    void onDelete(QListWidgetItem* pListWidgetItem);
+    void onDelete(QListWidgetItem* pListWidgetItem, const uint id);
+    void onEnabledChaged(const uint id, const bool enabled);
 
 private slots:
     void on_btn_close_clicked();
+    void on_checkBox_enabled_stateChanged(int enabled);
 
 private:
     Ui::WDG_LayerListItem *ui;
 
     QListWidgetItem* m_pListWidgetItem;
+    uint m_id;
 };
 
 #endif // WDG_LAYERLISTITEM_H
