@@ -640,9 +640,9 @@ void Canvas::onGreenLimit(const int value)
     }
     else
     {
-        for(size_t x = 0; x < m_canvasImage.width(); x++)
+        for(int x = 0; x < m_canvasImage.width(); x++)
         {
-            for(size_t y = 0; y < m_canvasImage.height(); y++)
+            for(int y = 0; y < m_canvasImage.height(); y++)
             {
                 m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
             }
@@ -650,6 +650,20 @@ void Canvas::onGreenLimit(const int value)
     }
 
     update();
+}
+
+void Canvas::onConfirmEffects()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_beforeEffectsImage = QImage();
+    recordImageHistory();
+}
+
+void Canvas::onCancelEffects()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_canvasImage = m_beforeEffectsImage;
+    m_beforeEffectsImage = QImage();
 }
 
 QImage Canvas::getImageCopy()
@@ -1188,6 +1202,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
     m_canvasMutex.unlock();
 }
 
+//Requires m_canvasMutex to be locked!
 QImage Canvas::getCanvasImageBeforeEffects()
 {
     if(m_beforeEffectsImage == QImage())

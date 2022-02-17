@@ -148,6 +148,8 @@ public:
     void onRedLimit(const int value);
     void onBlueLimit(const int value);
     void onGreenLimit(const int value);
+    void onConfirmEffects();
+    void onCancelEffects();
 
     ///Qt events
     void resizeEvent(QResizeEvent* event) override;
@@ -179,7 +181,7 @@ private:
     QString m_textToDraw = "";
     QPoint m_textDrawLocation;
     QImage m_beforeEffectsImage;
-    QImage getCanvasImageBeforeEffects();
+    QImage getCanvasImageBeforeEffects();//Requires m_canvasMutex to be locked!
 
     ///Draw shape
     QPoint m_drawShapeOrigin = QPoint(0,0);

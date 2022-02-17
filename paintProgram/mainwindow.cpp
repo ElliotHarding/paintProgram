@@ -55,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_effectsSliders, SIGNAL(onRedLimit(const int)), this, SLOT(onRedLimit(const int)));
     connect(m_dlg_effectsSliders, SIGNAL(onGreenLimit(const int)), this, SLOT(onGreenLimit(const int)));
     connect(m_dlg_effectsSliders, SIGNAL(onBlueLimit(const int)), this, SLOT(onBlueLimit(const int)));
+    connect(m_dlg_effectsSliders, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
+    connect(m_dlg_effectsSliders, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -450,6 +452,24 @@ void MainWindow::onGreenLimit(int value)
     if(c)
     {
         c->onGreenLimit(value);
+    }
+}
+
+void MainWindow::onConfirmEffects()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onConfirmEffects();
+    }
+}
+
+void MainWindow::onCancelEffects()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onCancelEffects();
     }
 }
 

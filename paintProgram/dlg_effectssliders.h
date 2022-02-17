@@ -24,6 +24,9 @@ signals:
     void onGreenLimit(const int value);
     void onBlueLimit(const int value);
 
+    void confirmEffects();
+    void cancelEffects();
+
 private slots:
     void on_slider_brightness_sliderMoved(int value);
     void on_spinBox_brightness_valueChanged(int value);
@@ -37,6 +40,8 @@ private slots:
     void on_spinBox_blueLimit_valueChanged(int arg1);
 
     void on_btn_ok_clicked();
+
+    void on_btn_cancel_clicked();
 
 private:
     Ui::DLG_EffectsSliders *ui;

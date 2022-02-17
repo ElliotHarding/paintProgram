@@ -94,6 +94,8 @@ private slots:
     void onRedLimit(const int value);
     void onBlueLimit(const int value);
     void onGreenLimit(const int value);
+    void onConfirmEffects();
+    void onCancelEffects();
 
     ///Mainwindow control slots
     void on_btn_undo_clicked();

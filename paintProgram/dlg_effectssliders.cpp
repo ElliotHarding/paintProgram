@@ -6,6 +6,7 @@ DLG_EffectsSliders::DLG_EffectsSliders(QWidget *parent) :
     ui(new Ui::DLG_EffectsSliders)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     resetValues();
 }
 
@@ -96,5 +97,12 @@ void DLG_EffectsSliders::on_spinBox_blueLimit_valueChanged(int value)
 
 void DLG_EffectsSliders::on_btn_ok_clicked()
 {
+    emit confirmEffects();
+    hide();
+}
+
+void DLG_EffectsSliders::on_btn_cancel_clicked()
+{
+    emit cancelEffects();
     hide();
 }
