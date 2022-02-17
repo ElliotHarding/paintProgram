@@ -433,12 +433,12 @@ int limitRange255(int num)
     return num;
 }
 
-QColor changeBrightness(QColor col, int value)
+QColor changeBrightness(QColor col, const int value)
 {
     return QColor(limitRange255(col.red() + value), limitRange255(col.green() + value), limitRange255(col.blue() + value), col.alpha());
 }
 
-void Canvas::onBrightness(int value)
+void Canvas::onBrightness(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -468,7 +468,7 @@ void Canvas::onBrightness(int value)
 }
 
 
-int changeContrastRGOB(int rgob, int value) // rgob --> stands for red, green or blue
+int changeContrastRGOB(int rgob, const int value) // rgob --> stands for red, green or blue
 {
     //127.5 is middle of 0 and 255, dulling contrast(<0) moves towards 127, high contrast(>0) moves away.
 
@@ -502,12 +502,12 @@ int changeContrastRGOB(int rgob, int value) // rgob --> stands for red, green or
     return rgob;
 }
 
-QColor changeContrast(QColor col, int value)
+QColor changeContrast(QColor col, const int value)
 {
     return QColor(changeContrastRGOB(col.red(), value), changeContrastRGOB(col.green(), value), changeContrastRGOB(col.blue(), value), col.alpha());
 }
 
-void Canvas::onContrast(int value)
+void Canvas::onContrast(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -536,7 +536,7 @@ void Canvas::onContrast(int value)
     update();
 }
 
-int limitInt(int value, int limit)
+int limitInt(int value, const int limit)
 {
     if(value > limit)
     {
@@ -545,12 +545,12 @@ int limitInt(int value, int limit)
     return value;
 }
 
-QColor limitRed(QColor col, int limit)
+QColor limitRed(QColor col, const int limit)
 {
     return QColor(limitInt(col.red(), limit), col.green(), col.blue(), col.alpha());
 }
 
-void Canvas::onRedLimit(int value)
+void Canvas::onRedLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -579,12 +579,12 @@ void Canvas::onRedLimit(int value)
     update();
 }
 
-QColor limitBlue(QColor col, int limit)
+QColor limitBlue(QColor col, const int limit)
 {
     return QColor(col.red(), col.green(), limitInt(col.blue(), limit), col.alpha());
 }
 
-void Canvas::onBlueLimit(int value)
+void Canvas::onBlueLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -613,12 +613,12 @@ void Canvas::onBlueLimit(int value)
     update();
 }
 
-QColor limitGreen(QColor col, int limit)
+QColor limitGreen(QColor col, const int limit)
 {
     return QColor(col.red(), limitInt(col.green(), limit), col.blue(), col.alpha());
 }
 
-void Canvas::onGreenLimit(int value)
+void Canvas::onGreenLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 

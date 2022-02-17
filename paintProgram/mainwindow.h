@@ -89,11 +89,11 @@ private slots:
     void onBlackAndWhite();
     void onInvert();
     void onEffectsSliders();
-    void onBrightness(int value);
-    void onContrast(int value);
-    void onRedLimit(int value);
-    void onBlueLimit(int value);
-    void onGreenLimit(int value);
+    void onBrightness(const int value);
+    void onContrast(const int value);
+    void onRedLimit(const int value);
+    void onBlueLimit(const int value);
+    void onGreenLimit(const int value);
 
     ///Mainwindow control slots
     void on_btn_undo_clicked();

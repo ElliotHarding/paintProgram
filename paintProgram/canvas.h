@@ -143,11 +143,11 @@ public:
     ///Effects events
     void onBlackAndWhite();
     void onInvert();
-    void onBrightness(int value);
-    void onContrast(int value);
-    void onRedLimit(int value);
-    void onBlueLimit(int value);
-    void onGreenLimit(int value);
+    void onBrightness(const int value);
+    void onContrast(const int value);
+    void onRedLimit(const int value);
+    void onBlueLimit(const int value);
+    void onGreenLimit(const int value);
 
     ///Qt events
     void resizeEvent(QResizeEvent* event) override;

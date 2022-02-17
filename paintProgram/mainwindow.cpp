@@ -50,6 +50,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_textSettings, SIGNAL(updateFont(const QFont)), this, SLOT(onUpdateFont(const QFont)));
     connect(m_dlg_colorPicker, SIGNAL(currentColorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
     connect(m_dlg_canvasSettings, SIGNAL(confirmCanvasSettings(int,int,QString)), this, SLOT(onGetCanvasSettings(int,int,QString)));
+    connect(m_dlg_effectsSliders, SIGNAL(onBrightness(const int)), this, SLOT(onBrightness(const int)));
+    connect(m_dlg_effectsSliders, SIGNAL(onContrast(const int)), this, SLOT(onContrast(const int)));
+    connect(m_dlg_effectsSliders, SIGNAL(onRedLimit(const int)), this, SLOT(onRedLimit(const int)));
+    connect(m_dlg_effectsSliders, SIGNAL(onGreenLimit(const int)), this, SLOT(onGreenLimit(const int)));
+    connect(m_dlg_effectsSliders, SIGNAL(onBlueLimit(const int)), this, SLOT(onBlueLimit(const int)));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;

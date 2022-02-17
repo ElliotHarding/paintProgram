@@ -18,11 +18,11 @@ public:
     void show();
 
 signals:
-    void onBrightness(int value);
-    void onContrast(int value);
-    void onRedLimit(int value);
-    void onGreenLimit(int value);
-    void onBlueLimit(int value);
+    void onBrightness(const int value);
+    void onContrast(const int value);
+    void onRedLimit(const int value);
+    void onGreenLimit(const int value);
+    void onBlueLimit(const int value);
 
 private slots:
     void on_slider_brightness_sliderMoved(int value);
