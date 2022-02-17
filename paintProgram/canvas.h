@@ -41,6 +41,7 @@ public:
 
     ///Pixel info
     bool isHighlighted(const uint x, const uint y);
+    bool containsPixels();
 
 private:
     ///Containers of selected pixels (two differnt for speed instead of memory)

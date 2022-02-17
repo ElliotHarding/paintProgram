@@ -355,34 +355,69 @@ void Canvas::onRedoPressed()
     }
 }
 
+QColor greyScaleColor(const QColor col)
+{
+    const int grey = (col.red() + col.green() + col.blue())/3;
+    return QColor(grey, grey, grey, col.alpha());
+}
+
 void Canvas::onBlackAndWhite()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Loop through selected pixels, turning to white&black
-    m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
     {
-        const QColor col = m_canvasImage.pixelColor(x,y);
-        const int grey = (col.red() + col.green() + col.blue())/3;
-        m_canvasImage.setPixelColor(x, y, QColor(grey, grey, grey, col.alpha()));
-    });
+        //Loop through selected pixels, turning to white&black
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
+        });
+    }
+    else
+    {
+        for(uint x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(uint y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
+            }
+        }
+    }
 
     recordImageHistory();
 
     update();
 }
 
+QColor invertColor(const QColor col)
+{
+    return QColor(255 - col.red(), 255 - col.green(), 255 - col.blue(), col.alpha());
+}
+
 void Canvas::onInvert() // todo make option to invert alpha aswell
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Loop through selected pixels
-    m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
     {
-        const QColor col = m_canvasImage.pixelColor(x,y);
-        const QColor newCol(255 - col.red(), 255 - col.green(), 255 - col.blue(), col.alpha());
-        m_canvasImage.setPixelColor(x, y, newCol);
-    });
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
+        });
+    }
+    else
+    {
+        for(uint x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(uint y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
+            }
+        }
+    }
 
     recordImageHistory();
 
@@ -1070,6 +1105,11 @@ bool SelectedPixels::isHighlighted(const uint x, const uint y)
         qDebug() << "SelectedPixels::isHighlighted - Out of range -" << x << ":" << y;
     }
     return false;
+}
+
+bool SelectedPixels::containsPixels()
+{
+    return m_selectedPixelsList.size() > 0;
 }
 
 void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
