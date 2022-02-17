@@ -120,7 +120,12 @@ public:
     int height();
     QImage getImageCopy();
     QString getSavePath();
-    void setSavePath(QString path);   
+    void setSavePath(QString path);
+
+    ///Layer stuff
+    void onLayerAdded(const uint id);
+    void onLayerDeleted(const uint id);
+    void onLayerEnabledChanged(const uint id, const bool enabled);
 
     ///Events
     void onAddedToTab();

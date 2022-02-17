@@ -109,6 +109,11 @@ private slots:
     void onConfirmEffects();
     void onCancelEffects();
 
+    ///Layer stuff slots
+    void onLayerAdded(const uint id);
+    void onLayerDeleted(const uint id);
+    void onLayerEnabledChanged(const uint id, const bool enabled);
+
     ///Mainwindow control slots
     void on_btn_undo_clicked();
     void on_btn_redo_clicked();

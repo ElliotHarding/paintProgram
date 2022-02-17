@@ -66,6 +66,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_sketch, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
+    connect(m_dlg_layers, SIGNAL(onLayerAdded(const uint)), this, SLOT(onLayerAdded(const uint)));
+    connect(m_dlg_layers, SIGNAL(onLayerDeleted(const uint)), this, SLOT(onLayerDeleted(const uint)));
+    connect(m_dlg_layers, SIGNAL(onLayerEnabledChanged(const uint, const bool enabled)), this, SLOT(onLayerEnabledChanged(const uint, const bool enabled)));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -508,6 +511,33 @@ void MainWindow::onCancelEffects()
     if(c)
     {
         c->onCancelEffects();
+    }
+}
+
+void MainWindow::onLayerAdded(const uint id)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onLayerAdded(id);
+    }
+}
+
+void MainWindow::onLayerDeleted(const uint id)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onLayerDeleted(id);
+    }
+}
+
+void MainWindow::onLayerEnabledChanged(const uint id, const bool enabled)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onLayerEnabledChanged(id, enabled);
     }
 }
 

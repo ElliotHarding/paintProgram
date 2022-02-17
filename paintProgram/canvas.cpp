@@ -150,6 +150,21 @@ void Canvas::setSavePath(QString path)
     m_savePath = path;
 }
 
+void Canvas::onLayerAdded(const uint id)
+{
+
+}
+
+void Canvas::onLayerDeleted(const uint id)
+{
+
+}
+
+void Canvas::onLayerEnabledChanged(const uint id, const bool enabled)
+{
+
+}
+
 void Canvas::onUpdateSettings(int width, int height, QString name)
 {
     //Create new image based on new settings

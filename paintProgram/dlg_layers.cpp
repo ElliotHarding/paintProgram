@@ -9,6 +9,7 @@ DLG_Layers::DLG_Layers(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    ui->listWidget_layers->setDragDropMode(QAbstractItemView::DragDropMode::InternalMove);
 }
 
 DLG_Layers::~DLG_Layers()
