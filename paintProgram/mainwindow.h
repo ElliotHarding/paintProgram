@@ -75,6 +75,8 @@ private slots:
     void onSaveAs();
     void onAddTabClicked();
     void onColorChanged(const QColor& color);
+    void onBlackAndWhite();
+    void onInvert();
 
     //Mainwindow control slots
     void on_btn_undo_clicked();

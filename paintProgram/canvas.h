@@ -14,6 +14,12 @@
 class Canvas;
 class MainWindow;
 
+/*
+add list of pixels aswell to selectedpixels,
+so can get number of pixels quick (so can check if no pixels are selected, so do action on all imnage)
+so can draw pixels quicker
+ */
+
 ///Holds selected pixels of parent canvas (also paints these pixels)
 class SelectedPixels : public QWidget
 {
@@ -126,6 +132,8 @@ public:
     void onPasteKeysPressed();
     void onUndoPressed();
     void onRedoPressed();
+    void onBlackAndWhite();
+    void onInvert();
 
     ///Qt events
     void resizeEvent(QResizeEvent* event) override;

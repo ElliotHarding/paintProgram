@@ -60,8 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(onAddTabClicked()));
     connect(ui->actionImageSettings, SIGNAL(triggered()), this, SLOT(onShowCanvasSettings()));
-
-
+    connect(ui->actionBlack_and_white, SIGNAL(triggered()), this, SLOT(onBlackAndWhite()));
+    connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
 
     showMaximized();
 
@@ -373,6 +373,24 @@ void MainWindow::onColorChanged(const QColor &color)
         {
             c->onUpdateText(m_dlg_textSettings->getFont());
         }
+    }
+}
+
+void MainWindow::onBlackAndWhite()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onBlackAndWhite();
+    }
+}
+
+void MainWindow::onInvert()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onInvert();
     }
 }
 

@@ -355,6 +355,40 @@ void Canvas::onRedoPressed()
     }
 }
 
+void Canvas::onBlackAndWhite()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //Loop through selected pixels, turning to white&black
+    m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+    {
+        const QColor col = m_canvasImage.pixelColor(x,y);
+        const int grey = (col.red() + col.green() + col.blue())/3;
+        m_canvasImage.setPixelColor(x, y, QColor(grey, grey, grey, col.alpha()));
+    });
+
+    recordImageHistory();
+
+    update();
+}
+
+void Canvas::onInvert() // todo make option to invert alpha aswell
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //Loop through selected pixels
+    m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+    {
+        const QColor col = m_canvasImage.pixelColor(x,y);
+        const QColor newCol(255 - col.red(), 255 - col.green(), 255 - col.blue(), col.alpha());
+        m_canvasImage.setPixelColor(x, y, newCol);
+    });
+
+    recordImageHistory();
+
+    update();
+}
+
 QImage Canvas::getImageCopy()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
