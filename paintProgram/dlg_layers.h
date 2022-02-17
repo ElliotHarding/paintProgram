@@ -15,6 +15,9 @@ public:
     explicit DLG_Layers(QWidget *parent = nullptr);
     ~DLG_Layers();
 
+private slots:
+    void on_btn_merge_clicked();
+
 private:
     Ui::DLG_Layers *ui;
 };

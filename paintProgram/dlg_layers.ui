@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>220</width>
+    <width>215</width>
     <height>253</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="btn_add">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>120</x>
      <y>220</y>
      <width>75</width>
      <height>23</height>
@@ -31,9 +31,22 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>200</width>
+     <width>195</width>
      <height>200</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_merge">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>220</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Merge</string>
    </property>
   </widget>
  </widget>

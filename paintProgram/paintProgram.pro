@@ -22,7 +22,8 @@ SOURCES += \
     dlg_textsettings.cpp \
     dlg_tools.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    wdg_layerlistitem.cpp
 
 HEADERS += \
     canvas.h \
@@ -37,7 +38,8 @@ HEADERS += \
     dlg_textsettings.h \
     dlg_tools.h \
     mainwindow.h \
-    tools.h
+    tools.h \
+    wdg_layerlistitem.h
 
 FORMS += \
     dlg_brushsettings.ui \
@@ -50,7 +52,8 @@ FORMS += \
     dlg_sketch.ui \
     dlg_textsettings.ui \
     dlg_tools.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    wdg_layerlistitem.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
