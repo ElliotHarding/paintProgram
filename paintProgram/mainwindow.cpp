@@ -406,8 +406,9 @@ void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
     connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
     connect(c, SIGNAL(canvasSizeChange(const int, const int)), m_dlg_info, SLOT(onCanvasSizeChange(const int, const int)));
 
-    ui->c_tabWidget->addTab(c, name);
+    const int index = ui->c_tabWidget->addTab(c, name);
     c->onAddedToTab();
+    ui->c_tabWidget->setCurrentIndex(index);
 }
 
 void MainWindow::onLoad()
