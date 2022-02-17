@@ -521,7 +521,76 @@ void Canvas::onInkSketch()
         m_canvasImage = inkSketch;
     }
 
+    recordImageHistory();
 
+    update();
+}
+
+void Canvas::onColorOutline()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    QImage outlineSketch = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
+    {
+        outlineSketch.fill(Qt::transparent);
+
+        const QColor sketchColor = m_pParent->getSelectedColor();
+        const int sensitivity = m_pParent->getSpreadSensitivity();
+
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasImage, x, y, x-1, y, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasImage, x, y, x, y+1, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasImage, x, y, x, y-1, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+        });
+
+        QPainter sketchPainter(&m_canvasImage);
+        sketchPainter.drawImage(0,0,outlineSketch);
+    }
+    else
+    {
+        const QColor sketchColor = m_pParent->getSelectedColor();
+        const int sensitivity = m_pParent->getSpreadSensitivity();
+
+        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        {
+            if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasImage, x, y, x-1, y, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasImage, x, y, x, y+1, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasImage, x, y, x, y-1, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+        });
+
+        m_canvasImage = outlineSketch;
+    }
 
     recordImageHistory();
 

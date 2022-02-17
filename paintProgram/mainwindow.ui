@@ -135,6 +135,7 @@
      <addaction name="actionBlack_and_white"/>
      <addaction name="actionInvert"/>
      <addaction name="actionInk_Sketch"/>
+     <addaction name="actionColor_Outline"/>
      <addaction name="actionEffectsSliders"/>
     </widget>
     <addaction name="actionImageSettings"/>
@@ -198,6 +199,11 @@
   <action name="actionInk_Sketch">
    <property name="text">
     <string>Ink Sketch</string>
+   </property>
+  </action>
+  <action name="actionColor_Outline">
+   <property name="text">
+    <string>Color Outline</string>
    </property>
   </action>
  </widget>

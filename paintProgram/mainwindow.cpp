@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
     connect(ui->actionInk_Sketch, SIGNAL(triggered()), this, SLOT(onInkSketch()));
+    connect(ui->actionColor_Outline, SIGNAL(triggered()), this, SLOT(onColorOutline()));
 
     showMaximized();
 
@@ -462,6 +463,15 @@ void MainWindow::onInkSketch()
     if(c)
     {
         c->onInkSketch();
+    }
+}
+
+void MainWindow::onColorOutline()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onColorOutline();
     }
 }
 
