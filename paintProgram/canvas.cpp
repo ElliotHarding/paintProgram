@@ -442,6 +442,9 @@ void Canvas::onBrightness(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
+
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
     {
@@ -461,8 +464,6 @@ void Canvas::onBrightness(const int value)
             }
         }
     }
-
-    recordImageHistory();
 
     update();
 }
@@ -511,6 +512,9 @@ void Canvas::onContrast(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
+
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
     {
@@ -530,8 +534,6 @@ void Canvas::onContrast(const int value)
             }
         }
     }
-
-    recordImageHistory();
 
     update();
 }
@@ -554,6 +556,9 @@ void Canvas::onRedLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
+
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
     {
@@ -574,8 +579,6 @@ void Canvas::onRedLimit(const int value)
         }
     }
 
-    recordImageHistory();
-
     update();
 }
 
@@ -587,6 +590,9 @@ QColor limitBlue(QColor col, const int limit)
 void Canvas::onBlueLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -608,8 +614,6 @@ void Canvas::onBlueLimit(const int value)
         }
     }
 
-    recordImageHistory();
-
     update();
 }
 
@@ -621,6 +625,9 @@ QColor limitGreen(QColor col, const int limit)
 void Canvas::onGreenLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //Get backup of canvas image before effects were applied (create backup if first effect)
+    m_canvasImage = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -641,8 +648,6 @@ void Canvas::onGreenLimit(const int value)
             }
         }
     }
-
-    recordImageHistory();
 
     update();
 }
@@ -1181,6 +1186,15 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }        
     }
     m_canvasMutex.unlock();
+}
+
+QImage Canvas::getCanvasImageBeforeEffects()
+{
+    if(m_beforeEffectsImage == QImage())
+    {
+        m_beforeEffectsImage = m_canvasImage;
+    }
+    return m_beforeEffectsImage;
 }
 
 void Canvas::updateCenter()

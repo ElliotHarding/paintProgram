@@ -174,10 +174,12 @@ private:
 
     ///Drawing
     QImage m_canvasImage;
-    QImage m_canvasBackgroundImage;
+    QImage m_canvasBackgroundImage;    
     QMutex m_canvasMutex;
     QString m_textToDraw = "";
     QPoint m_textDrawLocation;
+    QImage m_beforeEffectsImage;
+    QImage getCanvasImageBeforeEffects();
 
     ///Draw shape
     QPoint m_drawShapeOrigin = QPoint(0,0);
