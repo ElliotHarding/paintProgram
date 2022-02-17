@@ -376,9 +376,9 @@ void Canvas::onBlackAndWhite()
     }
     else
     {
-        for(uint x = 0; x < m_canvasImage.width(); x++)
+        for(int x = 0; x < m_canvasImage.width(); x++)
         {
-            for(uint y = 0; y < m_canvasImage.height(); y++)
+            for(int y = 0; y < m_canvasImage.height(); y++)
             {
                 m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
             }
@@ -410,9 +410,9 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
     }
     else
     {
-        for(uint x = 0; x < m_canvasImage.width(); x++)
+        for(int x = 0; x < m_canvasImage.width(); x++)
         {
-            for(uint y = 0; y < m_canvasImage.height(); y++)
+            for(int y = 0; y < m_canvasImage.height(); y++)
             {
                 m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
             }
@@ -424,29 +424,227 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
     update();
 }
 
+int limitRange255(int num)
+{
+    if(num > 255)
+        num = 255;
+    if(num < 0)
+        num = 0;
+    return num;
+}
+
+QColor changeBrightness(QColor col, int value)
+{
+    return QColor(limitRange255(col.red() + value), limitRange255(col.green() + value), limitRange255(col.blue() + value), col.alpha());
+}
+
 void Canvas::onBrightness(int value)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, changeBrightness(m_canvasImage.pixelColor(x,y), value));
+        });
+    }
+    else
+    {
+        for(int x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(int y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, changeBrightness(m_canvasImage.pixelColor(x,y), value));
+            }
+        }
+    }
+
+    recordImageHistory();
+
+    update();
+}
+
+
+int changeContrastRGOB(int rgob, int value) // rgob --> stands for red, green or blue
+{
+    //127.5 is middle of 0 and 255, dulling contrast(<0) moves towards 127, high contrast(>0) moves away.
+
+    if(rgob > 127)
+    {
+        if(value > 0)//Trying to move away from 127
+        {
+            rgob = limitRange255(rgob + value);
+        }
+        else if(value < 0)//Trying to get to 127
+        {
+            rgob += value; //wont go out of 0 255 range because rgob is bigger than 127 and subtracting something smaller or equal to 127
+            if(rgob < 127)
+                rgob = 127;
+        }
+    }
+    else if(rgob < 127)//Less than 127
+    {
+        if(value > 0)//Trying to move away from 127
+        {
+            rgob = limitRange255(rgob - value);
+        }
+        else if(value < 0)//Trying to get to 127
+        {
+            rgob -= value;//wont go out of 0 255 range because rgob is smaller than 127 and adding something smaller or equal to 127 (adding because to negatives make positive)
+            if(rgob > 127)//if pass 127 go back to 127
+                rgob = 127;
+        }
+    }
+
+    return rgob;
+}
+
+QColor changeContrast(QColor col, int value)
+{
+    return QColor(changeContrastRGOB(col.red(), value), changeContrastRGOB(col.green(), value), changeContrastRGOB(col.blue(), value), col.alpha());
 }
 
 void Canvas::onContrast(int value)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, changeContrast(m_canvasImage.pixelColor(x,y), value));
+        });
+    }
+    else
+    {
+        for(int x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(int y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, changeContrast(m_canvasImage.pixelColor(x,y), value));
+            }
+        }
+    }
+
+    recordImageHistory();
+
+    update();
+}
+
+int limitInt(int value, int limit)
+{
+    if(value > limit)
+    {
+        value = limit;
+    }
+    return value;
+}
+
+QColor limitRed(QColor col, int limit)
+{
+    return QColor(limitInt(col.red(), limit), col.green(), col.blue(), col.alpha());
 }
 
 void Canvas::onRedLimit(int value)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, limitRed(m_canvasImage.pixelColor(x,y), value));
+        });
+    }
+    else
+    {
+        for(int x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(int y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, limitRed(m_canvasImage.pixelColor(x,y), value));
+            }
+        }
+    }
+
+    recordImageHistory();
+
+    update();
+}
+
+QColor limitBlue(QColor col, int limit)
+{
+    return QColor(col.red(), col.green(), limitInt(col.blue(), limit), col.alpha());
 }
 
 void Canvas::onBlueLimit(int value)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, limitBlue(m_canvasImage.pixelColor(x,y), value));
+        });
+    }
+    else
+    {
+        for(int x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(int y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, limitBlue(m_canvasImage.pixelColor(x,y), value));
+            }
+        }
+    }
+
+    recordImageHistory();
+
+    update();
+}
+
+QColor limitGreen(QColor col, int limit)
+{
+    return QColor(col.red(), limitInt(col.green(), limit), col.blue(), col.alpha());
 }
 
 void Canvas::onGreenLimit(int value)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //check if were doing the whole image or just some selected pixels
+    if(m_pSelectedPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
+        });
+    }
+    else
+    {
+        for(size_t x = 0; x < m_canvasImage.width(); x++)
+        {
+            for(size_t y = 0; y < m_canvasImage.height(); y++)
+            {
+                m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
+            }
+        }
+    }
+
+    recordImageHistory();
+
+    update();
 }
 
 QImage Canvas::getImageCopy()
