@@ -182,7 +182,7 @@
   </action>
   <action name="actionBlack_and_white">
    <property name="text">
-    <string>Black and white</string>
+    <string>Black And White</string>
    </property>
   </action>
   <action name="actionInvert">
@@ -207,7 +207,7 @@
   </action>
   <action name="actionSketch_Outline">
    <property name="text">
-    <string>Sketch &amp; Outline</string>
+    <string>Sketch And Outline</string>
    </property>
   </action>
  </widget>
