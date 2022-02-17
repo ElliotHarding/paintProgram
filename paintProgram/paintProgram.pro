@@ -14,6 +14,7 @@ SOURCES += \
     dlg_brushsettings.cpp \
     dlg_effectssliders.cpp \
     dlg_info.cpp \
+    dlg_layers.cpp \
     dlg_sensitivity.cpp \
     dlg_setcanvassettings.cpp \
     dlg_shapes.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     dlg_brushsettings.h \
     dlg_effectssliders.h \
     dlg_info.h \
+    dlg_layers.h \
     dlg_sensitivity.h \
     dlg_setcanvassettings.h \
     dlg_shapes.h \
@@ -41,6 +43,7 @@ FORMS += \
     dlg_brushsettings.ui \
     dlg_effectssliders.ui \
     dlg_info.ui \
+    dlg_layers.ui \
     dlg_sensitivity.ui \
     dlg_setcanvassettings.ui \
     dlg_shapes.ui \

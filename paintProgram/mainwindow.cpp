@@ -45,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_sketch = new DLG_Sketch(this);
 
+    m_dlg_layers = new DLG_Layers(this);
+    m_dlg_layers->show();
+
     m_dlg_fileDlg = new QFileDialog(this);
 
     //Dialog connections
