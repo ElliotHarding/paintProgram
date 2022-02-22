@@ -14,10 +14,12 @@
 class Canvas;
 class MainWindow;
 
-/*
-add list of pixels aswell to selectedpixels,
-so can get number of pixels quick (so can check if no pixels are selected, so do action on all imnage)
-so can draw pixels quicker
+/* NOTES:
+onCancelEffects called when switching layer
+need a function that triggers on a layer switch
+make it so you cant remove the last layer
+
+on switch tab set layers
  */
 
 ///Holds selected pixels of parent canvas (also paints these pixels)
