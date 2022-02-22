@@ -183,6 +183,7 @@ private:
 
     ///Drawing
     QImage m_canvasImage;
+    //QList<QImage> m_canvasLayers;
     QImage m_canvasBackgroundImage;    
     QMutex m_canvasMutex;
     QString m_textToDraw = "";

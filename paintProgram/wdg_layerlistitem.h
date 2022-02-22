@@ -17,8 +17,8 @@ public:
     ~WDG_LayerListItem();
 
 signals:
-    void onDelete(QListWidgetItem* pListWidgetItem, const uint id);
-    void onEnabledChaged(const uint id, const bool enabled);
+    void onDelete(QListWidgetItem* pListWidgetItem);
+    void onEnabledChaged(QListWidgetItem* pListWidgetItem, const bool enabled);
 
 private slots:
     void on_btn_close_clicked();
@@ -28,7 +28,6 @@ private:
     Ui::WDG_LayerListItem *ui;
 
     QListWidgetItem* m_pListWidgetItem;
-    uint m_id;
 };
 
 #endif // WDG_LAYERLISTITEM_H

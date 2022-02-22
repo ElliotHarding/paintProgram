@@ -48,7 +48,8 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     QTabWidget(),
     m_pParent(parent)
 {
-    m_canvasImage = image;    
+    m_canvasImage = image;
+    //m_canvasLayers.push_back(image);
     m_canvasBackgroundImage = genTransparentPixelsBackground(image.width(), image.height());
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
