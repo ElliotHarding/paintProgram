@@ -22,10 +22,13 @@ public:
 signals:
     void onDelete(QListWidgetItem* pListWidgetItem);
     void onEnabledChaged(QListWidgetItem* pListWidgetItem, const bool enabled);
+    void onTextChanged(QListWidgetItem* pListWidgetItem, QString text);
 
 private slots:
     void on_btn_close_clicked();
     void on_checkBox_enabled_stateChanged(int enabled);
+
+    void on_textEdit_name_textChanged();
 
 private:
     Ui::WDG_LayerListItem *ui;

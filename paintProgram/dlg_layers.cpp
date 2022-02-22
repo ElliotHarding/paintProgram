@@ -56,6 +56,11 @@ void DLG_Layers::onEnabledChanged(QListWidgetItem* pListWidgetItem, const bool e
     emit onLayerEnabledChanged(ui->listWidget_layers->row(pListWidgetItem), enabled);
 }
 
+void DLG_Layers::onTextChanged(QListWidgetItem *pListWidgetItem, QString text)
+{
+    emit onLayerTextChanged(ui->listWidget_layers->row(pListWidgetItem), text);
+}
+
 void DLG_Layers::currentRowChanged(int currentRow)
 {
     emit onSelectedLayerChanged(currentRow);
@@ -71,6 +76,7 @@ void DLG_Layers::addLayer(CanvasLayerInfo info)
 
     connect(itemWidget, SIGNAL(onDelete(QListWidgetItem*)), this, SLOT(onDelete(QListWidgetItem*)));
     connect(itemWidget, SIGNAL(onEnabledChaged(QListWidgetItem*, const bool)), this, SLOT(onEnabledChanged(QListWidgetItem*, const bool)));
+    connect(itemWidget, SIGNAL(onTextChanged(QListWidgetItem*, QString)), this, SLOT(onTextChanged(QListWidgetItem*, QString)));
 
     item = nullptr;
     itemWidget = nullptr;

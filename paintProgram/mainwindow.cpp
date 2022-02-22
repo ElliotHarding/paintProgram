@@ -70,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_layers, SIGNAL(onLayerDeleted(const uint)), this, SLOT(onLayerDeleted(const uint)));
     connect(m_dlg_layers, SIGNAL(onLayerEnabledChanged(const uint, const bool)), this, SLOT(onLayerEnabledChanged(const uint, const bool)));
     connect(m_dlg_layers, SIGNAL(onSelectedLayerChanged(const uint)), this, SLOT(onSelectedLayerChanged(const uint)));
+    connect(m_dlg_layers, SIGNAL(onLayerTextChanged(const uint, QString)), this, SLOT(onLayerTextChanged(const uint, QString)));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -544,6 +545,15 @@ void MainWindow::onLayerEnabledChanged(const uint index, const bool enabled)
     if(c)
     {
         c->onLayerEnabledChanged(index, enabled);
+    }
+}
+
+void MainWindow::onLayerTextChanged(const uint index, QString text)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onLayerTextChanged(index, text);
     }
 }
 

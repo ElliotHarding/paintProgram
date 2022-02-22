@@ -182,7 +182,13 @@ void Canvas::onLayerDeleted(const uint index)
 void Canvas::onLayerEnabledChanged(const uint index, const bool enabled)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    m_canvasLayers[index].m_info.m_enabled = enabled;
+    m_canvasLayers[index].m_info.m_enabled = enabled; //Assumes there is a layer at index
+}
+
+void Canvas::onLayerTextChanged(const uint index, QString text)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_canvasLayers[index].m_info.m_name = text; //Assumes there is a layer at index
 }
 
 void Canvas::onSelectedLayerChanged(const uint index)

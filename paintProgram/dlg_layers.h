@@ -24,6 +24,7 @@ signals:
     void onLayerAdded();
     void onLayerDeleted(const uint index);
     void onLayerEnabledChanged(const uint index, const bool enabled);
+    void onLayerTextChanged(const uint index, QString text);
     void onSelectedLayerChanged(const uint index);
 
 private slots:
@@ -32,6 +33,7 @@ private slots:
 
     void onDelete(QListWidgetItem* pListWidgetItem);
     void onEnabledChanged(QListWidgetItem* pListWidgetItem, const bool enabled);
+    void onTextChanged(QListWidgetItem* pListWidgetItem, QString text);
 
     void currentRowChanged(int currentRow);
 

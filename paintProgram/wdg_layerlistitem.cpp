@@ -24,3 +24,8 @@ void WDG_LayerListItem::on_checkBox_enabled_stateChanged(int enabled)
 {
     emit onEnabledChaged(m_pListWidgetItem, enabled);
 }
+
+void WDG_LayerListItem::on_textEdit_name_textChanged()
+{
+    emit onTextChanged(m_pListWidgetItem, ui->textEdit_name->toPlainText());
+}

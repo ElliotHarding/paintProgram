@@ -129,6 +129,7 @@ public:
     void onLayerAdded();
     void onLayerDeleted(const uint index);
     void onLayerEnabledChanged(const uint index, const bool enabled);
+    void onLayerTextChanged(const uint index, QString text);
     void onSelectedLayerChanged(const uint index);
 
     ///Events
