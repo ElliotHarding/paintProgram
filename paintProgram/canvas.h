@@ -182,8 +182,8 @@ private:
     bool m_bMouseDown = false;
 
     ///Drawing
-    QImage m_canvasImage;
-    //QList<QImage> m_canvasLayers;
+    QList<std::pair<QImage, bool>> m_canvasLayers;
+    uint m_selectedLayer;
     QImage m_canvasBackgroundImage;    
     QMutex m_canvasMutex;
     QString m_textToDraw = "";
@@ -219,7 +219,9 @@ private:
     PaintableClipboard* m_pClipboardPixels;
 
     ///Geometry
-    QPoint m_center;
+    uint m_canvasWidth;
+    uint m_canvasHeight;
+    QPoint m_center;//Center of widget - not canvas
     void updateCenter();
 
     Tool m_tool = TOOL_PAINT;

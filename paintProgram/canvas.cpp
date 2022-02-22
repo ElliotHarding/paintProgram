@@ -48,8 +48,12 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     QTabWidget(),
     m_pParent(parent)
 {
-    m_canvasImage = image;
-    //m_canvasLayers.push_back(image);
+    m_canvasLayers.push_back(std::pair<QImage, bool>(image, true));
+    m_selectedLayer = 0;
+
+    m_canvasWidth = image.width();
+    m_canvasHeight = image.height();
+
     m_canvasBackgroundImage = genTransparentPixelsBackground(image.width(), image.height());
 
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
@@ -75,18 +79,20 @@ Canvas::~Canvas()
 
 void Canvas::onAddedToTab()
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
     updateCenter();
 
-    const float x = float(geometry().width()) / float(m_canvasImage.width());
-    const float y = float(geometry().height()) / float(m_canvasImage.height());
+    const float x = float(geometry().width()) / float(m_canvasWidth);
+    const float y = float(geometry().height()) / float(m_canvasHeight);
     m_zoomFactor = x < y ? x : y;
     if(m_zoomFactor < float(0.1))
         m_zoomFactor = 0.1;
 
-    m_panOffsetX = m_center.x() - (m_canvasImage.width() / 2);
-    m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
+    m_panOffsetX = m_center.x() - (m_canvasWidth / 2);
+    m_panOffsetY = m_center.y() - (m_canvasHeight / 2);
 
-    m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
+    m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
 
     recordImageHistory();
 }
@@ -94,13 +100,13 @@ void Canvas::onAddedToTab()
 int Canvas::width()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    return m_canvasImage.width();
+    return m_canvasWidth;
 }
 
 int Canvas::height()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    return m_canvasImage.height();
+    return m_canvasHeight;
 }
 
 void Canvas::onUpdateText(QFont font)
@@ -123,7 +129,7 @@ void Canvas::onWriteText(QString letter, QFont font)
 
         m_canvasMutex.lock();
 
-        QImage textImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+        QImage textImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
         QPainter textPainter(&textImage);
         textPainter.setCompositionMode (QPainter::CompositionMode_Clear);
         textPainter.fillRect(textImage.rect(), Qt::transparent);
@@ -153,43 +159,55 @@ void Canvas::setSavePath(QString path)
 
 void Canvas::onLayerAdded(const uint id)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    QImage newImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+    newImage.fill(Qt::transparent);
+
+    m_canvasLayers.push_back(std::pair<QImage, bool>(newImage, true));
 }
 
 void Canvas::onLayerDeleted(const uint id)
 {
-
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_canvasLayers.removeAt(id);
 }
 
 void Canvas::onLayerEnabledChanged(const uint id, const bool enabled)
 {
-
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_canvasLayers[id].second = enabled;
 }
 
 void Canvas::onUpdateSettings(int width, int height, QString name)
 {
-    //Create new image based on new settings
-    QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
-
     m_canvasMutex.lock();
 
-    //Fill new image as transparent
-    QPainter painter(&newImage);
-    painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    painter.fillRect(QRect(0, 0, newImage.width(), newImage.height()), Qt::transparent);
+    m_canvasWidth = width;
+    m_canvasHeight = height;
 
-    //Paint old image onto new image
-    painter.setCompositionMode (QPainter::CompositionMode_Source);
-    painter.drawImage(m_canvasImage.rect(), m_canvasImage);
-    painter.end();
+    for(std::pair<QImage, bool>& canvasLayer : m_canvasLayers)
+    {
+        //Create new image based on new settings
+        QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
 
-    m_canvasImage = newImage;
+        //Fill new image as transparent
+        newImage.fill(Qt::transparent);
+
+        //Paint old image onto new image
+        QPainter painter(&newImage);
+        painter.setCompositionMode (QPainter::CompositionMode_Source);
+        painter.drawImage(canvasLayer.first.rect(), canvasLayer.first);
+
+        canvasLayer.first = newImage;
+    }
+
     m_canvasBackgroundImage = genTransparentPixelsBackground(width, height);
 
-    emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
+    emit canvasSizeChange(width, height);
 
     //Clear selected pixels
-    m_pSelectedPixels->clearAndResize(m_canvasImage.width(), m_canvasImage.height());
+    m_pSelectedPixels->clearAndResize(width, height);
 
     m_canvasMutex.unlock();
 
@@ -216,7 +234,7 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
         //Dump dragged contents onto m_canvasImage
         //If something actually dumps, record image history
-        QPainter painter(&m_canvasImage);
+        QPainter painter(&m_canvasLayers[m_selectedLayer].first); //Assumes there is a selectedLayer
         if(m_pClipboardPixels->dumpImage(painter))
         {
             recordImageHistory();
@@ -257,7 +275,7 @@ void Canvas::onDeleteKeyPressed()
     {
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-        QPainter painter(&m_canvasImage);
+        QPainter painter(&m_canvasLayers[m_selectedLayer].first); //Assumes there is a selected layer
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -279,7 +297,7 @@ void Canvas::onCopyKeysPressed()
 {   
     m_canvasMutex.lock();
     Clipboard clipboard;
-    clipboard.generateClipboard(m_canvasImage, m_pSelectedPixels);
+    clipboard.generateClipboard(m_canvasLayers[m_selectedLayer].first, m_pSelectedPixels); //Assumes there is a selected layer
     m_pParent->setCopyBuffer(clipboard);
     m_canvasMutex.unlock();
 
@@ -300,19 +318,19 @@ void Canvas::onCutKeysPressed()
     else
     {
         //Copy cut pixels to clipboard
-        clipBoard.m_clipboardImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+        clipBoard.m_clipboardImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
 
         QPainter dragPainter(&clipBoard.m_clipboardImage);
         dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
         dragPainter.fillRect(clipBoard.m_clipboardImage.rect(), Qt::transparent);
 
-        QPainter painter(&m_canvasImage);
+        QPainter painter(&m_canvasLayers[m_selectedLayer].first); //Assumes there is a selected layer
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
         //Go through selected pixels cutting from canvas and copying to clipboard
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasImage.pixelColor(x, y));
+            dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasLayers[m_selectedLayer].first.pixelColor(x, y)); //Assumes there is a selected layer
             painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
             clipBoard.m_pixels.push_back(QPoint(x,y));
         });
@@ -354,7 +372,7 @@ void Canvas::onUndoPressed()
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_imageHistoryIndex > 0)
     {
-        m_canvasImage = m_imageHistory[size_t(--m_imageHistoryIndex)];
+        m_canvasLayers[m_selectedLayer].first = m_imageHistory[size_t(--m_imageHistoryIndex)]; //TODO ~ Make undo for all layers + this assumes there is a selected layer
 
         update();
     }
@@ -365,7 +383,7 @@ void Canvas::onRedoPressed()
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_imageHistoryIndex < int(m_imageHistory.size() - 1))
     {
-        m_canvasImage = m_imageHistory[size_t(++m_imageHistoryIndex)];
+        m_canvasLayers[m_selectedLayer].first = m_imageHistory[size_t(++m_imageHistoryIndex)]; //TODO ~ Make undo for all layers + this assumes there is a selected layer
 
         update();
     }
@@ -398,14 +416,14 @@ void Canvas::onBlackAndWhite()
         //Loop through selected pixels, turning to white&black
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, greyScaleColor(m_canvasLayers[m_selectedLayer].first.pixelColor(x, y))); //Assumes there is a selected layer
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, greyScaleColor(m_canvasImage.pixelColor(x, y)));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, greyScaleColor(m_canvasLayers[m_selectedLayer].first.pixelColor(x, y))); //Assumes there is a selected layer
         });
     }
 
@@ -429,14 +447,14 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, invertColor(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y))); //Assumes there is a selected layer
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, invertColor(m_canvasImage.pixelColor(x,y)));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, invertColor(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y)));
         });
     }
 
@@ -470,7 +488,7 @@ void Canvas::onSketchEffect(const int sensitivity)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     if(sensitivity == 0)
     {
@@ -1386,7 +1404,7 @@ QImage Canvas::getCanvasImageBeforeEffects()
 {
     if(m_beforeEffectsImage == QImage())
     {
-        m_beforeEffectsImage = m_canvasImage;
+        m_beforeEffectsImage = m_canvasLayers[m_selectedLayer].first; //Assumes there is a selected layer
     }
     return m_beforeEffectsImage;
 }
