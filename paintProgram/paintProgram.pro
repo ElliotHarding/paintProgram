@@ -27,6 +27,7 @@ SOURCES += \
 
 HEADERS += \
     canvas.h \
+    canvaslayer.h \
     dlg_brushsettings.h \
     dlg_effectssliders.h \
     dlg_info.h \

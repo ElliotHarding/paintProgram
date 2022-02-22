@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "tools.h"
+#include "canvaslayer.h"
 
 class Canvas;
 class MainWindow;

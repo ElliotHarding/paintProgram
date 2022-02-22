@@ -54,6 +54,9 @@ public:
     ///Test settings dlg to canvas
     QFont getTextFont();
 
+    ///Canvas to dlg layers
+    void setLayers(QList<CanvasLayerInfo> layerInfo);
+
     ///Access mainwindow properties
     bool isCtrlPressed();
     void setCopyBuffer(Clipboard clipboard);

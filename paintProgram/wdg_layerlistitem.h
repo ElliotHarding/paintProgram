@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QListWidgetItem>
 
+#include "canvaslayer.h"
+
 namespace Ui {
 class WDG_LayerListItem;
 }
@@ -13,7 +15,8 @@ class WDG_LayerListItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit WDG_LayerListItem(QListWidgetItem* pListWidgetItem);
+    WDG_LayerListItem(QListWidgetItem* pListWidgetItem, CanvasLayerInfo info);
+
     ~WDG_LayerListItem();
 
 signals:

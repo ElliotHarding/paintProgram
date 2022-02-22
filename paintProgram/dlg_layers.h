@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QListWidgetItem>
 
+#include "canvaslayer.h"
+
 namespace Ui {
 class DLG_Layers;
 }
@@ -15,6 +17,8 @@ class DLG_Layers : public QDialog
 public:
     explicit DLG_Layers(QWidget *parent = nullptr);
     ~DLG_Layers();
+
+    void setLayers(QList<CanvasLayerInfo> layerInfo);
 
 signals:
     void onLayerAdded();
@@ -33,6 +37,8 @@ private slots:
 
 private:
     Ui::DLG_Layers *ui;
+
+    void addLayer(CanvasLayerInfo info);
 };
 
 #endif // DLG_LAYERS_H
