@@ -299,6 +299,9 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
         m_dlg_textSettings->move((geometry().right() - geometry().left())/2 + geometry().left(), geometry().top());
 
         m_dlg_info->move(geometry().left(), geometry().bottom() - m_dlg_info->height() - (m_dlg_info->height()/2));
+
+        const int titleBarHeight = 40;
+        m_dlg_layers->move(geometry().right() - m_dlg_layers->width(), geometry().bottom() - m_dlg_layers->height() - titleBarHeight);
     }
 }
 

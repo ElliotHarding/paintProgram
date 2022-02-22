@@ -195,6 +195,8 @@ void Canvas::onSelectedLayerChanged(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_selectedLayer = index;
+    canvasMutexLocker.unlock();
+    onCancelEffects();
 }
 
 void Canvas::onUpdateSettings(int width, int height, QString name)
