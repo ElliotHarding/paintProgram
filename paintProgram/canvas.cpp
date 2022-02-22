@@ -194,9 +194,16 @@ void Canvas::onLayerTextChanged(const uint index, QString text)
 void Canvas::onSelectedLayerChanged(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    if(m_beforeEffectsImage != QImage())
+    {
+        canvasMutexLocker.unlock();
+        onCancelEffects();
+        canvasMutexLocker.relock();
+    }
+
     m_selectedLayer = index;
-    canvasMutexLocker.unlock();
-    onCancelEffects();
+
 }
 
 void Canvas::onUpdateSettings(int width, int height, QString name)
