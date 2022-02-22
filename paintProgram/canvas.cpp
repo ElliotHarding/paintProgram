@@ -994,6 +994,17 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
 void Canvas::showEvent(QShowEvent *)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    QList<CanvasLayerInfo> layers;
+    for(std::pair<QImage, bool>& layer : m_canvasLayers)
+    {
+        layers.push_back(CanvasLayerInfo());//Todo - based of m_canvasLayers
+    }
+    m_pParent->setLayers(layers);
+
+    canvasMutexLocker.unlock();
+
     emit canvasSizeChange(m_canvasWidth, m_canvasHeight);
     emit selectionAreaResize(0,0);
 }
