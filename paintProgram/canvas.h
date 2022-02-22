@@ -15,14 +15,6 @@
 class Canvas;
 class MainWindow;
 
-/* NOTES:
-onCancelEffects called when switching layer
-need a function that triggers on a layer switch
-make it so you cant remove the last layer
-
-on switch tab set layers
- */
-
 ///Holds selected pixels of parent canvas (also paints these pixels)
 class SelectedPixels : public QWidget
 {
