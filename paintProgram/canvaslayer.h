@@ -9,8 +9,9 @@ struct CanvasLayerInfo
     bool m_enabled = true;
 };
 
-struct CanvasLayer : public CanvasLayerInfo
+struct CanvasLayer
 {
+    CanvasLayerInfo m_info;
     QImage m_image;
 };
 

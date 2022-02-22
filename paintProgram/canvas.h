@@ -186,7 +186,7 @@ private:
     bool m_bMouseDown = false;
 
     ///Drawing
-    QList<std::pair<QImage, bool>> m_canvasLayers;
+    QList<CanvasLayer> m_canvasLayers;
     uint m_selectedLayer;
     QImage m_canvasBackgroundImage;    
     QMutex m_canvasMutex;
