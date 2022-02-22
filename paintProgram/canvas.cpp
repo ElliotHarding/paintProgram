@@ -488,7 +488,7 @@ void Canvas::onSketchEffect(const int sensitivity)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
     if(sensitivity == 0)
     {
@@ -496,7 +496,7 @@ void Canvas::onSketchEffect(const int sensitivity)
         return;
     }
 
-    QImage inkSketch = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    QImage inkSketch = QImage(QSize(m_canvasLayers[m_selectedLayer].first.width(), m_canvasLayers[m_selectedLayer].first.height()), QImage::Format_ARGB32);
     const QColor sketchColor = m_pParent->getSelectedColor() != Qt::white ? m_pParent->getSelectedColor() : Qt::black;
 
     //check if were doing the whole image or just some selected pixels
@@ -507,19 +507,19 @@ void Canvas::onSketchEffect(const int sensitivity)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
+            if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x+1, y, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x-1, y, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x-1, y, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y+1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y+1, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y-1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y-1, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
@@ -529,34 +529,34 @@ void Canvas::onSketchEffect(const int sensitivity)
             }
         });
 
-        QPainter sketchPainter(&m_canvasImage);
+        QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].first);
         sketchPainter.drawImage(0,0,inkSketch);
     }
     else
     {
         inkSketch.fill(Qt::white);
 
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
+            if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x+1, y, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x-1, y, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x-1, y, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y+1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y+1, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y-1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y-1, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
         });
 
-        m_canvasImage = inkSketch;
+        m_canvasLayers[m_selectedLayer].first = inkSketch;
     }
 
     update();
@@ -567,7 +567,7 @@ void Canvas::onOutlineEffect(const int sensitivity)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     if(sensitivity == 0)
     {
@@ -575,7 +575,7 @@ void Canvas::onOutlineEffect(const int sensitivity)
         return;
     }
 
-    QImage outlineSketch = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+    QImage outlineSketch = QImage(QSize(m_canvasLayers[m_selectedLayer].first.width(), m_canvasLayers[m_selectedLayer].first.height()), QImage::Format_ARGB32);
     //Laying this ontop of m_canvasImage so want most of it transparent
     outlineSketch.fill(Qt::transparent);
 
@@ -587,19 +587,19 @@ void Canvas::onOutlineEffect(const int sensitivity)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
+            if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x+1, y, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x-1, y, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x-1, y, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y+1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y+1, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y-1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y-1, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
@@ -608,21 +608,21 @@ void Canvas::onOutlineEffect(const int sensitivity)
     else
     {
         //Loop through pixels, if a border pixel set it to sketchColor
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasImage, x, y, x+1, y, sensitivity))
+            if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x+1, y, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x-1, y, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x-1, y, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y+1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y+1, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasImage, x, y, x, y-1, sensitivity))
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].first, x, y, x, y-1, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
@@ -630,7 +630,7 @@ void Canvas::onOutlineEffect(const int sensitivity)
     }
 
     //Dump outline sketch onto m_canvasImage
-    QPainter sketchPainter(&m_canvasImage);
+    QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].first);
     sketchPainter.drawImage(0,0,outlineSketch);
 
     update();
@@ -655,7 +655,7 @@ void Canvas::onBrightness(const int value)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -663,14 +663,14 @@ void Canvas::onBrightness(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, changeBrightness(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, changeBrightness(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, changeBrightness(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, changeBrightness(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
 
@@ -722,7 +722,7 @@ void Canvas::onContrast(const int value)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -730,14 +730,14 @@ void Canvas::onContrast(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, changeContrast(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, changeContrast(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, changeContrast(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, changeContrast(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
 
@@ -763,7 +763,7 @@ void Canvas::onRedLimit(const int value)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -771,14 +771,14 @@ void Canvas::onRedLimit(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, limitRed(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, limitRed(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, limitRed(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, limitRed(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
 
@@ -795,7 +795,7 @@ void Canvas::onBlueLimit(const int value)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -803,14 +803,14 @@ void Canvas::onBlueLimit(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, limitBlue(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, limitBlue(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, limitBlue(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, limitBlue(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
 
@@ -827,7 +827,7 @@ void Canvas::onGreenLimit(const int value)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasImage = getCanvasImageBeforeEffects();
+    m_canvasLayers[m_selectedLayer].first = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
@@ -835,14 +835,14 @@ void Canvas::onGreenLimit(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, limitGreen(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
     else
     {
-        operateOnCanvasPixels(m_canvasImage, [&](int x, int y)-> void
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].first, [&](int x, int y)-> void
         {
-            m_canvasImage.setPixelColor(x, y, limitGreen(m_canvasImage.pixelColor(x,y), value));
+            m_canvasLayers[m_selectedLayer].first.setPixelColor(x, y, limitGreen(m_canvasLayers[m_selectedLayer].first.pixelColor(x,y), value));
         });
     }
 
@@ -859,14 +859,14 @@ void Canvas::onConfirmEffects()
 void Canvas::onCancelEffects()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    m_canvasImage = m_beforeEffectsImage;
+    m_canvasLayers[m_selectedLayer].first = m_beforeEffectsImage;
     m_beforeEffectsImage = QImage();
 }
 
 QImage Canvas::getImageCopy()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    return m_canvasImage;
+    return m_canvasLayers[m_selectedLayer].first; //TODO - make for all layers?
 }
 
 float Canvas::getZoom()
@@ -893,11 +893,11 @@ void Canvas::resizeEvent(QResizeEvent *event)
     m_pSelectedPixels->setGeometry(geometry());
     m_pClipboardPixels->setGeometry(geometry());
 
-    m_panOffsetX = m_center.x() - (m_canvasImage.width() / 2);
-    m_panOffsetY = m_center.y() - (m_canvasImage.height() / 2);
+    m_panOffsetX = m_center.x() - (m_canvasWidth / 2);
+    m_panOffsetY = m_center.y() - (m_canvasHeight / 2);
 
-    if(m_textDrawLocation.x() > m_canvasImage.width() || m_textDrawLocation.y() > m_canvasImage.height())
-        m_textDrawLocation = QPoint(m_canvasImage.width() / 2, m_canvasImage.height() / 2);
+    if(m_textDrawLocation.x() > m_canvasWidth || m_textDrawLocation.y() > m_canvasHeight)
+        m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
 
     update();
 }
@@ -905,7 +905,7 @@ void Canvas::resizeEvent(QResizeEvent *event)
 //Function called when m_canvasMutex is locked
 void Canvas::recordImageHistory()
 {
-    m_imageHistory.push_back(m_canvasImage);
+    m_imageHistory.push_back(m_canvasLayers[m_selectedLayer].first); //TODO - make for all layers - at the moment it assumes theres always a selected layer
 
     if(m_c_maxHistory < m_imageHistory.size())
     {
@@ -931,8 +931,14 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     //Switch out transparent pixels for grey-white pattern
     painter.drawImage(m_panOffsetX, m_panOffsetY, m_canvasBackgroundImage);
 
-    //Draw current image
-    painter.drawImage(m_panOffsetX, m_panOffsetY, m_canvasImage);
+    //Draw current layers
+    for(std::pair<QImage, bool>& canvasLayer : m_canvasLayers)
+    {
+        if(canvasLayer.second)
+        {
+            painter.drawImage(m_panOffsetX, m_panOffsetY, canvasLayer.first);
+        }
+    }
 
     //Draw selection tool
     if(m_tool == TOOL_SELECT)
@@ -944,7 +950,7 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 
     //Draw border
     painter.setPen(QPen(Constants::ImageBorderColor, 1/m_zoomFactor));
-    painter.drawRect(m_canvasImage.rect().translated(m_panOffsetX, m_panOffsetY));
+    painter.drawRect(QRect(0, 0, m_canvasWidth, m_canvasHeight).translated(m_panOffsetX, m_panOffsetY));
 
     m_canvasMutex.unlock();
 }
@@ -978,7 +984,7 @@ void Canvas::wheelEvent(QWheelEvent* event)
 
 void Canvas::showEvent(QShowEvent *)
 {
-    emit canvasSizeChange(m_canvasImage.width(), m_canvasImage.height());
+    emit canvasSizeChange(m_canvasWidth, m_canvasHeight);
     emit selectionAreaResize(0,0);
 }
 
@@ -1116,7 +1122,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     if(m_tool != TOOL_DRAG && !m_pClipboardPixels->isImageDefault())
     {
         //Dump clipboard, if something actually dumped record image history
-        QPainter painter(&m_canvasImage);
+        QPainter painter(&m_canvasLayers[m_selectedLayer].first);
         if(m_pClipboardPixels->dumpImage(painter))
         {
             recordImageHistory();
@@ -1126,12 +1132,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
     if(m_tool == TOOL_PAINT)
     {
-        paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+        paintBrush(m_canvasLayers[m_selectedLayer].first, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
         update();
     }
     else if(m_tool == TOOL_ERASER)
     {
-        paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+        paintBrush(m_canvasLayers[m_selectedLayer].first, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
         update();
     }
     else if(m_tool == TOOL_SELECT)
@@ -1151,21 +1157,21 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
             m_pSelectedPixels->clear();
         }
 
-        std::vector<std::vector<bool>> newSelectedPixels = std::vector<std::vector<bool>>(m_canvasImage.width(), std::vector<bool>(m_canvasImage.height(), false));
-        spreadSelectSimilarColor(m_canvasImage, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
+        std::vector<std::vector<bool>> newSelectedPixels = std::vector<std::vector<bool>>(m_canvasWidth, std::vector<bool>(m_canvasHeight, false));
+        spreadSelectSimilarColor(m_canvasLayers[m_selectedLayer].first, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
         m_pSelectedPixels->addPixels(newSelectedPixels);
 
         update();
     }
     else if(m_tool == TOOL_BUCKET)
     {
-        floodFillOnSimilar(m_canvasImage, m_pParent->getSelectedColor(), mouseLocation.x(), mouseLocation.y(), m_pParent->getSpreadSensitivity());
+        floodFillOnSimilar(m_canvasLayers[m_selectedLayer].first, m_pParent->getSelectedColor(), mouseLocation.x(), mouseLocation.y(), m_pParent->getSpreadSensitivity());
 
         update();
     }
     else if(m_tool == TOOL_COLOR_PICKER)
     {
-        m_pParent->setSelectedColor(m_canvasImage.pixelColor(mouseLocation.x(), mouseLocation.y()));
+        m_pParent->setSelectedColor(m_canvasLayers[m_selectedLayer].first.pixelColor(mouseLocation.x(), mouseLocation.y()));
     }
     else if(m_tool == TOOL_TEXT)
     {
@@ -1180,7 +1186,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     else if(m_tool == TOOL_SHAPE)
     {
         //Dump dragged contents onto m_canvasImage
-        QPainter painter(&m_canvasImage);
+        QPainter painter(&m_canvasLayers[m_selectedLayer].first);
         m_pClipboardPixels->dumpImage(painter);
         painter.end();
 
@@ -1246,12 +1252,12 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
     {
         if(m_tool == TOOL_PAINT)
         {
-            paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+            paintBrush(m_canvasLayers[m_selectedLayer].first, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
             update();
         }
         else if(m_tool == TOOL_ERASER)
         {
-            paintBrush(m_canvasImage, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
+            paintBrush(m_canvasLayers[m_selectedLayer].first, mouseLocation.x(), mouseLocation.y(), Qt::transparent, m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
             update();
         }
         else if(m_tool == TOOL_SELECT)
@@ -1288,7 +1294,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 {
                     if(m_pClipboardPixels->isImageDefault())
                     {
-                        m_pClipboardPixels->generateClipboard(m_canvasImage, m_pSelectedPixels);
+                        m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].first, m_pSelectedPixels);
                     }
 
                     m_pClipboardPixels->startDragging(mouseLocation);
@@ -1307,7 +1313,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         {           
             m_pClipboardPixels->reset();
 
-            QImage newShapeImage = QImage(QSize(m_canvasImage.width(), m_canvasImage.height()), QImage::Format_ARGB32);
+            QImage newShapeImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
 
             QPainter shapePainter(&newShapeImage);
             shapePainter.setCompositionMode (QPainter::CompositionMode_Clear);
