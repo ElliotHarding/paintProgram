@@ -110,9 +110,10 @@ private slots:
     void onCancelEffects();
 
     ///Layer stuff slots
-    void onLayerAdded(const uint id);
-    void onLayerDeleted(const uint id);
-    void onLayerEnabledChanged(const uint id, const bool enabled);
+    void onLayerAdded();
+    void onLayerDeleted(const uint index);
+    void onLayerEnabledChanged(const uint index, const bool enabled);
+    void onSelectedLayerChanged(const uint index);
 
     ///Mainwindow control slots
     void on_btn_undo_clicked();

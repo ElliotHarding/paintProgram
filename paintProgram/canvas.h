@@ -123,9 +123,10 @@ public:
     void setSavePath(QString path);
 
     ///Layer stuff
-    void onLayerAdded(const uint id);
-    void onLayerDeleted(const uint id);
-    void onLayerEnabledChanged(const uint id, const bool enabled);
+    void onLayerAdded();
+    void onLayerDeleted(const uint index);
+    void onLayerEnabledChanged(const uint index, const bool enabled);
+    void onSelectedLayerChanged(const uint index);
 
     ///Events
     void onAddedToTab();

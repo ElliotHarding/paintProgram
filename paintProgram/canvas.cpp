@@ -157,7 +157,7 @@ void Canvas::setSavePath(QString path)
     m_savePath = path;
 }
 
-void Canvas::onLayerAdded(const uint id)
+void Canvas::onLayerAdded()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
@@ -167,16 +167,22 @@ void Canvas::onLayerAdded(const uint id)
     m_canvasLayers.push_back(std::pair<QImage, bool>(newImage, true));
 }
 
-void Canvas::onLayerDeleted(const uint id)
+void Canvas::onLayerDeleted(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    m_canvasLayers.removeAt(id);
+    m_canvasLayers.removeAt(index);
 }
 
-void Canvas::onLayerEnabledChanged(const uint id, const bool enabled)
+void Canvas::onLayerEnabledChanged(const uint index, const bool enabled)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    m_canvasLayers[id].second = enabled;
+    m_canvasLayers[index].second = enabled;
+}
+
+void Canvas::onSelectedLayerChanged(const uint index)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    m_selectedLayer = index;
 }
 
 void Canvas::onUpdateSettings(int width, int height, QString name)

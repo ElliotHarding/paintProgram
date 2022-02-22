@@ -1,7 +1,7 @@
 #include "wdg_layerlistitem.h"
 #include "ui_wdg_layerlistitem.h"
 
-WDG_LayerListItem::WDG_LayerListItem(QListWidgetItem* pListWidgetItem, const uint id) :
+WDG_LayerListItem::WDG_LayerListItem(QListWidgetItem* pListWidgetItem) :
     m_pListWidgetItem(pListWidgetItem),
     ui(new Ui::WDG_LayerListItem)
 {

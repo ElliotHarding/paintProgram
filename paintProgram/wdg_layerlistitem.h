@@ -13,7 +13,7 @@ class WDG_LayerListItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit WDG_LayerListItem(QListWidgetItem* pListWidgetItem, const uint id);
+    explicit WDG_LayerListItem(QListWidgetItem* pListWidgetItem);
     ~WDG_LayerListItem();
 
 signals:

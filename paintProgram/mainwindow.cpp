@@ -66,9 +66,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_sketch, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
-    connect(m_dlg_layers, SIGNAL(onLayerAdded(const uint)), this, SLOT(onLayerAdded(const uint)));
+    connect(m_dlg_layers, SIGNAL(onLayerAdded()), this, SLOT(onLayerAdded()));
     connect(m_dlg_layers, SIGNAL(onLayerDeleted(const uint)), this, SLOT(onLayerDeleted(const uint)));
-    connect(m_dlg_layers, SIGNAL(onLayerEnabledChanged(const uint, const bool enabled)), this, SLOT(onLayerEnabledChanged(const uint, const bool enabled)));
+    connect(m_dlg_layers, SIGNAL(onLayerEnabledChanged(const uint, const bool)), this, SLOT(onLayerEnabledChanged(const uint, const bool)));
+    connect(m_dlg_layers, SIGNAL(onSelectedLayerChanged(const uint)), this, SLOT(onSelectedLayerChanged(const uint)));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -514,30 +515,39 @@ void MainWindow::onCancelEffects()
     }
 }
 
-void MainWindow::onLayerAdded(const uint id)
+void MainWindow::onLayerAdded()
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->onLayerAdded(id);
+        c->onLayerAdded();
     }
 }
 
-void MainWindow::onLayerDeleted(const uint id)
+void MainWindow::onLayerDeleted(const uint index)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->onLayerDeleted(id);
+        c->onLayerDeleted(index);
     }
 }
 
-void MainWindow::onLayerEnabledChanged(const uint id, const bool enabled)
+void MainWindow::onLayerEnabledChanged(const uint index, const bool enabled)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->onLayerEnabledChanged(id, enabled);
+        c->onLayerEnabledChanged(index, enabled);
+    }
+}
+
+void MainWindow::onSelectedLayerChanged(const uint index)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onSelectedLayerChanged(index);
     }
 }
 
