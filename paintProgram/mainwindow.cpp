@@ -310,9 +310,7 @@ void MainWindow::onGetCanvasSettings(int width, int height, QString name)
     if(m_bMakingNewCanvas)
     {
         QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
-        QPainter painter(&newImage);
-        painter.setCompositionMode (QPainter::CompositionMode_Clear);
-        painter.fillRect(QRect(0, 0, newImage.width(), newImage.height()), Qt::transparent);
+        newImage.fill(Qt::transparent);
 
         loadNewCanvas(newImage, name);
     }
