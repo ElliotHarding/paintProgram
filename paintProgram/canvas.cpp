@@ -54,7 +54,7 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     m_selectedLayer = 0;
 
     QList<CanvasLayerInfo> layers;
-    layers.push_back(canvasLayer.m_info);//Todo - based of m_canvasLayers
+    layers.push_back(canvasLayer.m_info);
     m_pParent->setLayers(layers);
 
     m_canvasWidth = image.width();
