@@ -23,6 +23,7 @@ const uint MaxCanvasHistory = 20;
 const QString CanvasSaveFileType = "paintProgram";
 const QString CanvasSaveLayerBegin = "BEGIN_LAYER";
 const QString CanvasSaveLayerEnd = "END_LAYER";
+const float ZoomIncrement = 1.1;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -1207,16 +1208,21 @@ void Canvas::wheelEvent(QWheelEvent* event)
     if(event->angleDelta().y() > 0)
     {
         if(m_zoomFactor < geometry().width())
-            m_zoomFactor *= (m_cZoomIncrement);
+            m_zoomFactor *= (Constants::ZoomIncrement);
     }
     else if(event->angleDelta().y() < 0)
     {
         if(m_zoomFactor > 0.1)
-            m_zoomFactor /= (m_cZoomIncrement);
+            m_zoomFactor /= (Constants::ZoomIncrement);
     }
 
     //Call to redraw
     update();
+}
+
+void Canvas::onParentMouseScroll(QWheelEvent* event)
+{
+    wheelEvent(event);
 }
 
 void Canvas::showEvent(QShowEvent *)

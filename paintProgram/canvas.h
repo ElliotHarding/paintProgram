@@ -147,6 +147,7 @@ public:
     void onUpdateSettings(int width, int height, QString name);
     void onCurrentToolUpdated(const Tool t);
     void onParentMouseMove(QMouseEvent* event);
+    void onParentMouseScroll(QWheelEvent* event);
 
     ///Text writing events
     void onUpdateText(QFont font);
@@ -188,14 +189,14 @@ signals:
 private:
     void init(uint width, uint height);
 
-    void paintEvent(QPaintEvent* paintEvent) override;
-    void wheelEvent(QWheelEvent* event) override;
+    void paintEvent(QPaintEvent* paintEvent) override;    
     void showEvent(QShowEvent *) override;
 
     ///Mouse events and members
     void mousePressEvent(QMouseEvent* mouseEvent) override;
     void mouseReleaseEvent(QMouseEvent *releaseEvent) override;
     void mouseMoveEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
     bool m_bMouseDown = false;
 
     ///Drawing
@@ -213,7 +214,6 @@ private:
 
     ///Zooming
     float m_zoomFactor = 1;
-    const float m_cZoomIncrement = 1.1;
 
     ///Panning
     const QPoint m_c_nullPanPos = QPoint(-1,-1);

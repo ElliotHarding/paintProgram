@@ -181,6 +181,22 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             qDebug() << "MainWindow::eventFilter - cant find canvas! ";
         }
     }
+    else if(event->type() == QEvent::Wheel)
+    {
+        if(dynamic_cast<DLG_Tools*>(watched))
+        {
+            Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+            if(c)
+            {
+                c->onParentMouseScroll(dynamic_cast<QWheelEvent*>(event));
+            }
+            else
+            {
+                qDebug() << "MainWindow::eventFilter - cant find canvas! ";
+            }
+        }
+    }
+
     return QObject::eventFilter( watched, event );
 }
 
