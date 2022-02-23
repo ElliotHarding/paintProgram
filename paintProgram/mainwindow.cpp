@@ -620,30 +620,22 @@ void MainWindow::onLoad()
     //todo ~ why do i need to cut the first / of the url?
     filePath = filePath.mid(1, filePath.length());
 
-    //Todo ~ better way of checking file type
-    if(filePath.contains("paintProgram"))
-    {
-        Canvas* c = new Canvas(this, filePath);
-        c->setSavePath(filePath);
-        addNewCanvas(c, fileName);
-    }
-    else
-    {
-        QImage image(filePath);
-        Canvas* c = new Canvas(this, image);
-        c->setSavePath(filePath);
-        addNewCanvas(c , fileName);
-    }
+    Canvas* c = new Canvas(this, filePath);
+    addNewCanvas(c, fileName);
 }
 
 void MainWindow::onLoadLayer()
 {
+    if(ui->c_tabWidget->count() == 0)
+    {
+        //todo - notify user that theres no canvas to add layer to
+        return;
+    }
+
     const QUrl fileUrl = m_dlg_fileDlg->getOpenFileUrl(this);
     QString filePath = fileUrl.path();
     QString fileName = QFileInfo(fileUrl.fileName()).baseName();
-
-    //todo ~ why do i need to cut the first / of the url?
-    filePath = filePath.mid(1, filePath.length());
+    filePath = filePath.mid(1, filePath.length());//todo ~ why do i need to cut the first / of the url?
 
     QImage image(filePath);
     if(image == QImage())
@@ -659,6 +651,10 @@ void MainWindow::onLoadLayer()
         cl.m_image = image;
         cl.m_info.m_name = fileName;
         c->onLoadLayer(cl);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onLoadLayer - Couldnt get canvas";
     }
 }
 

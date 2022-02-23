@@ -71,30 +71,43 @@ Canvas::Canvas(MainWindow *parent, QString filePath) :
     QTabWidget(),
     m_pParent(parent)
 {
-    QFile inFile(filePath);
-    inFile.open(QIODevice::ReadOnly | QIODevice::Text);
-    QTextStream in(&inFile);
-
-    while(!in.atEnd())
+    if(filePath.contains("paintProgram"))
     {
-        QString line = in.readLine();
-        if(line == "BEGIN_LAYER")
+        QFile inFile(filePath);
+        inFile.open(QIODevice::ReadOnly | QIODevice::Text);
+        QTextStream in(&inFile);
+
+        while(!in.atEnd())
         {
-            CanvasLayer cl;
+            QString line = in.readLine();
+            if(line == "BEGIN_LAYER")
+            {
+                CanvasLayer cl;
 
-            //Read layer info
-            cl.m_info.m_name = in.readLine();
-            cl.m_info.m_enabled = in.readLine() == "1" ? true : false;
+                //Read layer info
+                cl.m_info.m_name = in.readLine();
+                cl.m_info.m_enabled = in.readLine() == "1" ? true : false;
 
-            //Read layer image data
-            QByteArray ba;
-            QTextStream(&ba) << in.readLine();
-            QByteArray layerImageData = QByteArray::fromHex(ba);
-            cl.m_image.loadFromData(layerImageData);
+                //Read layer image data
+                QByteArray ba;
+                QTextStream(&ba) << in.readLine();
+                QByteArray layerImageData = QByteArray::fromHex(ba);
+                cl.m_image.loadFromData(layerImageData);
 
-            m_canvasLayers.push_back(cl);
+                m_canvasLayers.push_back(cl);
+            }
         }
     }
+    else
+    {
+        QImage image(filePath);
+
+        CanvasLayer canvasLayer;
+        canvasLayer.m_image = image;
+        m_canvasLayers.push_back(canvasLayer);
+    }
+
+    setSavePath(filePath);
 
     //Todo ~ what if theres no canvas layers!
     init(m_canvasLayers[0].m_image.width(), m_canvasLayers[0].m_image.height());
