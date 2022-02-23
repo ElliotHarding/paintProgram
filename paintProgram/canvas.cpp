@@ -6,6 +6,7 @@
 #include <stack>
 #include <QPainterPath>
 #include <QBuffer>
+#include <QFileInfo>
 
 #include "mainwindow.h"
 
@@ -66,7 +67,7 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 
     init(image.width(), image.height());
 }
-#include <QFileInfo>
+
 Canvas::Canvas(MainWindow *parent, QString& filePath) :
     QTabWidget(),
     m_pParent(parent)
