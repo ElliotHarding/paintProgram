@@ -80,6 +80,7 @@ private slots:
 
     ///Canvas save/load/change settings/add
     void onLoad();
+    void onLoadLayer();
     void onSave();
     void onSaveAs();
     void onAddTabClicked();

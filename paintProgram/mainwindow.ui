@@ -113,6 +113,7 @@
      <string>File</string>
     </property>
     <addaction name="actionLoad_Image"/>
+    <addaction name="actionLoad_layer"/>
     <addaction name="actionSave_Image"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionNew"/>
@@ -244,6 +245,11 @@
   <action name="action_showToolSpecificDialogs">
    <property name="text">
     <string>Tool Specific Dialogs</string>
+   </property>
+  </action>
+  <action name="actionLoad_layer">
+   <property name="text">
+    <string>Load Layer</string>
    </property>
   </action>
  </widget>

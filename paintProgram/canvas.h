@@ -138,6 +138,7 @@ public:
     void onLayerMoveUp(const uint index);
     void onLayerMoveDown(const uint index);
     void onSelectedLayerChanged(const uint index);
+    void onLoadLayer(CanvasLayer canvasLayer);
 
     ///Events
     void onAddedToTab();

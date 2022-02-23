@@ -96,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_showColorPicker, SIGNAL(triggered()), this, SLOT(onShowColorPickerDialog()));
     connect(ui->action_showToolSelector, SIGNAL(triggered()), this, SLOT(onShowToolSelectorDialog()));
     connect(ui->action_showToolSpecificDialogs, SIGNAL(triggered()), this, SLOT(onShowToolSpecificDialogs()));
+    connect(ui->actionLoad_layer, SIGNAL(triggered()), this, SLOT(onLoadLayer()));
 
     showMaximized();
 
@@ -624,6 +625,27 @@ void MainWindow::onLoad()
 
     QImage image(filePath);
     loadNewCanvas(image, fileName, filePath);
+}
+
+void MainWindow::onLoadLayer()
+{
+    const QUrl fileUrl = m_dlg_fileDlg->getOpenFileUrl(this);
+    QString filePath = fileUrl.path();
+    QString fileName = QFileInfo(fileUrl.fileName()).baseName();
+
+    //todo ~ why do i need to cut the first / of the url?
+    filePath = filePath.mid(1, filePath.length());
+
+    QImage image(filePath);
+
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        CanvasLayer cl;
+        cl.m_image = image;
+        cl.m_info.m_name = fileName;
+        c->onLoadLayer(cl);
+    }
 }
 
 void MainWindow::onSave()

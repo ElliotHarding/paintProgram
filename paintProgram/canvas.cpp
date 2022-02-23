@@ -295,6 +295,29 @@ void Canvas::onSelectedLayerChanged(const uint index)
     m_selectedLayer = index;
 }
 
+void Canvas::onLoadLayer(CanvasLayer canvasLayer)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //todo - limit the images size to current canvas restrictions
+    QImage newLayerImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+    newLayerImage.fill(Qt::transparent);
+
+    //Draw loaded image onto image with canvas dimensions
+    QPainter painter(&newLayerImage);
+    painter.drawImage(newLayerImage.rect(), canvasLayer.m_image, canvasLayer.m_image.rect());
+    painter.end();
+
+    canvasLayer.m_image = newLayerImage;
+
+    //Add layer
+    m_canvasLayers.push_back(canvasLayer);
+
+    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
+
+    m_canvasHistory.recordHistory(m_canvasLayers);
+}
+
 void Canvas::onUpdateSettings(int width, int height, QString name)
 {
     m_canvasMutex.lock();
