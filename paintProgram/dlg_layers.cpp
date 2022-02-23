@@ -27,6 +27,8 @@ void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo)
     {
         addLayer(layer);
     }
+
+    currentRowChanged();
 }
 
 void DLG_Layers::on_btn_add_clicked()
@@ -63,6 +65,17 @@ void DLG_Layers::onTextChanged(QListWidgetItem *pListWidgetItem, QString text)
 
 void DLG_Layers::currentRowChanged(int currentRow)
 {
+    //Loop through all layer widgets set background to white
+    for(int row = 0; row < ui->listWidget_layers->count(); row++)
+    {
+        QListWidgetItem *item = ui->listWidget_layers->item(row);
+        ui->listWidget_layers->itemWidget(item)->setStyleSheet("background-color: white");
+    }
+
+    //Except for current widget. Set this background to lightblue
+    QListWidgetItem *item = ui->listWidget_layers->item(currentRow);
+    ui->listWidget_layers->itemWidget(item)->setStyleSheet("background-color: lightblue");
+
     emit onSelectedLayerChanged(currentRow);
 }
 
