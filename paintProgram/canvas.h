@@ -222,7 +222,7 @@ private:
     float m_panOffsetY = 0;
 
     ///Selecting
-    SelectedPixels* m_pSelectedPixels;
+    SelectedPixels* m_pSelectedPixels = nullptr;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
 

@@ -99,7 +99,10 @@ Canvas::Canvas(MainWindow *parent, QString& filePath, bool& loadSuccess) :
                 QByteArray layerImageData = QByteArray::fromHex(ba);
                 cl.m_image.loadFromData(layerImageData);
 
-                m_canvasLayers.push_back(cl);
+                if(cl.m_image != QImage() && !cl.m_image.isNull())
+                {
+                    m_canvasLayers.push_back(cl);
+                }
             }
         }
 
