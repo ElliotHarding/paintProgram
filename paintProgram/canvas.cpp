@@ -66,12 +66,12 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 
     init(image.width(), image.height());
 }
-
+#include <QFileInfo>
 Canvas::Canvas(MainWindow *parent, QString& filePath) :
     QTabWidget(),
     m_pParent(parent)
 {
-    if(filePath.contains("paintProgram"))
+    if(QFileInfo(filePath).suffix().contains(".paintProgram"))
     {
         QFile inFile(filePath);
         inFile.open(QIODevice::ReadOnly | QIODevice::Text);
