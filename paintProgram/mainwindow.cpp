@@ -314,10 +314,7 @@ void MainWindow::onGetCanvasSettings(int width, int height, QString name)
 {
     if(m_bMakingNewCanvas)
     {
-        QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
-        newImage.fill(Qt::transparent);
-
-        Canvas* c = new Canvas(this, newImage);
+        Canvas* c = new Canvas(this, width, height);
         addNewCanvas(c, name);
     }
     else

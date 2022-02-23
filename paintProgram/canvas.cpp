@@ -57,15 +57,16 @@ QList<CanvasLayerInfo> getLayerInfoList(QList<CanvasLayer>& canvasLayers)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Canvas
 ///
-Canvas::Canvas(MainWindow* parent, QImage image) :
+Canvas::Canvas(MainWindow* parent, const int width, const int height) :
     QTabWidget(),
     m_pParent(parent)
 {
     CanvasLayer canvasLayer;
-    canvasLayer.m_image = image;
+    canvasLayer.m_image = QImage(QSize(width, height), QImage::Format_ARGB32);
+    canvasLayer.m_image.fill(Qt::transparent);
     m_canvasLayers.push_back(canvasLayer);
 
-    init(image.width(), image.height());
+    init(width, height);
 }
 
 Canvas::Canvas(MainWindow *parent, QString& filePath) :

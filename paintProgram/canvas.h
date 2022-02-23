@@ -120,7 +120,7 @@ class Canvas : public QTabWidget
     Q_OBJECT
 
 public:
-    Canvas(MainWindow* parent, QImage image);
+    Canvas(MainWindow* parent, const int width, const int height);
     Canvas(MainWindow* parent, QString& filePath);
     ~Canvas();
 
