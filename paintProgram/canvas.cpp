@@ -299,20 +299,20 @@ void Canvas::onLoadLayer(CanvasLayer canvasLayer)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //todo - limit the images size to current canvas restrictions
+    //Take canvasLayer's image and map it to an image with m_canvasWidth, m_canvasHeight dimensions
     QImage newLayerImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
     newLayerImage.fill(Qt::transparent);
-
-    //Draw loaded image onto image with canvas dimensions
     QPainter painter(&newLayerImage);
     painter.drawImage(newLayerImage.rect(), canvasLayer.m_image, canvasLayer.m_image.rect());
     painter.end();
 
+    //Use image with correct dimensions as one to add
     canvasLayer.m_image = newLayerImage;
 
     //Add layer
     m_canvasLayers.push_back(canvasLayer);
 
+    //Update layers dlg
     m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     m_canvasHistory.recordHistory(m_canvasLayers);
