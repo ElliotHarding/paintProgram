@@ -187,6 +187,8 @@ signals:
     void canvasSizeChange(const int x, const int y);
 
 private:
+    void init(uint width, uint height);
+
     void paintEvent(QPaintEvent* paintEvent) override;
     void wheelEvent(QWheelEvent* event) override;
     void showEvent(QShowEvent *) override;

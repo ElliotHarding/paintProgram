@@ -316,7 +316,8 @@ void MainWindow::onGetCanvasSettings(int width, int height, QString name)
         QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
         newImage.fill(Qt::transparent);
 
-        loadNewCanvas(newImage, name);
+        Canvas* c = new Canvas(this, newImage);
+        addNewCanvas(c, name);
     }
     else
     {
@@ -598,12 +599,8 @@ void MainWindow::onSelectedLayerChanged(const uint index)
     }
 }
 
-void MainWindow::loadNewCanvas(QImage image, QString name, QString savePath)
+void MainWindow::addNewCanvas(Canvas *c, QString name)
 {
-    Canvas* c = new Canvas(this, image);
-
-    c->setSavePath(savePath);
-
     c->onCurrentToolUpdated(m_dlg_tools->getCurrentTool());
     connect(c, SIGNAL(selectionAreaResize(const int, const int)), m_dlg_info, SLOT(onSelectionAreaResize(const int, const int)));
     connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
@@ -627,22 +624,15 @@ void MainWindow::onLoad()
     if(filePath.contains("paintProgram"))
     {
         Canvas* c = new Canvas(this, filePath);
-
         c->setSavePath(filePath);
-
-        c->onCurrentToolUpdated(m_dlg_tools->getCurrentTool());
-        connect(c, SIGNAL(selectionAreaResize(const int, const int)), m_dlg_info, SLOT(onSelectionAreaResize(const int, const int)));
-        connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
-        connect(c, SIGNAL(canvasSizeChange(const int, const int)), m_dlg_info, SLOT(onCanvasSizeChange(const int, const int)));
-
-        const int index = ui->c_tabWidget->addTab(c, fileName);
-        c->onAddedToTab();
-        ui->c_tabWidget->setCurrentIndex(index);
+        addNewCanvas(c, fileName);
     }
     else
     {
         QImage image(filePath);
-        loadNewCanvas(image, fileName, filePath);
+        Canvas* c = new Canvas(this, image);
+        c->setSavePath(filePath);
+        addNewCanvas(c , fileName);
     }
 }
 
@@ -656,7 +646,6 @@ void MainWindow::onLoadLayer()
     filePath = filePath.mid(1, filePath.length());
 
     QImage image(filePath);
-
     if(image == QImage())
     {
         //todo - notify user of invalid load

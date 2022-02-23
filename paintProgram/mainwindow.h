@@ -150,7 +150,7 @@ private:
     Clipboard m_copyBuffer;
 
     ///Loading
-    void loadNewCanvas(QImage image, QString name, QString savePath = "");
+    void addNewCanvas(Canvas* c, QString name);
     bool m_bMakingNewCanvas = false;
 
     ///Saving

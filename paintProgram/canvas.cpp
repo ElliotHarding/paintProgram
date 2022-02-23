@@ -63,26 +63,8 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     CanvasLayer canvasLayer;
     canvasLayer.m_image = image;
     m_canvasLayers.push_back(canvasLayer);
-    m_selectedLayer = 0;
-    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
-    m_canvasHistory.recordHistory(m_canvasLayers);
-
-    m_canvasWidth = image.width();
-    m_canvasHeight = image.height();
-
-    m_canvasBackgroundImage = genTransparentPixelsBackground(image.width(), image.height());
-
-    m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
-    m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
-
-    m_pSelectedPixels = new SelectedPixels(this, image.width(), image.height());
-    m_pSelectedPixels->raise();
-
-    m_pClipboardPixels = new PaintableClipboard(this);
-    m_pClipboardPixels->raise();
-
-    setMouseTracking(true);
+    init(image.width(), image.height());
 }
 
 Canvas::Canvas(MainWindow *parent, QString filePath) :
@@ -114,13 +96,19 @@ Canvas::Canvas(MainWindow *parent, QString filePath) :
         }
     }
 
+    //Todo ~ what if theres no canvas layers!
+    init(m_canvasLayers[0].m_image.width(), m_canvasLayers[0].m_image.height());
+}
+
+void Canvas::init(uint width, uint height)
+{
     m_selectedLayer = 0;
     m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     m_canvasHistory.recordHistory(m_canvasLayers);
 
-    m_canvasWidth = m_canvasLayers[m_selectedLayer].m_image.width();
-    m_canvasHeight = m_canvasLayers[m_selectedLayer].m_image.height();
+    m_canvasWidth = width;
+    m_canvasHeight = height;
 
     m_canvasBackgroundImage = genTransparentPixelsBackground(m_canvasWidth, m_canvasHeight);
 
