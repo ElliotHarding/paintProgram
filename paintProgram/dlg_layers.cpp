@@ -23,18 +23,20 @@ void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
 {
     //Dont want the clearing of the layers to signal the canvas of a selected row change since canvas is calling setLayers with its mutex locked.
     disconnect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
-    ui->listWidget_layers->clear();
 
+    //Clear current displayed layers and add new ones
+    ui->listWidget_layers->clear();
     for(CanvasLayerInfo& layer : layerInfo)
     {
         addLayer(layer);
     }
 
+    //set current selected layer and update layers to highlight selected one
     ui->listWidget_layers->setCurrentRow(selectedLayer);
-
-    connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
-
     drawLayerSelections(selectedLayer);
+
+    //Reconnet current row changed signal and slot
+    connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 }
 
 void DLG_Layers::on_btn_add_clicked()
