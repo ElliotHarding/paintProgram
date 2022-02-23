@@ -158,14 +158,14 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     {
         if(!m_dlg_textSettings->spinBoxHasFocus())
         {
-            keyPressEvent(dynamic_cast<QKeyEvent*>(event));
+            keyPress(dynamic_cast<QKeyEvent*>(event));
         }
     }
     else if(event->type() == QEvent::KeyRelease)
     {
         if(!m_dlg_textSettings->spinBoxHasFocus())
         {
-            keyReleaseEvent(dynamic_cast<QKeyEvent*>(event));
+            keyRelease(dynamic_cast<QKeyEvent*>(event));
         }
     }
     else if(event->type() == QEvent::MouseMove)
@@ -220,12 +220,12 @@ BrushShape MainWindow::getCurrentBrushShape()
     return m_dlg_brushSettings->getBrushShape();
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
+void MainWindow::keyPress(QKeyEvent *event)
 {
     m_pressedKeys.insert(event->key());
 }
 
-void MainWindow::keyReleaseEvent(QKeyEvent *event)
+void MainWindow::keyRelease(QKeyEvent *event)
 {
     if(m_pressedKeys.find(Qt::Key_Delete) != m_pressedKeys.end())
     {
