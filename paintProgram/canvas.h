@@ -100,6 +100,7 @@ private:
     Canvas* m_pParentCanvas;
 };
 
+///Holds the history of actions on the canvas ~ may incorporate actual CanvasLayers later...
 class CanvasHistory
 {
 public:

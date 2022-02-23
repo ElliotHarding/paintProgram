@@ -109,8 +109,6 @@ void Canvas::onAddedToTab()
     m_panOffsetY = m_center.y() - (m_canvasHeight / 2);
 
     m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
-
-    //m_canvasHistory.recordHistory(m_canvasLayers); TODO ~ Test if needed (its recorded in constructor)
 }
 
 int Canvas::width()
