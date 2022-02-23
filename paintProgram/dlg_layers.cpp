@@ -83,6 +83,7 @@ void DLG_Layers::currentRowChanged(int currentRow)
     emit onSelectedLayerChanged(currentRow);
 }
 
+//Adds a layer widget locally to dlg_layers (not canvas)
 void DLG_Layers::addLayer(CanvasLayerInfo info)
 {
     QListWidgetItem* item = new QListWidgetItem();
@@ -126,10 +127,22 @@ void DLG_Layers::on_btn_merge_clicked()
 
 void DLG_Layers::on_btn_moveUp_clicked()
 {
+    const int currentRow = ui->listWidget_layers->currentRow();
 
+    //If we can move it up
+    if(currentRow > 0 && currentRow < ui->listWidget_layers->count())
+    {
+        emit onLayerMoveUp(currentRow);
+    }
 }
 
 void DLG_Layers::on_btn_moveDown_clicked()
 {
+    const int currentRow = ui->listWidget_layers->currentRow();
 
+    //If can move down
+    if(currentRow < ui->listWidget_layers->count() - 1 && currentRow > -1)
+    {
+        emit onLayerMoveDown(currentRow);
+    }
 }

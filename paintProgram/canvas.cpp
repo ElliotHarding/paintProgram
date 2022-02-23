@@ -227,6 +227,46 @@ void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndex
     }
 }
 
+void Canvas::onLayerMoveUp(const uint index)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    if(index > 0 && index < m_canvasLayers.size())
+    {
+        //Move up
+        m_canvasLayers.swap(index, index - 1);
+        m_selectedLayer = index - 1;
+
+        //Update layer dialog on new layers
+        m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
+
+        update();
+    }
+    else
+    {
+        qDebug() << "Canvas::onLayerMoveUp - incorrect index " << index;
+    }
+}
+
+void Canvas::onLayerMoveDown(const uint index)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    if(index < m_canvasLayers.size() - 1)
+    {
+        //Move down
+        m_canvasLayers.swap(index + 1, index);
+        m_selectedLayer = index + 1;
+
+        //Update layer dialog on new layers
+        m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
+
+        update();
+    }
+    else
+    {
+        qDebug() << "Canvas::onLayerMoveDown - incorrect index " << index;
+    }
+}
+
 void Canvas::onSelectedLayerChanged(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);

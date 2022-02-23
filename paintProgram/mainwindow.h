@@ -118,6 +118,8 @@ private slots:
     void onLayerEnabledChanged(const uint index, const bool enabled);
     void onLayerTextChanged(const uint index, QString text);
     void onLayerMergeRequested(const uint layerIndexA, const uint layerIndexB);
+    void onLayerMoveUp(const uint index);
+    void onLayerMoveDown(const uint index);
     void onSelectedLayerChanged(const uint index);
 
     ///Mainwindow control slots

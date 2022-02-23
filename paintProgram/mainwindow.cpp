@@ -72,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_layers, SIGNAL(onSelectedLayerChanged(const uint)), this, SLOT(onSelectedLayerChanged(const uint)));
     connect(m_dlg_layers, SIGNAL(onLayerTextChanged(const uint, QString)), this, SLOT(onLayerTextChanged(const uint, QString)));
     connect(m_dlg_layers, SIGNAL(onLayerMergeRequested(const uint, const uint)), this, SLOT(onLayerMergeRequested(const uint, const uint)));
+    connect(m_dlg_layers, SIGNAL(onLayerMoveUp(const uint)), this, SLOT(onLayerMoveUp(const uint)));
+    connect(m_dlg_layers, SIGNAL(onLayerMoveDown(const uint)), this, SLOT(onLayerMoveDown(const uint)));
 
     //Finished creating dialogs
     m_bDialogsCreated = true;
@@ -565,6 +567,24 @@ void MainWindow::onLayerMergeRequested(const uint layerIndexA, const uint layerI
     if(c)
     {
         c->onLayerMergeRequested(layerIndexA, layerIndexB);
+    }
+}
+
+void MainWindow::onLayerMoveUp(const uint index)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onLayerMoveUp(index);
+    }
+}
+
+void MainWindow::onLayerMoveDown(const uint index)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onLayerMoveDown(index);
     }
 }
 
