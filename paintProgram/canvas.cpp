@@ -1116,7 +1116,7 @@ void Canvas::onCancelEffects()
 QImage Canvas::getImageCopy()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    return m_canvasLayers[m_selectedLayer].m_image; //TODO - make for all layers?
+    return m_canvasLayers[m_selectedLayer].m_image;
 }
 
 float Canvas::getZoom()

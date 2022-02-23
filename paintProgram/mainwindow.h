@@ -1,11 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-//todo ~ colorPicker ~ shapes ~ text
-// - pass zoom down from parent
-// - when selecting color for text update immediatly...
-// - typing font size causes text to be written
-
 #include <QMainWindow>
 #include <QColorDialog>
 #include <QFileDialog>
