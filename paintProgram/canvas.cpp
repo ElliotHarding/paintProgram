@@ -172,8 +172,8 @@ void Canvas::onAddedToTab()
 
     updateCenter();
 
-    const float x = float(geometry().width()) / float(m_canvasWidth);
-    const float y = float(geometry().height()) / float(m_canvasHeight);
+    const float x = float(geometry().width() * 2) / float(m_canvasWidth);
+    const float y = float(geometry().height() * 2) / float(m_canvasHeight);
     m_zoomFactor = x < y ? x : y;
     if(m_zoomFactor < float(0.1))
         m_zoomFactor = 0.1;
