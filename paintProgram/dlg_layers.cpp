@@ -24,12 +24,15 @@ void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
     //Dont want the clearing of the layers to signal the canvas of a selected row change since canvas is calling setLayers with its mutex locked.
     disconnect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
     ui->listWidget_layers->clear();
-    connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 
     for(CanvasLayerInfo& layer : layerInfo)
     {
         addLayer(layer);
     }
+
+    ui->listWidget_layers->setCurrentRow(selectedLayer);
+
+    connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 
     setSelectedLayer(selectedLayer);
 }
@@ -110,7 +113,13 @@ void DLG_Layers::setSelectedLayer(uint currentRow)
 
 void DLG_Layers::on_btn_merge_clicked()
 {
+    const int currentRow = ui->listWidget_layers->currentRow();
 
+    //If we have a layer below the current one
+    if(currentRow > -1 && currentRow < ui->listWidget_layers->count() - 1)
+    {
+        emit onLayerMergeRequested(currentRow, currentRow+1);
+    }
 }
 
 void DLG_Layers::on_btn_moveUp_clicked()

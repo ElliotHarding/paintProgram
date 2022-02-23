@@ -40,6 +40,16 @@ QImage genTransparentPixelsBackground(const int width, const int height)
     return transparentBackground;
 }
 
+QList<CanvasLayerInfo> getLayerInfoList(QList<CanvasLayer>& canvasLayers)
+{
+    QList<CanvasLayerInfo> layers;
+    for(CanvasLayer& layer : canvasLayers)
+    {
+        layers.push_back(layer.m_info);
+    }
+    return layers;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Canvas
@@ -52,10 +62,7 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     canvasLayer.m_image = image;
     m_canvasLayers.push_back(canvasLayer);
     m_selectedLayer = 0;
-
-    QList<CanvasLayerInfo> layers;
-    layers.push_back(canvasLayer.m_info);
-    m_pParent->setLayers(layers, m_selectedLayer);
+    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     m_canvasWidth = image.width();
     m_canvasHeight = image.height();
@@ -190,6 +197,34 @@ void Canvas::onLayerTextChanged(const uint index, QString text)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers[index].m_info.m_name = text; //Assumes there is a layer at index
+}
+
+void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndexB)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    if(layerIndexA < m_canvasLayers.count() && layerIndexB < m_canvasLayers.count() && m_selectedLayer == layerIndexA)
+    {
+        //Paint layer b onto layer a
+        QPainter mergePainter(&m_canvasLayers[layerIndexA].m_image);
+        mergePainter.setCompositionMode (QPainter::CompositionMode_Source);
+        mergePainter.drawImage(m_canvasLayers[layerIndexB].m_image.rect(), m_canvasLayers[layerIndexB].m_image);
+        mergePainter.end();
+
+        //Combine names of layers
+        m_canvasLayers[layerIndexA].m_info.m_name = m_canvasLayers[layerIndexA].m_info.m_name + " & " + m_canvasLayers[layerIndexB].m_info.m_name;
+
+        //Remove layer b as now merged into layer a
+        m_canvasLayers.removeAt(layerIndexB);
+
+        //Update layer dialog on new layers
+        m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
+
+        update();
+    }
+    else
+    {
+        qDebug() << "Canvas::onLayerMergeRequested - layer indexes incorrect";
+    }
 }
 
 void Canvas::onSelectedLayerChanged(const uint index)
@@ -997,12 +1032,7 @@ void Canvas::showEvent(QShowEvent *)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    QList<CanvasLayerInfo> layers;
-    for(CanvasLayer& layer : m_canvasLayers)
-    {
-        layers.push_back(layer.m_info);
-    }
-    m_pParent->setLayers(layers, m_selectedLayer);
+    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     canvasMutexLocker.unlock();
 
