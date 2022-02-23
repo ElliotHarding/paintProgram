@@ -100,6 +100,18 @@ private:
     Canvas* m_pParentCanvas;
 };
 
+class CanvasHistory
+{
+public:
+    void recordHistory(QList<CanvasLayer> canvasSnapShot);
+    void redoHistory(QList<CanvasLayer>& canvasLayers);
+    void undoHistory(QList<CanvasLayer>& canvasLayers);
+
+private:
+    QList<QList<CanvasLayer>> m_history;
+    uint m_historyIndex = 0;
+};
+
 
 ///Tab widget in charge of displaying & interacting with the image edited by paint program
 class Canvas : public QTabWidget
@@ -211,6 +223,9 @@ private:
 
     ///Dragging/copy/paste
     PaintableClipboard* m_pClipboardPixels;
+
+    ///Undo/redo
+    CanvasHistory m_canvasHistory;
 
     ///Geometry
     uint m_canvasWidth;

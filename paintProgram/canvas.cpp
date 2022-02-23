@@ -17,6 +17,7 @@ const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
 const QColor SelectionAreaColorA = QColor(0,40,100,50);
 const int SelectedPixelsOutlineFlashFrequency = 200;
+const uint MaxCanvasHistory = 20;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -64,6 +65,8 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     m_selectedLayer = 0;
     m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
+    m_canvasHistory.recordHistory(m_canvasLayers);
+
     m_canvasWidth = image.width();
     m_canvasHeight = image.height();
 
@@ -107,7 +110,7 @@ void Canvas::onAddedToTab()
 
     m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
 
-    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+    //m_canvasHistory.recordHistory(m_canvasLayers); TODO ~ Test if needed (its recorded in constructor)
 }
 
 int Canvas::width()
@@ -177,26 +180,30 @@ void Canvas::onLayerAdded()
     CanvasLayer canvasLayer;
     canvasLayer.m_image = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
     canvasLayer.m_image.fill(Qt::transparent);
-    canvasLayer.recordHistory();
     m_canvasLayers.push_back(canvasLayer);
+
+    m_canvasHistory.recordHistory(m_canvasLayers);
 }
 
 void Canvas::onLayerDeleted(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers.removeAt(index);
+    m_canvasHistory.recordHistory(m_canvasLayers);
 }
 
 void Canvas::onLayerEnabledChanged(const uint index, const bool enabled)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers[index].m_info.m_enabled = enabled; //Assumes there is a layer at index
+    m_canvasHistory.recordHistory(m_canvasLayers);
 }
 
 void Canvas::onLayerTextChanged(const uint index, QString text)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers[index].m_info.m_name = text; //Assumes there is a layer at index
+    m_canvasHistory.recordHistory(m_canvasLayers);
 }
 
 void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndexB)
@@ -219,7 +226,7 @@ void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndex
         //Update layer dialog on new layers
         m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
-        m_canvasLayers[m_selectedLayer].recordHistory();
+        m_canvasHistory.recordHistory(m_canvasLayers);
 
         update();
     }
@@ -241,6 +248,8 @@ void Canvas::onLayerMoveUp(const uint index)
         //Update layer dialog on new layers
         m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
+        m_canvasHistory.recordHistory(m_canvasLayers);
+
         update();
     }
     else
@@ -261,6 +270,8 @@ void Canvas::onLayerMoveDown(const uint index)
         //Update layer dialog on new layers
         m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
+        m_canvasHistory.recordHistory(m_canvasLayers);
+
         update();
     }
     else
@@ -273,6 +284,7 @@ void Canvas::onSelectedLayerChanged(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
+    //Reset effects incase in the middle of effects when switched layer
     if(m_beforeEffectsImage != QImage())
     {
         canvasMutexLocker.unlock();
@@ -281,7 +293,6 @@ void Canvas::onSelectedLayerChanged(const uint index)
     }
 
     m_selectedLayer = index;
-
 }
 
 void Canvas::onUpdateSettings(int width, int height, QString name)
@@ -342,7 +353,7 @@ void Canvas::onCurrentToolUpdated(const Tool t)
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selectedLayer
         if(m_pClipboardPixels->dumpImage(painter))
         {
-            m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+            m_canvasHistory.recordHistory(m_canvasLayers);
         }
 
         canvasMutexLocker.unlock();
@@ -390,7 +401,7 @@ void Canvas::onDeleteKeyPressed()
 
         m_pSelectedPixels->clear();
 
-        m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+        m_canvasHistory.recordHistory(m_canvasLayers);
 
         canvasMutexLocker.unlock();
 
@@ -446,7 +457,7 @@ void Canvas::onCutKeysPressed()
     m_pSelectedPixels->clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+    m_canvasHistory.recordHistory(m_canvasLayers);
 
     canvasMutexLocker.unlock();
 
@@ -476,7 +487,15 @@ void Canvas::onUndoPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    m_canvasLayers[m_selectedLayer].undoHistory(); //assumes theres always a selected layer
+    m_canvasHistory.undoHistory(m_canvasLayers);
+
+    if(m_selectedLayer >= m_canvasLayers.size())
+    {
+        m_selectedLayer = m_canvasLayers.size() - 1; //assumes theres at least one layer
+    }
+
+    //Todo ~ check if need to update layers
+    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     update();
 }
@@ -485,7 +504,10 @@ void Canvas::onRedoPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    m_canvasLayers[m_selectedLayer].redoHistory(); //assumes theres always a selected layer
+    m_canvasHistory.redoHistory(m_canvasLayers);
+
+    //Todo ~ check if need to update layers
+    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     update();
 }
@@ -528,7 +550,7 @@ void Canvas::onBlackAndWhite()
         });
     }
 
-    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+    m_canvasHistory.recordHistory(m_canvasLayers);
 
     update();
 }
@@ -559,7 +581,7 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
         });
     }
 
-    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+    m_canvasHistory.recordHistory(m_canvasLayers);
 
     update();
 }
@@ -660,6 +682,8 @@ void Canvas::onSketchEffect(const int sensitivity)
         m_canvasLayers[m_selectedLayer].m_image = inkSketch;
     }
 
+    //Record history is done in onConfirmEffects()
+
     update();
 }
 
@@ -734,6 +758,8 @@ void Canvas::onOutlineEffect(const int sensitivity)
     QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].m_image);
     sketchPainter.drawImage(0,0,outlineSketch);
 
+    //Record history is done in onConfirmEffects()
+
     update();
 }
 
@@ -774,6 +800,8 @@ void Canvas::onBrightness(const int value)
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeBrightness(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
+
+    //Record history is done in onConfirmEffects()
 
     update();
 }
@@ -842,6 +870,8 @@ void Canvas::onContrast(const int value)
         });
     }
 
+    //Record history is done in onConfirmEffects()
+
     update();
 }
 
@@ -883,6 +913,8 @@ void Canvas::onRedLimit(const int value)
         });
     }
 
+    //Record history is done in onConfirmEffects()
+
     update();
 }
 
@@ -914,6 +946,8 @@ void Canvas::onBlueLimit(const int value)
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitBlue(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
+
+    //Record history is done in onConfirmEffects()
 
     update();
 }
@@ -947,6 +981,8 @@ void Canvas::onGreenLimit(const int value)
         });
     }
 
+    //Record history is done in onConfirmEffects()
+
     update();
 }
 
@@ -954,7 +990,7 @@ void Canvas::onConfirmEffects()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_beforeEffectsImage = QImage();
-    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+    m_canvasHistory.recordHistory(m_canvasLayers);
 }
 
 void Canvas::onCancelEffects()
@@ -1219,7 +1255,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
         if(m_pClipboardPixels->dumpImage(painter))
         {
-            m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+            m_canvasHistory.recordHistory(m_canvasLayers);
         }
         update();
     }
@@ -1286,7 +1322,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         update();
 
-        m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+        m_canvasHistory.recordHistory(m_canvasLayers);
 
         m_pSelectedPixels->clear();
 
@@ -1310,7 +1346,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
-        m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
+        m_canvasHistory.recordHistory(m_canvasLayers);
     }
     else if(m_tool == TOOL_SHAPE)
     {
@@ -1899,5 +1935,37 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
             painter.fillRect(QRect(p.x() + m_dragX + offsetX, p.y() + m_dragY + offsetY, 1, 1), col);
         }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// CanvasHistory
+///
+void CanvasHistory::recordHistory(QList<CanvasLayer> canvasSnapShot)
+{
+    m_history.push_back(canvasSnapShot);
+
+    if(Constants::MaxCanvasHistory < m_history.size())
+    {
+        m_history.erase(m_history.begin());
+    }
+
+    m_historyIndex = m_history.size() - 1;
+}
+
+void CanvasHistory::redoHistory(QList<CanvasLayer>& canvasLayers)
+{
+    if(m_historyIndex < m_history.size() - 1)
+    {
+        canvasLayers = m_history[size_t(++m_historyIndex)];
+    }
+}
+
+void CanvasHistory::undoHistory(QList<CanvasLayer>& canvasLayers)
+{
+    if(m_historyIndex > 0)
+    {
+        canvasLayers = m_history[size_t(--m_historyIndex)];
     }
 }
