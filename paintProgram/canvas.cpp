@@ -206,7 +206,7 @@ void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndex
     {
         //Paint layer b onto layer a
         QPainter mergePainter(&m_canvasLayers[layerIndexA].m_image);
-        mergePainter.setCompositionMode (QPainter::CompositionMode_Source);
+        mergePainter.setCompositionMode (QPainter::CompositionMode_SourceAtop);
         mergePainter.drawImage(m_canvasLayers[layerIndexB].m_image.rect(), m_canvasLayers[layerIndexB].m_image);
         mergePainter.end();
 
