@@ -21,6 +21,7 @@
 #include "dlg_effectssliders.h"
 #include "dlg_sketch.h"
 #include "dlg_layers.h"
+#include "dlg_message.h"
 
 #include "canvas.h"
 
@@ -143,6 +144,7 @@ private:
     DLG_EffectsSliders* m_dlg_effectsSliders = nullptr;
     DLG_Sketch* m_dlg_sketch = nullptr;
     DLG_Layers* m_dlg_layers = nullptr;
+    DLG_Message* m_dlg_message = nullptr;
     QColorDialog* m_dlg_colorPicker = nullptr;
     QFileDialog* m_dlg_fileDlg = nullptr;
 

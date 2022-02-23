@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_dlg_layers = new DLG_Layers(this);
     m_dlg_layers->show();
 
+    m_dlg_message = new DLG_Message(this);
+
     m_dlg_fileDlg = new QFileDialog(this);
 
     //Dialog connections
@@ -174,6 +176,10 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         {
             c->onParentMouseMove(dynamic_cast<QMouseEvent*>(event));
         }
+        else
+        {
+            qDebug() << "MainWindow::eventFilter - cant find canvas! ";
+        }
     }
     return QObject::eventFilter( watched, event );
 }
@@ -212,6 +218,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         {
             c->onDeleteKeyPressed();
         }
+        else
+        {
+            qDebug() << "MainWindow::keyReleaseEvent - cant find canvas! ";
+        }
     }
 
     if(m_pressedKeys.find(Qt::Key_Control) != m_pressedKeys.end())
@@ -223,6 +233,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             {
                 c->onCopyKeysPressed();
             }
+            else
+            {
+                qDebug() << "MainWindow::keyReleaseEvent - cant find canvas! ";
+            }
         }
 
         else if(m_pressedKeys.find(Qt::Key_V) != m_pressedKeys.end())
@@ -232,6 +246,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             {
                 c->onPasteKeysPressed();
             }
+            else
+            {
+                qDebug() << "MainWindow::keyReleaseEvent - cant find canvas! ";
+            }
         }
 
         else if(m_pressedKeys.find(Qt::Key_X) != m_pressedKeys.end())
@@ -240,6 +258,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             if(c)
             {
                 c->onCutKeysPressed();
+            }
+            else
+            {
+                qDebug() << "MainWindow::keyReleaseEvent - cant find canvas! ";
             }
         }
 
@@ -263,6 +285,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
                 if(c)
                 {
                     c->onWriteText(event->text(), m_dlg_textSettings->getFont());
+                }
+                else
+                {
+                    qDebug() << "MainWindow::keyReleaseEvent - cant find canvas! ";
                 }
             }
         }
@@ -325,6 +351,10 @@ void MainWindow::onGetCanvasSettings(int width, int height, QString name)
         {
             c->onUpdateSettings(width, height, name);
         }
+        else
+        {
+            qDebug() << "MainWindow::onGetCanvasSettings - cant find canvas! ";
+        }
     }
 }
 
@@ -374,6 +404,10 @@ void MainWindow::onCurrentToolUpdated(Tool tool)
         {
             c->onCurrentToolUpdated(tool);
         }
+        else
+        {
+            qDebug() << "MainWindow::onCurrentToolUpdated - cant find canvas! " << i;
+        }
     }
 }
 
@@ -383,6 +417,10 @@ void MainWindow::onUpdateFont(const QFont font)
     if(c)
     {
         c->onUpdateText(font);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onUpdateFont - cant find canvas!";
     }
 }
 
@@ -402,6 +440,10 @@ void MainWindow::onShowCanvasSettings()
         m_bMakingNewCanvas = false;
         m_dlg_canvasSettings->show();
     }
+    else
+    {
+        qDebug() << "MainWindow::onShowCanvasSettings - cant find canvas!";
+    }
 }
 
 void MainWindow::onColorChanged(const QColor &color)
@@ -413,6 +455,10 @@ void MainWindow::onColorChanged(const QColor &color)
         {
             c->onUpdateText(m_dlg_textSettings->getFont());
         }
+        else
+        {
+            qDebug() << "MainWindow::onColorChanged - cant find canvas!";
+        }
     }
 }
 
@@ -423,6 +469,10 @@ void MainWindow::onBlackAndWhite()
     {
         c->onBlackAndWhite();
     }
+    else
+    {
+        qDebug() << "MainWindow::onBlackAndWhite - cant find canvas!";
+    }
 }
 
 void MainWindow::onInvert()
@@ -431,6 +481,10 @@ void MainWindow::onInvert()
     if(c)
     {
         c->onInvert();
+    }
+    else
+    {
+        qDebug() << "MainWindow::onInvert - cant find canvas!";
     }
 }
 
@@ -451,6 +505,10 @@ void MainWindow::onBrightness(int value)
     {
         c->onBrightness(value);
     }
+    else
+    {
+        qDebug() << "MainWindow::onBrightness - cant find canvas!";
+    }
 }
 
 void MainWindow::onContrast(int value)
@@ -459,6 +517,10 @@ void MainWindow::onContrast(int value)
     if(c)
     {
         c->onContrast(value);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onContrast - cant find canvas!";
     }
 }
 
@@ -469,6 +531,10 @@ void MainWindow::onRedLimit(int value)
     {
         c->onRedLimit(value);
     }
+    else
+    {
+        qDebug() << "MainWindow::onRedLimit - cant find canvas!";
+    }
 }
 
 void MainWindow::onBlueLimit(int value)
@@ -477,6 +543,10 @@ void MainWindow::onBlueLimit(int value)
     if(c)
     {
         c->onBlueLimit(value);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onBlueLimit - cant find canvas!";
     }
 }
 
@@ -487,6 +557,10 @@ void MainWindow::onGreenLimit(int value)
     {
         c->onGreenLimit(value);
     }
+    else
+    {
+        qDebug() << "MainWindow::onGreenLimit - cant find canvas!";
+    }
 }
 
 void MainWindow::onOutlineEffect(const int value)
@@ -495,6 +569,10 @@ void MainWindow::onOutlineEffect(const int value)
     if(c)
     {
         c->onOutlineEffect(value);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onOutlineEffect - cant find canvas!";
     }
 }
 
@@ -505,6 +583,10 @@ void MainWindow::onSketchEffect(const int value)
     {
         c->onSketchEffect(value);
     }
+    else
+    {
+        qDebug() << "MainWindow::onSketchEffect - cant find canvas!";
+    }
 }
 
 void MainWindow::onConfirmEffects()
@@ -513,6 +595,10 @@ void MainWindow::onConfirmEffects()
     if(c)
     {
         c->onConfirmEffects();
+    }
+    else
+    {
+        qDebug() << "MainWindow::onConfirmEffects - cant find canvas!";
     }
 }
 
@@ -523,6 +609,10 @@ void MainWindow::onCancelEffects()
     {
         c->onCancelEffects();
     }
+    else
+    {
+        qDebug() << "MainWindow::onCancelEffects - cant find canvas!";
+    }
 }
 
 void MainWindow::onLayerAdded()
@@ -531,6 +621,10 @@ void MainWindow::onLayerAdded()
     if(c)
     {
         c->onLayerAdded();
+    }
+    else
+    {
+        qDebug() << "MainWindow::onLayerAdded - cant find canvas!";
     }
 }
 
@@ -541,6 +635,10 @@ void MainWindow::onLayerDeleted(const uint index)
     {
         c->onLayerDeleted(index);
     }
+    else
+    {
+        qDebug() << "MainWindow::onLayerDeleted - cant find canvas!";
+    }
 }
 
 void MainWindow::onLayerEnabledChanged(const uint index, const bool enabled)
@@ -549,6 +647,10 @@ void MainWindow::onLayerEnabledChanged(const uint index, const bool enabled)
     if(c)
     {
         c->onLayerEnabledChanged(index, enabled);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onLayerEnabledChanged - cant find canvas!";
     }
 }
 
@@ -559,6 +661,10 @@ void MainWindow::onLayerTextChanged(const uint index, QString text)
     {
         c->onLayerTextChanged(index, text);
     }
+    else
+    {
+        qDebug() << "MainWindow::onLayerTextChanged - cant find canvas!";
+    }
 }
 
 void MainWindow::onLayerMergeRequested(const uint layerIndexA, const uint layerIndexB)
@@ -567,6 +673,10 @@ void MainWindow::onLayerMergeRequested(const uint layerIndexA, const uint layerI
     if(c)
     {
         c->onLayerMergeRequested(layerIndexA, layerIndexB);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onLayerMergeRequested - cant find canvas!";
     }
 }
 
@@ -577,6 +687,10 @@ void MainWindow::onLayerMoveUp(const uint index)
     {
         c->onLayerMoveUp(index);
     }
+    else
+    {
+        qDebug() << "MainWindow::onLayerMoveUp - cant find canvas!";
+    }
 }
 
 void MainWindow::onLayerMoveDown(const uint index)
@@ -586,6 +700,10 @@ void MainWindow::onLayerMoveDown(const uint index)
     {
         c->onLayerMoveDown(index);
     }
+    else
+    {
+        qDebug() << "MainWindow::onLayerMoveDown - cant find canvas!";
+    }
 }
 
 void MainWindow::onSelectedLayerChanged(const uint index)
@@ -594,6 +712,10 @@ void MainWindow::onSelectedLayerChanged(const uint index)
     if(c)
     {
         c->onSelectedLayerChanged(index);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onSelectedLayerChanged - cant find canvas!";
     }
 }
 
@@ -616,6 +738,11 @@ void MainWindow::onLoad()
     QString fileName = QFileInfo(fileUrl.fileName()).baseName();    
     filePath = filePath.mid(1, filePath.length());//todo ~ why do i need to cut the first / of the url?
 
+    if(filePath == "")
+    {
+        return;
+    }
+
     bool loadSuccess = false;
     Canvas* c = new Canvas(this, filePath, loadSuccess);
     if(loadSuccess)
@@ -624,8 +751,8 @@ void MainWindow::onLoad()
     }
     else
     {
-        //Todo ~ notify user of load failure
         delete c;
+        m_dlg_message->show("Canvas load has failed!");
     }
 }
 
@@ -633,7 +760,7 @@ void MainWindow::onLoadLayer()
 {
     if(ui->c_tabWidget->count() == 0)
     {
-        //todo - notify user that theres no canvas to add layer to
+        m_dlg_message->show("No canvas to load layer into!");
         return;
     }
 
@@ -643,11 +770,16 @@ void MainWindow::onLoadLayer()
     QString fileName = QFileInfo(fileUrl.fileName()).baseName();
     filePath = filePath.mid(1, filePath.length());//todo ~ why do i need to cut the first / of the url?
 
+    if(filePath == "")
+    {
+        return;
+    }
+
     //Create & validate image
     QImage image(filePath);
-    if(image == QImage())
+    if(image == QImage() || image.isNull())
     {
-        //todo - notify user of invalid load
+        m_dlg_message->show("Failed to load layer! \n Ensure file is of correct type.");
         return;
     }
 
@@ -679,6 +811,10 @@ void MainWindow::onSave()
 
         saveCanvas(c, savePath);
     }
+    else
+    {
+        m_dlg_message->show("No canvas to save!");
+    }
 }
 
 void MainWindow::onSaveAs()
@@ -689,6 +825,10 @@ void MainWindow::onSaveAs()
         const QString savePath = getSaveAsPath(ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()));
 
         saveCanvas(c, savePath);
+    }
+    else
+    {
+        m_dlg_message->show("No canvas to save!");
     }
 }
 
@@ -702,6 +842,10 @@ void MainWindow::onExportImage()
         qDebug() << "MainWindow::onExportImage:";
         qDebug() << exportPath;
         qDebug() << (c->getImageCopy().save(exportPath) ? "Saved image" : "Failed to save image");
+    }
+    else
+    {
+        m_dlg_message->show("No canvas to export image!");
     }
 }
 
