@@ -1969,7 +1969,7 @@ void CanvasHistory::recordHistory(QList<CanvasLayer> canvasSnapShot)
 {
     m_history.push_back(canvasSnapShot);
 
-    if(Constants::MaxCanvasHistory < m_history.size())
+    if((int)Constants::MaxCanvasHistory < m_history.size())
     {
         m_history.erase(m_history.begin());
     }
