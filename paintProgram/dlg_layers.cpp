@@ -34,7 +34,7 @@ void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
 
     connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 
-    setSelectedLayer(selectedLayer);
+    drawLayerSelections(selectedLayer);
 }
 
 void DLG_Layers::on_btn_add_clicked()
@@ -76,7 +76,7 @@ void DLG_Layers::onTextChanged(QListWidgetItem *pListWidgetItem, QString text)
 
 void DLG_Layers::currentRowChanged(int currentRow)
 {
-    setSelectedLayer(currentRow);
+    drawLayerSelections(currentRow);
 
     emit onSelectedLayerChanged(currentRow);
 }
@@ -97,7 +97,7 @@ void DLG_Layers::addLayer(CanvasLayerInfo info)
     itemWidget = nullptr;
 }
 
-void DLG_Layers::setSelectedLayer(uint currentRow)
+void DLG_Layers::drawLayerSelections(uint currentRow)
 {
     //Loop through all layer widgets set background to white
     for(int row = 0; row < ui->listWidget_layers->count(); row++)

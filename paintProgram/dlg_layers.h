@@ -44,7 +44,7 @@ private:
     Ui::DLG_Layers *ui;
 
     void addLayer(CanvasLayerInfo info);
-    void setSelectedLayer(uint index);
+    void drawLayerSelections(uint index);
 };
 
 #endif // DLG_LAYERS_H
