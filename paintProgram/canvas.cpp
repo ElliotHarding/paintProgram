@@ -85,6 +85,57 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     setMouseTracking(true);
 }
 
+Canvas::Canvas(MainWindow *parent, QString filePath) :
+    QTabWidget(),
+    m_pParent(parent)
+{
+    QFile inFile(filePath);
+    inFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream in(&inFile);
+
+    while(!in.atEnd())
+    {
+        QString line = in.readLine();
+        if(line == "BEGIN_LAYER")
+        {
+            CanvasLayer cl;
+            cl.m_info.m_name = in.readLine();
+            cl.m_info.m_enabled = in.readLine() == "1" ? true : false;
+
+            QByteArray ba;
+            QBuffer buffer(&ba);
+            buffer.open(QIODevice::ReadOnly);
+            QTextStream(&ba) << in.readLine();
+            QByteArray layerImageData = QByteArray::fromHex(ba);
+            cl.m_image.loadFromData(layerImageData);
+            //cl.m_image.loadFromData(ba);
+
+            m_canvasLayers.push_back(cl);
+        }
+    }
+
+    m_selectedLayer = 0;
+    m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
+
+    m_canvasHistory.recordHistory(m_canvasLayers);
+
+    m_canvasWidth = m_canvasLayers[m_selectedLayer].m_image.width();
+    m_canvasHeight = m_canvasLayers[m_selectedLayer].m_image.height();
+
+    m_canvasBackgroundImage = genTransparentPixelsBackground(m_canvasWidth, m_canvasHeight);
+
+    m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
+    m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
+
+    m_pSelectedPixels = new SelectedPixels(this, m_canvasWidth, m_canvasHeight);
+    m_pSelectedPixels->raise();
+
+    m_pClipboardPixels = new PaintableClipboard(this);
+    m_pClipboardPixels->raise();
+
+    setMouseTracking(true);
+}
+
 Canvas::~Canvas()
 {
     if(m_selectionTool)

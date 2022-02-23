@@ -623,8 +623,27 @@ void MainWindow::onLoad()
     //todo ~ why do i need to cut the first / of the url?
     filePath = filePath.mid(1, filePath.length());
 
-    QImage image(filePath);
-    loadNewCanvas(image, fileName, filePath);
+    //Todo ~ better way of checking file type
+    if(filePath.contains("paintProgram"))
+    {
+        Canvas* c = new Canvas(this, filePath);
+
+        c->setSavePath(filePath);
+
+        c->onCurrentToolUpdated(m_dlg_tools->getCurrentTool());
+        connect(c, SIGNAL(selectionAreaResize(const int, const int)), m_dlg_info, SLOT(onSelectionAreaResize(const int, const int)));
+        connect(c, SIGNAL(mousePositionChange(const int, const int)), m_dlg_info, SLOT(onMousePositionChange(const int, const int)));
+        connect(c, SIGNAL(canvasSizeChange(const int, const int)), m_dlg_info, SLOT(onCanvasSizeChange(const int, const int)));
+
+        const int index = ui->c_tabWidget->addTab(c, fileName);
+        c->onAddedToTab();
+        ui->c_tabWidget->setCurrentIndex(index);
+    }
+    else
+    {
+        QImage image(filePath);
+        loadNewCanvas(image, fileName, filePath);
+    }
 }
 
 void MainWindow::onLoadLayer()
