@@ -219,6 +219,8 @@ void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndex
         //Update layer dialog on new layers
         m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
+        m_canvasLayers[m_selectedLayer].recordHistory();
+
         update();
     }
     else
