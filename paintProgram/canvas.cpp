@@ -124,7 +124,7 @@ Canvas::Canvas(MainWindow *parent, QString& filePath, bool& loadSuccess) :
     if(m_canvasLayers.size() == 0)
     {
         loadSuccess = false;
-        qDebug() << "Failed to load canvas!";
+        qDebug() << "Canvas::Canvas - Failed to load canvas!";
     }
     else
     {
