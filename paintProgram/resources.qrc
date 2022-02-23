@@ -23,5 +23,6 @@
         <file>Resources/icon-triangle.png</file>
         <file>Resources/icon-move-down.png</file>
         <file>Resources/icon-move-up.png</file>
+        <file>Resources/icon-merge-layers.png</file>
     </qresource>
 </RCC>

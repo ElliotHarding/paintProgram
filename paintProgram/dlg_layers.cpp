@@ -112,3 +112,13 @@ void DLG_Layers::on_btn_merge_clicked()
 {
 
 }
+
+void DLG_Layers::on_btn_moveUp_clicked()
+{
+
+}
+
+void DLG_Layers::on_btn_moveDown_clicked()
+{
+
+}

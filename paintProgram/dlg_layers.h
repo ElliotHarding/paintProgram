@@ -30,6 +30,8 @@ signals:
 private slots:
     void on_btn_merge_clicked();
     void on_btn_add_clicked();
+    void on_btn_moveUp_clicked();
+    void on_btn_moveDown_clicked();
 
     void onDelete(QListWidgetItem* pListWidgetItem);
     void onEnabledChanged(QListWidgetItem* pListWidgetItem, const bool enabled);
