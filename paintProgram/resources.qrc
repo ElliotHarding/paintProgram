@@ -24,5 +24,6 @@
         <file>Resources/icon-move-down.png</file>
         <file>Resources/icon-move-up.png</file>
         <file>Resources/icon-merge-layers.png</file>
+        <file>Resources/icon-add-layer.png</file>
     </qresource>
 </RCC>
