@@ -615,10 +615,8 @@ void MainWindow::onLoad()
 {
     const QUrl fileUrl = m_dlg_fileDlg->getOpenFileUrl(this);
     QString filePath = fileUrl.path();
-    QString fileName = QFileInfo(fileUrl.fileName()).baseName();
-
-    //todo ~ why do i need to cut the first / of the url?
-    filePath = filePath.mid(1, filePath.length());
+    QString fileName = QFileInfo(fileUrl.fileName()).baseName();    
+    filePath = filePath.mid(1, filePath.length());//todo ~ why do i need to cut the first / of the url?
 
     Canvas* c = new Canvas(this, filePath);
     addNewCanvas(c, fileName);
@@ -632,11 +630,13 @@ void MainWindow::onLoadLayer()
         return;
     }
 
+    //Get file path and name
     const QUrl fileUrl = m_dlg_fileDlg->getOpenFileUrl(this);
     QString filePath = fileUrl.path();
     QString fileName = QFileInfo(fileUrl.fileName()).baseName();
     filePath = filePath.mid(1, filePath.length());//todo ~ why do i need to cut the first / of the url?
 
+    //Create & validate image
     QImage image(filePath);
     if(image == QImage())
     {
@@ -644,6 +644,7 @@ void MainWindow::onLoadLayer()
         return;
     }
 
+    //Add to current canvas
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
