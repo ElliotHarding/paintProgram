@@ -152,7 +152,6 @@ void MainWindow::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
     m_dlg_layers->setLayers(layerInfo, selectedLayer);
 }
 
-//todo. pass mousewheel events to canvas for zoom. because clicking on other dialogs means you cant zoom until clicked back on mainwindow
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::KeyPress)
@@ -183,7 +182,8 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     }
     else if(event->type() == QEvent::Wheel)
     {
-        if(dynamic_cast<DLG_Tools*>(watched))
+        if(dynamic_cast<DLG_Tools*>(watched) || dynamic_cast<DLG_TextSettings*>(watched) || dynamic_cast<DLG_BrushSettings*>(watched) || dynamic_cast<DLG_Shapes*>(watched) ||
+           dynamic_cast<DLG_Info*>(watched) || dynamic_cast<DLG_Layers*>(watched) || dynamic_cast<QColorDialog*>(watched) || dynamic_cast<DLG_Sensitivity*>(watched))
         {
             Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
             if(c)
