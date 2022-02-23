@@ -129,6 +129,7 @@ public:
     QImage getImageCopy();
     QString getSavePath();
     void setSavePath(QString path);
+    bool save(QString path);
 
     ///Layer stuff
     void onLayerAdded();

@@ -682,12 +682,18 @@ void MainWindow::onSaveAs()
 
 QString MainWindow::getSaveAsPath(QString name)
 {
-    return m_dlg_fileDlg->getSaveFileName(this, name, ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );
+    return m_dlg_fileDlg->getSaveFileName(this, name, ".", "PPG (*.paintProgram)" );
+    //to be copied for export
+    //return m_dlg_fileDlg->getSaveFileName(this, name, ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );
 }
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
 {
     canvas->setSavePath(path);
+    canvas->save(path);
+
+    //QFile caFile(outputFolder + "file.extension");
+    //caFile.open(QIODevice::WriteOnly | QIODevice::Text);
 
     /*
 Save to text file:
@@ -720,8 +726,8 @@ qDebug() << "fail to save image from Qbytrearray";
 }
      */
 
-    qDebug() << path;
-    qDebug() << (canvas->getImageCopy().save(path) ? "Saved image" : "Failed to save image");
+    //qDebug() << path;
+    //qDebug() << (canvas->getImageCopy().save(path) ? "Saved image" : "Failed to save image");
 }
 
 void MainWindow::onOpenColorPicker()

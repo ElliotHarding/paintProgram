@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <stack>
 #include <QPainterPath>
+#include <QBuffer>
 
 #include "mainwindow.h"
 
@@ -169,6 +170,33 @@ QString Canvas::getSavePath()
 void Canvas::setSavePath(QString path)
 {
     m_savePath = path;
+}
+
+bool Canvas::save(QString path)
+{
+    m_savePath = path;
+
+    QFile file(path);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream out(&file);
+
+    for(CanvasLayer& cl : m_canvasLayers)
+    {
+        out << "BEGIN_LAYER" << "\n";;
+        out << cl.m_info.m_name << "\n";
+        out << cl.m_info.m_enabled << "\n";;
+
+        QByteArray ba;
+        QBuffer buffer(&ba);
+        buffer.open(QIODevice::WriteOnly);
+
+        cl.m_image.save(&buffer, "PNG");
+        out << buffer.data().toHex() << "\n";
+        out << "END_LAYER" << "\n";
+    }
+
+    file.close();
+    return true;
 }
 
 void Canvas::onLayerAdded()
