@@ -9,7 +9,7 @@ DLG_Layers::DLG_Layers(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    ui->listWidget_layers->setDragDropMode(QAbstractItemView::DragDropMode::InternalMove);
+    ui->listWidget_layers->setDragDropMode(QAbstractItemView::DragDropMode::NoDragDrop);
 
     connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 }
