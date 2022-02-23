@@ -67,7 +67,7 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
     init(image.width(), image.height());
 }
 
-Canvas::Canvas(MainWindow *parent, QString filePath) :
+Canvas::Canvas(MainWindow *parent, QString& filePath) :
     QTabWidget(),
     m_pParent(parent)
 {
@@ -97,6 +97,8 @@ Canvas::Canvas(MainWindow *parent, QString filePath) :
                 m_canvasLayers.push_back(cl);
             }
         }
+
+        m_savePath = filePath;
     }
     else
     {
@@ -106,8 +108,6 @@ Canvas::Canvas(MainWindow *parent, QString filePath) :
         canvasLayer.m_image = image;
         m_canvasLayers.push_back(canvasLayer);
     }
-
-    m_savePath = filePath;
 
     //Todo ~ what if theres no canvas layers!
     init(m_canvasLayers[0].m_image.width(), m_canvasLayers[0].m_image.height());

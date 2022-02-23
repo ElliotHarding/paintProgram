@@ -121,7 +121,7 @@ class Canvas : public QTabWidget
 
 public:
     Canvas(MainWindow* parent, QImage image);
-    Canvas(MainWindow* parent, QString filePath);
+    Canvas(MainWindow* parent, QString& filePath);
     ~Canvas();
 
     ///Image stuff & Saving/loading

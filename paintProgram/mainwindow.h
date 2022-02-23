@@ -83,6 +83,7 @@ private slots:
     void onLoadLayer();
     void onSave();
     void onSaveAs();
+    void onExportImage();
     void onAddTabClicked();
     void onGetCanvasSettings(int width, int height, QString name);
     void onShowCanvasSettings();

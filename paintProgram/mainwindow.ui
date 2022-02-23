@@ -116,6 +116,7 @@
     <addaction name="actionLoad_layer"/>
     <addaction name="actionSave_Image"/>
     <addaction name="actionSave_As"/>
+    <addaction name="actionExport"/>
     <addaction name="actionNew"/>
    </widget>
    <widget class="QMenu" name="menuMenu">
@@ -250,6 +251,11 @@
   <action name="actionLoad_layer">
    <property name="text">
     <string>Load Layer</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
    </property>
   </action>
  </widget>

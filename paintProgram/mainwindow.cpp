@@ -97,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_showToolSelector, SIGNAL(triggered()), this, SLOT(onShowToolSelectorDialog()));
     connect(ui->action_showToolSpecificDialogs, SIGNAL(triggered()), this, SLOT(onShowToolSpecificDialogs()));
     connect(ui->actionLoad_layer, SIGNAL(triggered()), this, SLOT(onLoadLayer()));
+    connect(ui->actionExport, SIGNAL(triggered()), this, SLOT(onExportImage()));
 
     showMaximized();
 
@@ -685,11 +686,22 @@ void MainWindow::onSaveAs()
     }
 }
 
+void MainWindow::onExportImage()
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        const QString exportPath = m_dlg_fileDlg->getSaveFileName(this, ui->c_tabWidget->tabText(ui->c_tabWidget->currentIndex()), ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );
+
+        qDebug() << "MainWindow::onExportImage:";
+        qDebug() << exportPath;
+        qDebug() << (c->getImageCopy().save(exportPath) ? "Saved image" : "Failed to save image");
+    }
+}
+
 QString MainWindow::getSaveAsPath(QString name)
 {
     return m_dlg_fileDlg->getSaveFileName(this, name, ".", "PPG (*.paintProgram)" );
-    //to be copied for export
-    //return m_dlg_fileDlg->getSaveFileName(this, name, ".", "PNG (*.png);; JPG (*.jpg);; XPM (*.xpm);; BMP (*.bmp)" );
 }
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
