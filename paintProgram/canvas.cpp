@@ -20,6 +20,9 @@ const QColor SelectionBorderColor = Qt::blue;
 const QColor SelectionAreaColorA = QColor(0,40,100,50);
 const int SelectedPixelsOutlineFlashFrequency = 200;
 const uint MaxCanvasHistory = 20;
+const QString CanvasSaveFileType = "paintProgram";
+const QString CanvasSaveLayerBegin = "BEGIN_LAYER";
+const QString CanvasSaveLayerEnd = "END_LAYER";
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -73,7 +76,7 @@ Canvas::Canvas(MainWindow *parent, QString& filePath) :
     QTabWidget(),
     m_pParent(parent)
 {
-    if(QFileInfo(filePath).suffix().contains(".paintProgram"))
+    if(QFileInfo(filePath).suffix().contains(Constants::CanvasSaveFileType))
     {
         QFile inFile(filePath);
         inFile.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -82,7 +85,7 @@ Canvas::Canvas(MainWindow *parent, QString& filePath) :
         while(!in.atEnd())
         {
             QString line = in.readLine();
-            if(line == "BEGIN_LAYER")
+            if(line == Constants::CanvasSaveLayerBegin)
             {
                 CanvasLayer cl;
 
@@ -231,7 +234,7 @@ bool Canvas::save(QString path)
 
     for(CanvasLayer& cl : m_canvasLayers)
     {
-        out << "BEGIN_LAYER" << "\n";;
+        out << Constants::CanvasSaveLayerBegin << "\n";;
         out << cl.m_info.m_name << "\n";
         out << cl.m_info.m_enabled << "\n";;
 
@@ -241,7 +244,7 @@ bool Canvas::save(QString path)
 
         cl.m_image.save(&buffer, "PNG");
         out << buffer.data().toHex() << "\n";
-        out << "END_LAYER" << "\n";
+        out << Constants::CanvasSaveLayerEnd << "\n";
     }
 
     file.close();
