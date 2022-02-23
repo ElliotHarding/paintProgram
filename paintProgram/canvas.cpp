@@ -217,9 +217,8 @@ void Canvas::onWriteText(QString letter, QFont font)
         m_canvasMutex.lock();
 
         QImage textImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+        textImage.fill(Qt::transparent);
         QPainter textPainter(&textImage);
-        textPainter.setCompositionMode (QPainter::CompositionMode_Clear);
-        textPainter.fillRect(textImage.rect(), Qt::transparent);
         textPainter.setCompositionMode (QPainter::CompositionMode_Source);
         textPainter.setPen(m_pParent->getSelectedColor());
         textPainter.setFont(font);
@@ -1361,8 +1360,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
-    //If were not dragging, and the clipboard shows something. Dump it
-    if(m_tool != TOOL_DRAG && !m_pClipboardPixels->isImageDefault())
+    //If were not dragging, and the clipboard shows something. Dump it - unless editing text
+    if(m_tool != TOOL_DRAG && !m_pClipboardPixels->isImageDefault() && m_tool != TOOL_TEXT)
     {
         //Dump clipboard, if something actually dumped record image history
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
