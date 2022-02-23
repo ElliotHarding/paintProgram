@@ -107,7 +107,7 @@ Canvas::Canvas(MainWindow *parent, QString filePath) :
         m_canvasLayers.push_back(canvasLayer);
     }
 
-    setSavePath(filePath);
+    m_savePath = filePath;
 
     //Todo ~ what if theres no canvas layers!
     init(m_canvasLayers[0].m_image.width(), m_canvasLayers[0].m_image.height());
@@ -217,11 +217,6 @@ void Canvas::onWriteText(QString letter, QFont font)
 QString Canvas::getSavePath()
 {
     return m_savePath;
-}
-
-void Canvas::setSavePath(QString path)
-{
-    m_savePath = path;
 }
 
 bool Canvas::save(QString path)

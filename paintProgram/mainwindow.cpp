@@ -694,45 +694,9 @@ QString MainWindow::getSaveAsPath(QString name)
 
 void MainWindow::saveCanvas(Canvas *canvas, QString path)
 {
-    canvas->setSavePath(path);
-    canvas->save(path);
-
-    //QFile caFile(outputFolder + "file.extension");
-    //caFile.open(QIODevice::WriteOnly | QIODevice::Text);
-
-    /*
-Save to text file:
-QByteArray ba;
-QBuffer buffer(&ba);
-buffer.open(QIODevice::WriteOnly);
-QTextStream out(&file);
-
-Image_snapshot.save(&buffer, "PNG");
-out << buffer.data().toHex();
-
-
-load from file:
-if(line.contains("#BEGIN_Image"))
-{
-line = in.readLine();
-ba.clear();
-while (!line.contains("#END_Image")) {
-line = in.readLine();
-QTextStream(&ba) << line;
-}
-QByteArray readCompressed = QByteArray::fromHex(Buffer.toAscii());
-if(!WebCam_snapshot.loadFromData(readCompressed))
-qDebug() << "fail to load Qbytrearray";
-
-//test image
-if(!WebCam_snapshot.save("test.bmp"))
-qDebug() << "fail to save image from Qbytrearray";
-
-}
-     */
-
-    //qDebug() << path;
-    //qDebug() << (canvas->getImageCopy().save(path) ? "Saved image" : "Failed to save image");
+    qDebug() << "MainWindow::saveCanvas:";
+    qDebug() << path;
+    qDebug() << (canvas->save(path) ? "Saved image" : "Failed to save image");
 }
 
 void MainWindow::onOpenColorPicker()
