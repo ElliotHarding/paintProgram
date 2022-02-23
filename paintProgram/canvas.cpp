@@ -610,7 +610,6 @@ void Canvas::onUndoPressed()
         m_selectedLayer = m_canvasLayers.size() - 1; //assumes theres at least one layer
     }
 
-    //Todo ~ check if need to update layers
     m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     update();
@@ -621,8 +620,6 @@ void Canvas::onRedoPressed()
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     m_canvasHistory.redoHistory(m_canvasLayers);
-
-    //Todo ~ check if need to update layers
     m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
     update();
