@@ -209,7 +209,7 @@ void Canvas::onLayerTextChanged(const uint index, QString text)
 void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndexB)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    if(layerIndexA < m_canvasLayers.count() && layerIndexB < m_canvasLayers.count() && m_selectedLayer == layerIndexA)
+    if(layerIndexA < (uint)m_canvasLayers.count() && layerIndexB < (uint)m_canvasLayers.count() && m_selectedLayer == layerIndexA)
     {
         //Paint layer b onto layer a
         QPainter mergePainter(&m_canvasLayers[layerIndexA].m_image);
@@ -239,10 +239,10 @@ void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndex
 void Canvas::onLayerMoveUp(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    if(index > 0 && index < m_canvasLayers.size())
+    if(index > 0 && (int)index < m_canvasLayers.size())
     {
         //Move up
-        m_canvasLayers.swap(index, index - 1);
+        m_canvasLayers.swapItemsAt(index, index - 1);
         m_selectedLayer = index - 1;
 
         //Update layer dialog on new layers
@@ -261,10 +261,10 @@ void Canvas::onLayerMoveUp(const uint index)
 void Canvas::onLayerMoveDown(const uint index)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    if(index < m_canvasLayers.size() - 1)
+    if((int)index < m_canvasLayers.size() - 1)
     {
         //Move down
-        m_canvasLayers.swap(index + 1, index);
+        m_canvasLayers.swapItemsAt(index + 1, index);
         m_selectedLayer = index + 1;
 
         //Update layer dialog on new layers
@@ -512,7 +512,7 @@ void Canvas::onUndoPressed()
 
     m_canvasHistory.undoHistory(m_canvasLayers);
 
-    if(m_selectedLayer >= m_canvasLayers.size())
+    if((int)m_selectedLayer >= m_canvasLayers.size())
     {
         m_selectedLayer = m_canvasLayers.size() - 1; //assumes theres at least one layer
     }
@@ -1979,7 +1979,7 @@ void CanvasHistory::recordHistory(QList<CanvasLayer> canvasSnapShot)
 
 void CanvasHistory::redoHistory(QList<CanvasLayer>& canvasLayers)
 {
-    if(m_historyIndex < m_history.size() - 1)
+    if((int)m_historyIndex < m_history.size() - 1)
     {
         canvasLayers = m_history[size_t(++m_historyIndex)];
     }
