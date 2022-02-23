@@ -100,7 +100,7 @@ void Canvas::onAddedToTab()
 
     m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
 
-    recordImageHistory();
+    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 }
 
 int Canvas::width()
@@ -170,6 +170,7 @@ void Canvas::onLayerAdded()
     CanvasLayer canvasLayer;
     canvasLayer.m_image = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
     canvasLayer.m_image.fill(Qt::transparent);
+    canvasLayer.recordHistory();
     m_canvasLayers.push_back(canvasLayer);
 }
 
@@ -264,7 +265,7 @@ void Canvas::onCurrentToolUpdated(const Tool t)
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selectedLayer
         if(m_pClipboardPixels->dumpImage(painter))
         {
-            recordImageHistory();
+            m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
         }
 
         canvasMutexLocker.unlock();
@@ -312,7 +313,7 @@ void Canvas::onDeleteKeyPressed()
 
         m_pSelectedPixels->clear();
 
-        recordImageHistory();
+        m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 
         canvasMutexLocker.unlock();
 
@@ -368,7 +369,7 @@ void Canvas::onCutKeysPressed()
     m_pSelectedPixels->clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    recordImageHistory();
+    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 
     canvasMutexLocker.unlock();
 
@@ -397,23 +398,19 @@ void Canvas::onPasteKeysPressed()
 void Canvas::onUndoPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    if(m_imageHistoryIndex > 0)
-    {
-        m_canvasLayers[m_selectedLayer].m_image = m_imageHistory[size_t(--m_imageHistoryIndex)]; //TODO ~ Make undo for all layers + this assumes there is a selected layer
 
-        update();
-    }
+    m_canvasLayers[m_selectedLayer].undoHistory(); //assumes theres always a selected layer
+
+    update();
 }
 
 void Canvas::onRedoPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    if(m_imageHistoryIndex < int(m_imageHistory.size() - 1))
-    {
-        m_canvasLayers[m_selectedLayer].m_image = m_imageHistory[size_t(++m_imageHistoryIndex)]; //TODO ~ Make undo for all layers + this assumes there is a selected layer
 
-        update();
-    }
+    m_canvasLayers[m_selectedLayer].redoHistory(); //assumes theres always a selected layer
+
+    update();
 }
 
 void operateOnCanvasPixels(QImage& canvas, std::function<void (int, int)> func)
@@ -454,7 +451,7 @@ void Canvas::onBlackAndWhite()
         });
     }
 
-    recordImageHistory();
+    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 
     update();
 }
@@ -485,7 +482,7 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
         });
     }
 
-    recordImageHistory();
+    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 
     update();
 }
@@ -880,7 +877,7 @@ void Canvas::onConfirmEffects()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_beforeEffectsImage = QImage();
-    recordImageHistory();
+    m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 }
 
 void Canvas::onCancelEffects()
@@ -927,19 +924,6 @@ void Canvas::resizeEvent(QResizeEvent *event)
         m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
 
     update();
-}
-
-//Function called when m_canvasMutex is locked
-void Canvas::recordImageHistory()
-{
-    m_imageHistory.push_back(m_canvasLayers[m_selectedLayer].m_image); //TODO - make for all layers - at the moment it assumes theres always a selected layer
-
-    if(m_c_maxHistory < m_imageHistory.size())
-    {
-        m_imageHistory.erase(m_imageHistory.begin());
-    }
-
-    m_imageHistoryIndex = m_imageHistory.size() - 1;
 }
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
@@ -1163,7 +1147,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
         if(m_pClipboardPixels->dumpImage(painter))
         {
-            recordImageHistory();
+            m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
         }
         update();
     }
@@ -1224,13 +1208,13 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     else if(m_tool == TOOL_SHAPE)
     {
         //Dump dragged contents onto m_canvasImage
-        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
+        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);//assumes theres always a selected layer
         m_pClipboardPixels->dumpImage(painter);
         painter.end();
 
         update();
 
-        recordImageHistory();
+        m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
 
         m_pSelectedPixels->clear();
 
@@ -1254,7 +1238,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
-        recordImageHistory();
+        m_canvasLayers[m_selectedLayer].recordHistory(); //assumes theres always a selected layer
     }
     else if(m_tool == TOOL_SHAPE)
     {

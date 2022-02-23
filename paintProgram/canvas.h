@@ -191,12 +191,6 @@ private:
     ///Draw shape
     QPoint m_drawShapeOrigin = QPoint(0,0);
 
-    ///Undo/redo
-    void recordImageHistory();//Function called when m_canvasMutex is locked
-    std::vector<QImage> m_imageHistory;
-    int m_imageHistoryIndex = 0;
-    const uint m_c_maxHistory = 20;
-
     ///Zooming
     float m_zoomFactor = 1;
     const float m_cZoomIncrement = 1.1;
