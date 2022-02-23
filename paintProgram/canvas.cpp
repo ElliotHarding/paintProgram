@@ -72,7 +72,7 @@ Canvas::Canvas(MainWindow* parent, const int width, const int height) :
     init(width, height);
 }
 
-Canvas::Canvas(MainWindow *parent, QString& filePath) :
+Canvas::Canvas(MainWindow *parent, QString& filePath, bool& loadSuccess) :
     QTabWidget(),
     m_pParent(parent)
 {
@@ -109,13 +109,25 @@ Canvas::Canvas(MainWindow *parent, QString& filePath) :
     {
         QImage image(filePath);
 
-        CanvasLayer canvasLayer;
-        canvasLayer.m_image = image;
-        m_canvasLayers.push_back(canvasLayer);
+        if(image != QImage() && !image.isNull())
+        {
+            CanvasLayer canvasLayer;
+            canvasLayer.m_image = image;
+            m_canvasLayers.push_back(canvasLayer);
+        }
     }
 
-    //Todo ~ what if theres no canvas layers!
-    init(m_canvasLayers[0].m_image.width(), m_canvasLayers[0].m_image.height());
+    //Did we load successfully?
+    if(m_canvasLayers.size() == 0)
+    {
+        loadSuccess = false;
+        qDebug() << "Failed to load canvas!";
+    }
+    else
+    {
+        loadSuccess = true;
+        init(m_canvasLayers[0].m_image.width(), m_canvasLayers[0].m_image.height());
+    }
 }
 
 void Canvas::init(uint width, uint height)

@@ -616,8 +616,17 @@ void MainWindow::onLoad()
     QString fileName = QFileInfo(fileUrl.fileName()).baseName();    
     filePath = filePath.mid(1, filePath.length());//todo ~ why do i need to cut the first / of the url?
 
-    Canvas* c = new Canvas(this, filePath);
-    addNewCanvas(c, fileName);
+    bool loadSuccess = false;
+    Canvas* c = new Canvas(this, filePath, loadSuccess);
+    if(loadSuccess)
+    {
+        addNewCanvas(c, fileName);
+    }
+    else
+    {
+        //Todo ~ notify user of load failure
+        delete c;
+    }
 }
 
 void MainWindow::onLoadLayer()
