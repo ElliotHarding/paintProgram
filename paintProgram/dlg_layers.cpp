@@ -41,15 +41,20 @@ void DLG_Layers::on_btn_add_clicked()
 
 void DLG_Layers::onDelete(QListWidgetItem* pListWidgetItem)
 {
-    const uint layerPosition = ui->listWidget_layers->row(pListWidgetItem);
-
     //Dont ever remove the last layer
-    if(layerPosition != 0)
+    if(ui->listWidget_layers->count() > 1)
     {
+        const uint layerIndex = ui->listWidget_layers->row(pListWidgetItem);
+
         ui->listWidget_layers->removeItemWidget(pListWidgetItem);
         delete pListWidgetItem;
 
-        emit onLayerDeleted(layerPosition);
+        emit onLayerDeleted(layerIndex);
+
+        if(layerIndex == 0)
+        {
+            currentRowChanged(0);
+        }
     }
 }
 
