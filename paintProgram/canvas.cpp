@@ -99,16 +99,16 @@ Canvas::Canvas(MainWindow *parent, QString filePath) :
         if(line == "BEGIN_LAYER")
         {
             CanvasLayer cl;
+
+            //Read layer info
             cl.m_info.m_name = in.readLine();
             cl.m_info.m_enabled = in.readLine() == "1" ? true : false;
 
+            //Read layer image data
             QByteArray ba;
-            QBuffer buffer(&ba);
-            buffer.open(QIODevice::ReadOnly);
             QTextStream(&ba) << in.readLine();
             QByteArray layerImageData = QByteArray::fromHex(ba);
             cl.m_image.loadFromData(layerImageData);
-            //cl.m_image.loadFromData(ba);
 
             m_canvasLayers.push_back(cl);
         }
