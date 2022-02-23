@@ -140,9 +140,9 @@ QFont MainWindow::getTextFont()
     return m_dlg_textSettings->getFont();
 }
 
-void MainWindow::setLayers(QList<CanvasLayerInfo> layerInfo)
+void MainWindow::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
 {
-    m_dlg_layers->setLayers(layerInfo);
+    m_dlg_layers->setLayers(layerInfo, selectedLayer);
 }
 
 //todo. pass mousewheel events to canvas for zoom. because clicking on other dialogs means you cant zoom until clicked back on mainwindow

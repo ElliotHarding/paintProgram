@@ -55,7 +55,7 @@ Canvas::Canvas(MainWindow* parent, QImage image) :
 
     QList<CanvasLayerInfo> layers;
     layers.push_back(canvasLayer.m_info);
-    m_pParent->setLayers(layers);
+    m_pParent->setLayers(layers, m_selectedLayer);
 
     m_canvasWidth = image.width();
     m_canvasHeight = image.height();
@@ -1002,7 +1002,7 @@ void Canvas::showEvent(QShowEvent *)
     {
         layers.push_back(layer.m_info);
     }
-    m_pParent->setLayers(layers);
+    m_pParent->setLayers(layers, m_selectedLayer);
 
     canvasMutexLocker.unlock();
 

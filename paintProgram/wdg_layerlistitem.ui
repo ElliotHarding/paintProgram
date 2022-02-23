@@ -68,7 +68,7 @@ p, li { white-space: pre-wrap; }
     <string>X</string>
    </property>
   </widget>
-  <widget class="QFrame" name="frame">
+  <widget class="QFrame" name="frame_background">
    <property name="geometry">
     <rect>
      <x>1</x>
@@ -87,7 +87,7 @@ p, li { white-space: pre-wrap; }
     <enum>QFrame::Raised</enum>
    </property>
   </widget>
-  <zorder>frame</zorder>
+  <zorder>frame_background</zorder>
   <zorder>checkBox_enabled</zorder>
   <zorder>textEdit_name</zorder>
   <zorder>btn_close</zorder>

@@ -19,6 +19,8 @@ public:
 
     ~WDG_LayerListItem();
 
+    void setSelected(bool isSelected);
+
 signals:
     void onDelete(QListWidgetItem* pListWidgetItem);
     void onEnabledChaged(QListWidgetItem* pListWidgetItem, const bool enabled);

@@ -8,11 +8,17 @@ WDG_LayerListItem::WDG_LayerListItem(QListWidgetItem *pListWidgetItem, CanvasLay
     ui->setupUi(this);
     ui->checkBox_enabled->setCheckState(info.m_enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     ui->textEdit_name->setText(info.m_name);
+    setSelected(false);
 }
 
 WDG_LayerListItem::~WDG_LayerListItem()
 {
     delete ui;
+}
+
+void WDG_LayerListItem::setSelected(bool isSelected)
+{
+    ui->frame_background->setStyleSheet(isSelected ? "background-color: lightblue" : "background-color: white");
 }
 
 void WDG_LayerListItem::on_btn_close_clicked()

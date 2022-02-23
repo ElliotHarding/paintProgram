@@ -19,7 +19,7 @@ DLG_Layers::~DLG_Layers()
     delete ui;
 }
 
-void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo)
+void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
 {
     ui->listWidget_layers->clear();
 
@@ -28,7 +28,7 @@ void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo)
         addLayer(layer);
     }
 
-    currentRowChanged();
+    setSelectedLayer(selectedLayer);
 }
 
 void DLG_Layers::on_btn_add_clicked()
@@ -65,16 +65,7 @@ void DLG_Layers::onTextChanged(QListWidgetItem *pListWidgetItem, QString text)
 
 void DLG_Layers::currentRowChanged(int currentRow)
 {
-    //Loop through all layer widgets set background to white
-    for(int row = 0; row < ui->listWidget_layers->count(); row++)
-    {
-        QListWidgetItem *item = ui->listWidget_layers->item(row);
-        ui->listWidget_layers->itemWidget(item)->setStyleSheet("background-color: white");
-    }
-
-    //Except for current widget. Set this background to lightblue
-    QListWidgetItem *item = ui->listWidget_layers->item(currentRow);
-    ui->listWidget_layers->itemWidget(item)->setStyleSheet("background-color: lightblue");
+    setSelectedLayer(currentRow);
 
     emit onSelectedLayerChanged(currentRow);
 }
@@ -93,6 +84,20 @@ void DLG_Layers::addLayer(CanvasLayerInfo info)
 
     item = nullptr;
     itemWidget = nullptr;
+}
+
+void DLG_Layers::setSelectedLayer(uint currentRow)
+{
+    //Loop through all layer widgets set background to white
+    for(int row = 0; row < ui->listWidget_layers->count(); row++)
+    {
+        QListWidgetItem *item = ui->listWidget_layers->item(row);
+        WDG_LayerListItem* itemWidget = dynamic_cast<WDG_LayerListItem*>(ui->listWidget_layers->itemWidget(item));
+        if(itemWidget)
+        {
+            itemWidget->setSelected(row == currentRow);
+        }
+    }
 }
 
 void DLG_Layers::on_btn_merge_clicked()

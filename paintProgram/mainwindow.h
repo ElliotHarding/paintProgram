@@ -55,7 +55,7 @@ public:
     QFont getTextFont();
 
     ///Canvas to dlg layers
-    void setLayers(QList<CanvasLayerInfo> layerInfo);
+    void setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer);
 
     ///Access mainwindow properties
     bool isCtrlPressed();

@@ -18,7 +18,7 @@ public:
     explicit DLG_Layers(QWidget *parent = nullptr);
     ~DLG_Layers();
 
-    void setLayers(QList<CanvasLayerInfo> layerInfo);
+    void setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer);
 
 signals:
     void onLayerAdded();
@@ -41,6 +41,7 @@ private:
     Ui::DLG_Layers *ui;
 
     void addLayer(CanvasLayerInfo info);
+    void setSelectedLayer(uint index);
 };
 
 #endif // DLG_LAYERS_H
