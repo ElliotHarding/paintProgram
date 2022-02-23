@@ -29,8 +29,7 @@ signals:
 private slots:
     void on_btn_close_clicked();
     void on_checkBox_enabled_stateChanged(int enabled);
-
-    void on_textEdit_name_textChanged();
+    void on_lineEdit_name_textChanged(const QString &arg1);
 
 private:
     Ui::WDG_LayerListItem *ui;

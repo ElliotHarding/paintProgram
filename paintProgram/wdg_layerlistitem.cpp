@@ -7,7 +7,7 @@ WDG_LayerListItem::WDG_LayerListItem(QListWidgetItem *pListWidgetItem, CanvasLay
 {
     ui->setupUi(this);
     ui->checkBox_enabled->setCheckState(info.m_enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    ui->textEdit_name->setText(info.m_name);
+    ui->lineEdit_name->setText(info.m_name);
     setSelected(false);
 }
 
@@ -31,7 +31,7 @@ void WDG_LayerListItem::on_checkBox_enabled_stateChanged(int enabled)
     emit onEnabledChaged(m_pListWidgetItem, enabled);
 }
 
-void WDG_LayerListItem::on_textEdit_name_textChanged()
+void WDG_LayerListItem::on_lineEdit_name_textChanged(const QString &text)
 {
-    emit onTextChanged(m_pListWidgetItem, ui->textEdit_name->toPlainText());
+    emit onTextChanged(m_pListWidgetItem, text);
 }
