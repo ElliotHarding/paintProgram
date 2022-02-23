@@ -638,6 +638,12 @@ void MainWindow::onLoadLayer()
 
     QImage image(filePath);
 
+    if(image == QImage())
+    {
+        //todo - notify user of invalid load
+        return;
+    }
+
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
