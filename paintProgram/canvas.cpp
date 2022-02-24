@@ -2062,7 +2062,17 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         }
     }
 
-    painter.drawRect(m_dimensionsRect.translated(m_dragX + offsetX, m_dragY + offsetY));
+    //Draw draggy things to scale dimension of clipboard
+    if(m_pixels.size() > 0)
+    {
+        const QRect translatedDimensions = m_dimensionsRect.translated(m_dragX + offsetX, m_dragY + offsetY);
+
+        QPen p;
+        painter.setBrush(Qt::white);
+        p.setColor(Qt::black);
+        painter.setPen(p);
+        painter.drawEllipse(QRect(translatedDimensions.topLeft(), QSize(1,1)));
+    }
 }
 
 void PaintableClipboard::updateDimensionsRect()
