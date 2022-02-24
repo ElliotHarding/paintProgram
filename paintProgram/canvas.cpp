@@ -1905,6 +1905,7 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 void PaintableClipboard::generateClipboard(QImage &canvas, SelectedPixels *pSelectedPixels)
 {
     Clipboard::generateClipboard(canvas, pSelectedPixels);
+    updateDimensionsRect();
     update();
 }
 
@@ -1915,6 +1916,7 @@ void PaintableClipboard::setClipboard(Clipboard clipboard)
     m_previousDragPos = Constants::NullDragPoint;
     m_dragX = 0;
     m_dragY = 0;
+    updateDimensionsRect();
     update();
 }
 
@@ -1941,6 +1943,8 @@ void PaintableClipboard::setImage(QImage image)
             }
         }
     }
+
+    updateDimensionsRect();
 
     update();
 }
@@ -2025,6 +2029,7 @@ void PaintableClipboard::reset()
     m_dragX = 0;
     m_dragY = 0;
     m_pixels.clear();
+    m_dimensionsRect = QRect();
 }
 
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
@@ -2040,9 +2045,10 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     float offsetY = 0;
     m_pParentCanvas->getPanOffset(offsetX, offsetY);
 
+    //Draw clipboard
     painter.drawImage(QRect(m_dragX + offsetX, m_dragY + offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
-    //Draw transparent selected pixels ~ So inneficient! look for something else
+    //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     for(QPoint p : m_pixels)
     {
         if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
@@ -2053,6 +2059,32 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
                         (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
 
             painter.fillRect(QRect(p.x() + m_dragX + offsetX, p.y() + m_dragY + offsetY, 1, 1), col);
+        }
+    }
+
+    painter.drawRect(m_dimensionsRect.translated(m_dragX + offsetX, m_dragY + offsetY));
+}
+
+void PaintableClipboard::updateDimensionsRect()
+{
+    m_dimensionsRect = QRect();
+    for(QPoint p : m_pixels)
+    {
+        if(m_dimensionsRect.x() == 0 || m_dimensionsRect.x() > p.x())
+        {
+            m_dimensionsRect.setX(p.x());
+        }
+        if(m_dimensionsRect.y() == 0 || m_dimensionsRect.y() > p.y())
+        {
+            m_dimensionsRect.setY(p.y());
+        }
+        if(m_dimensionsRect.right() < p.x())
+        {
+            m_dimensionsRect.setRight(p.x());
+        }
+        if(m_dimensionsRect.bottom() < p.y())
+        {
+            m_dimensionsRect.setBottom(p.y());
         }
     }
 }

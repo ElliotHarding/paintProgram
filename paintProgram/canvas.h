@@ -91,8 +91,14 @@ public:
     void reset();
 
 private:
+    ///Drawing
     void paintEvent(QPaintEvent* paintEvent) override;
 
+    ///Dimensions rect
+    QRect m_dimensionsRect = QRect();
+    void updateDimensionsRect();
+
+    ///Dragging
     int m_dragX = 0;
     int m_dragY = 0;
     QPoint m_previousDragPos;
