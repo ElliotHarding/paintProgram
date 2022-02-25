@@ -505,10 +505,9 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
 void Canvas::onDeleteKeyPressed()
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selected layer
         painter.setCompositionMode (QPainter::CompositionMode_Clear);
 
@@ -524,6 +523,11 @@ void Canvas::onDeleteKeyPressed()
         canvasMutexLocker.unlock();
 
         update();
+    }
+    else if(m_tool == TOOL_DRAG)
+    {
+        m_pClipboardPixels->reset();
+        m_pSelectedPixels->clear();
     }
 }
 
