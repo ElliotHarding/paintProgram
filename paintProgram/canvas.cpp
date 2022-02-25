@@ -2073,11 +2073,29 @@ void PaintableClipboard::mouseReleaseEvent(QMouseEvent *releaseEvent)
     m_bDraggingBottomRight = false;
 }
 
+void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDimensions)
+{
+    QImage oldImage = imageToScale;
+
+    imageToScale.fill(Qt::transparent);
+    QPainter clipboardPainter(&imageToScale);
+    clipboardPainter.drawImage(newDimensions, oldImage, oldDimensions);
+}
+
 void PaintableClipboard::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_bDraggingTopLeft == true)
     {
+        const QRect oldDimensions = m_dimensionsRect;
+
         QPoint mouseLocation = getMousePosRelative(event->pos());
+        m_dimensionsRect.setX(mouseLocation.x());
+        m_dimensionsRect.setY(mouseLocation.y());
+
+        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+
+        //Redraws, updates m_dimensionsRect and m_pixels
+        setImage(m_clipboardImage);
     }
     else if(m_bDraggingTopRight == true)
     {
