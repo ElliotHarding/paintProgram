@@ -97,6 +97,7 @@ private:
     ///Dimensions rect
     QRect m_dimensionsRect = QRect();
     void updateDimensionsRect();
+    QImage m_nubbleImage;
 
     ///Dragging
     int m_dragX = 0;

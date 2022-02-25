@@ -1901,6 +1901,12 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
     m_pParentCanvas(parent)
 {
     setGeometry(0, 0, parent->width(), parent->height());
+
+    m_nubbleImage = QImage(QSize(5, 5), QImage::Format_ARGB32);
+    m_nubbleImage.fill(Qt::black);
+    QPainter nubbleImagePainter(&m_nubbleImage);
+    nubbleImagePainter.fillRect(QRect(1, 1, 3, 3), Qt::white);
+    nubbleImagePainter.end();
 }
 
 void PaintableClipboard::generateClipboard(QImage &canvas, SelectedPixels *pSelectedPixels)
@@ -2064,12 +2070,6 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         }
     }
 
-    QImage nubbleImage = QImage(QSize(5, 5), QImage::Format_ARGB32);
-    nubbleImage.fill(Qt::black);
-    QPainter nubbleImagePainter(&nubbleImage);
-    nubbleImagePainter.fillRect(QRect(1, 1, 3, 3), Qt::white);
-    nubbleImagePainter.end();
-
     //Draw draggy things to scale dimension of clipboard
     if(m_pixels.size() > 0)
     {
@@ -2082,8 +2082,17 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
                                        translatedDimensions.bottom() + halfNubbleSize);
 
         painter.drawImage(QRectF(translatedDimensions.topLeft().x(), translatedDimensions.topLeft().y(), nubbleSize, nubbleSize),
-                          nubbleImage,
-                          nubbleImage.rect());
+                          m_nubbleImage,
+                          m_nubbleImage.rect());
+        painter.drawImage(QRectF(translatedDimensions.topRight().x(), translatedDimensions.topRight().y(), nubbleSize, nubbleSize),
+                          m_nubbleImage,
+                          m_nubbleImage.rect());
+        painter.drawImage(QRectF(translatedDimensions.bottomLeft().x(), translatedDimensions.bottomLeft().y(), nubbleSize, nubbleSize),
+                          m_nubbleImage,
+                          m_nubbleImage.rect());
+        painter.drawImage(QRectF(translatedDimensions.bottomRight().x(), translatedDimensions.bottomRight().y(), nubbleSize, nubbleSize),
+                          m_nubbleImage,
+                          m_nubbleImage.rect());
     }
 }
 
