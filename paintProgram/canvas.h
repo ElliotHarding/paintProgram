@@ -91,6 +91,7 @@ public:
     void reset();
 
     bool nubblesDrag(QMouseEvent* event, const float& zoom, const float& offsetX, const float& offsetY);
+    void stopNubblesDrag();
 
 private:
     ///Drawing
@@ -105,6 +106,11 @@ private:
     int m_dragX = 0;
     int m_dragY = 0;
     QPoint m_previousDragPos;
+
+    bool m_bDraggingTopLeftNubble = false;
+    bool m_bDraggingTopRightNubble = false;
+    bool m_bDraggingBottomLeftNubble = false;
+    bool m_bDraggingBottomRightNubble = false;
 
     Canvas* m_pParentCanvas;
 };

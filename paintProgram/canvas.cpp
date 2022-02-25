@@ -1478,6 +1478,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     else if(m_tool == TOOL_DRAG)
     {
         m_pClipboardPixels->raise();
+        m_pClipboardPixels->stopNubblesDrag();
     }
 }
 
@@ -2062,10 +2063,11 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 
-    if(mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
+    if(m_bDraggingTopLeftNubble ||
+       mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
        mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1)
     {
-        //Dragging top left
+        m_bDraggingTopLeftNubble = true;
 
         const QRect oldDimensions = m_dimensionsRect;
 
@@ -2078,27 +2080,68 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         setImage(m_clipboardImage);
         return true;
     }
-    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topRight().x() + 1 &&
+    else if(m_bDraggingTopRightNubble ||
+            mouseLocation.x() >= m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topRight().x() + 1 &&
             mouseLocation.y() >= m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topRight().y() + 1)
     {
-        //Dragging top right
+        m_bDraggingTopRightNubble = true;
+
+        const QRect oldDimensions = m_dimensionsRect;
+
+        m_dimensionsRect.setRight(mouseLocation.x());
+        m_dimensionsRect.setY(mouseLocation.y());
+
+        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+
+        //Redraws, updates m_dimensionsRect and m_pixels
+        setImage(m_clipboardImage);
 
         return true;
     }
-    else if(mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + 1 &&
+    else if(m_bDraggingBottomLeftNubble ||
+            mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + 1 &&
             mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + 1)
     {
-        //Dragging bottom left
+        m_bDraggingBottomLeftNubble = true;
+
+        const QRect oldDimensions = m_dimensionsRect;
+
+        m_dimensionsRect.setX(mouseLocation.x());
+        m_dimensionsRect.setBottom(mouseLocation.y());
+
+        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+
+        //Redraws, updates m_dimensionsRect and m_pixels
+        setImage(m_clipboardImage);
 
         return true;
     }
-    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + 1 &&
+    else if(m_bDraggingBottomRightNubble ||
+            mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + 1 &&
             mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + 1)
     {
-        //Dragging bottom right
+        m_bDraggingBottomRightNubble = true;
+
+        const QRect oldDimensions = m_dimensionsRect;
+
+        m_dimensionsRect.setRight(mouseLocation.x());
+        m_dimensionsRect.setBottom(mouseLocation.y());
+
+        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+
+        //Redraws, updates m_dimensionsRect and m_pixels
+        setImage(m_clipboardImage);
 
         return true;
     }
+}
+
+void PaintableClipboard::stopNubblesDrag()
+{
+    m_bDraggingTopLeftNubble = false;
+    m_bDraggingTopRightNubble = false;
+    m_bDraggingBottomLeftNubble = false;
+    m_bDraggingBottomRightNubble = false;
 }
 
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
