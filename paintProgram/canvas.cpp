@@ -1536,10 +1536,10 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            //If starting dragging
-            if(!m_pClipboardPixels->isDragging())
+            if(!m_pClipboardPixels->nubblesDrag(event, m_zoomFactor, m_panOffsetX, m_panOffsetY))
             {
-                if(!m_pClipboardPixels->nubblesDrag(event, m_zoomFactor, m_panOffsetX, m_panOffsetY))
+                //If starting dragging
+                if(!m_pClipboardPixels->isDragging())
                 {
                     //check if mouse is over selection area
                     if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
@@ -1552,14 +1552,14 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         m_pClipboardPixels->startDragging(mouseLocation);
                     }
                 }
-            }
-            else //If currently dragging
-            {
-                m_pClipboardPixels->doDragging(mouseLocation);
+                else //If currently dragging
+                {
+                    m_pClipboardPixels->doDragging(mouseLocation);
 
-                //Clear selected pixels and set to clipboard pixels
-                m_pSelectedPixels->clear();
-                m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
+                    //Clear selected pixels and set to clipboard pixels
+                    m_pSelectedPixels->clear();
+                    m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
+                }
             }
         }
         else if(m_tool == TOOL_SHAPE)
@@ -2056,8 +2056,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 
-    if(mouseLocation.x() > m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.topLeft().x() + 1 &&
-       mouseLocation.y() > m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.topLeft().y() + 1)
+    if(mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
+       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1)
     {
         //Dragging top left
 
@@ -2072,22 +2072,22 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         setImage(m_clipboardImage);
         return true;
     }
-    else if(mouseLocation.x() > m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.topRight().x() + 1 &&
-            mouseLocation.y() > m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.topRight().y() + 1)
+    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topRight().x() + 1 &&
+            mouseLocation.y() >= m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topRight().y() + 1)
     {
         //Dragging top right
 
         return true;
     }
-    else if(mouseLocation.x() > m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomLeft().x() + 1 &&
-            mouseLocation.y() > m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomLeft().y() + 1)
+    else if(mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + 1 &&
+            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + 1)
     {
         //Dragging bottom left
 
         return true;
     }
-    else if(mouseLocation.x() > m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomRight().x() + 1 &&
-            mouseLocation.y() > m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomRight().y() + 1)
+    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + 1 &&
+            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + 1)
     {
         //Dragging bottom right
 
