@@ -117,6 +117,7 @@ private:
     bool m_bDraggingBottomRightNubble = false;
     QImage m_clipboardImageBeforeNubbleDrag = QImage();
     QRect m_dimensionsRectBeforeNubbleDrag = QRect();
+    void finishNubbleDrag();
 
     Canvas* m_pParentCanvas;
 };
