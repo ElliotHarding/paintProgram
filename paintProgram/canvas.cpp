@@ -7,6 +7,7 @@
 #include <QPainterPath>
 #include <QBuffer>
 #include <QFileInfo>
+#include <cmath>
 
 #include "mainwindow.h"
 
@@ -2037,8 +2038,9 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     QPainter painter(this);
 
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+    const float zoom = m_pParentCanvas->getZoom();
     painter.translate(center);
-    painter.scale(m_pParentCanvas->getZoom(), m_pParentCanvas->getZoom());
+    painter.scale(zoom, zoom);
     painter.translate(-center);
 
     float offsetX = 0;
@@ -2065,13 +2067,24 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw draggy things to scale dimension of clipboard
     if(m_pixels.size() > 0)
     {
-        const QRect translatedDimensions = m_dimensionsRect.translated((m_dragX + offsetX), (m_dragY + offsetY));
+        QRect translatedDimensions = m_dimensionsRect.translated((m_dragX + offsetX), (m_dragY + offsetY));
+        int nubbleSize = std::floor(3/zoom*0.5);
+        if(nubbleSize < 2)
+        {
+            nubbleSize = 2;
+        }
+        const int halfNubbleSize = std::floor(nubbleSize/2);
+        translatedDimensions.setCoords(translatedDimensions.x() - halfNubbleSize,
+                                       translatedDimensions.y() - halfNubbleSize,
+                                       translatedDimensions.right() - halfNubbleSize,
+                                       translatedDimensions.bottom() - halfNubbleSize);
+
 
         QPen p;
         painter.setBrush(Qt::white);
         p.setColor(Qt::black);
         painter.setPen(p);
-        painter.drawEllipse(QRect(translatedDimensions.topLeft(), QSize(3,3)));
+        painter.drawEllipse(QRect(translatedDimensions.topLeft(), QSize(nubbleSize, nubbleSize)));
     }
 }
 
