@@ -2072,6 +2072,10 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 
+    //Todo - also event->localPos pass QPF into getPosRel
+    const float nubbleSize = 6 / zoom;
+    const float halfNubbleSize = nubbleSize/2;
+
     if(m_bDraggingTopLeftNubble || (
        mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
        mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1))
