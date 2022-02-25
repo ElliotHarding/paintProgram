@@ -1542,7 +1542,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            if(m_pClipboardPixels->nubblesDrag(event, m_zoomFactor, m_panOffsetX, m_panOffsetY))
+            if(m_pClipboardPixels->nubblesDrag(mouseLocation, m_zoomFactor))
             {
                 //Clear selected pixels and set to clipboard pixels
                 m_pSelectedPixels->clear();
@@ -2064,11 +2064,8 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
     clipboardPainter.drawImage(newDimensions, oldImage, oldDimensions);
 }
 
-bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, const float& offsetX, const float& offsetY)
+bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
 {
-    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-    QPointF mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
-
     const float nubbleSize = 6 / zoom;
     const float halfNubbleSize = nubbleSize/2;
 
