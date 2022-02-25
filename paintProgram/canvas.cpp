@@ -499,6 +499,11 @@ void Canvas::onCurrentToolUpdated(const Tool t)
         doUpdate = true;
     }
 
+    if(m_tool == TOOL_DRAG && m_pSelectedPixels->containsPixels())
+    {
+        m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
+    }
+
     if (doUpdate)
         update();
 }
@@ -1561,7 +1566,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                     {
                         //If no clipboard exists to drag, generate one based on selected pixels
-                        if(m_pClipboardPixels->isImageDefault())
+                        if(m_pClipboardPixels->isImageDefault()) //Todo - might not need this anymore...
                         {
                             m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
                         }
