@@ -2068,23 +2068,30 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     if(m_pixels.size() > 0)
     {
         QRect translatedDimensions = m_dimensionsRect.translated((m_dragX + offsetX), (m_dragY + offsetY));
-        int nubbleSize = std::floor(3/zoom*0.5);
-        if(nubbleSize < 2)
-        {
-            nubbleSize = 2;
-        }
-        const int halfNubbleSize = std::floor(nubbleSize/2);
-        translatedDimensions.setCoords(translatedDimensions.x() - halfNubbleSize,
-                                       translatedDimensions.y() - halfNubbleSize,
-                                       translatedDimensions.right() - halfNubbleSize,
-                                       translatedDimensions.bottom() - halfNubbleSize);
+        const float nubbleSize = 6 / zoom;
+        const float halfNubbleSize = nubbleSize/2;
 
+        QPolygonF nubbleBackgroundPoly;
+        nubbleBackgroundPoly << QPointF(translatedDimensions.x() - nubbleSize, translatedDimensions.y() - nubbleSize);
+        nubbleBackgroundPoly << QPointF(translatedDimensions.x() + nubbleSize, translatedDimensions.y() - nubbleSize);
+        nubbleBackgroundPoly << QPointF(translatedDimensions.x() - nubbleSize, translatedDimensions.y() + nubbleSize);
+        nubbleBackgroundPoly << QPointF(translatedDimensions.x() + nubbleSize, translatedDimensions.y() + nubbleSize);
+
+        QPolygonF nubblePoly;
+        nubblePoly << QPointF(translatedDimensions.x() - halfNubbleSize, translatedDimensions.y() - halfNubbleSize);
+        nubblePoly << QPointF(translatedDimensions.x() + halfNubbleSize, translatedDimensions.y() - halfNubbleSize);
+        nubblePoly << QPointF(translatedDimensions.x() - halfNubbleSize, translatedDimensions.y() + halfNubbleSize);
+        nubblePoly << QPointF(translatedDimensions.x() + halfNubbleSize, translatedDimensions.y() + halfNubbleSize);
 
         QPen p;
-        painter.setBrush(Qt::white);
+        painter.setBrush(Qt::black);
         p.setColor(Qt::black);
         painter.setPen(p);
-        painter.drawEllipse(QRect(translatedDimensions.topLeft(), QSize(nubbleSize, nubbleSize)));
+        painter.drawPolygon(nubbleBackgroundPoly);
+        p.setColor(Qt::white);
+        painter.setBrush(Qt::white);
+        painter.drawPolygon(nubblePoly);
+        //painter.drawEllipse(QRect(translatedDimensions.topLeft(), QSize(nubbleSize, nubbleSize)));
     }
 }
 
