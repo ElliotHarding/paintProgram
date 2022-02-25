@@ -2053,7 +2053,7 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
 
 bool PaintableClipboard::nubblesDrag(QMouseEvent *event)
 {
-    QPoint mouseLocation = getMousePosRelative(mouseEvent->pos());
+    QPoint mouseLocation = getMousePosRelative(event->pos());
 
     if(mouseLocation.x() > m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.topLeft().x() + 1 &&
        mouseLocation.y() > m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.topLeft().y() + 1)
