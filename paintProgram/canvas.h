@@ -90,11 +90,7 @@ public:
     ///Reset/clear
     void reset();
 
-protected:
-    ///Mouse events
-    void mousePressEvent(QMouseEvent* mouseEvent) override;
-    void mouseReleaseEvent(QMouseEvent *releaseEvent) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
+    bool nubblesDrag(QMouseEvent* event);
 
 private:
     ///Drawing
@@ -104,12 +100,6 @@ private:
     QRect m_dimensionsRect = QRect();
     void updateDimensionsRect();
     QImage m_nubbleImage;
-
-    ///Dimensions dragging
-    bool m_bDraggingTopLeft = false;
-    bool m_bDraggingTopRight = false;
-    bool m_bDraggingBottomLeft = false;
-    bool m_bDraggingBottomRight = false;
 
     ///Dragging
     int m_dragX = 0;

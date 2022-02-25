@@ -1539,15 +1539,18 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             //If starting dragging
             if(!m_pClipboardPixels->isDragging())
             {
-                //check if mouse is over selection area
-                if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
+                if(!m_pClipboardPixels->nubblesDrag(event))
                 {
-                    if(m_pClipboardPixels->isImageDefault())
+                    //check if mouse is over selection area
+                    if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                     {
-                        m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
-                    }
+                        if(m_pClipboardPixels->isImageDefault())
+                        {
+                            m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
+                        }
 
-                    m_pClipboardPixels->startDragging(mouseLocation);
+                        m_pClipboardPixels->startDragging(mouseLocation);
+                    }
                 }
             }
             else //If currently dragging
@@ -2039,40 +2042,6 @@ void PaintableClipboard::reset()
     m_dimensionsRect = QRect();
 }
 
-void PaintableClipboard::mousePressEvent(QMouseEvent *mouseEvent)
-{
-    QPoint mouseLocation = getMousePosRelative(mouseEvent->pos());
-
-    if(mouseLocation.x() > m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.topLeft().x() + 1 &&
-       mouseLocation.y() > m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.topLeft().y() + 1)
-    {
-        m_bDraggingTopLeft = true;
-    }
-    else if(mouseLocation.x() > m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.topRight().x() + 1 &&
-            mouseLocation.y() > m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.topRight().y() + 1)
-    {
-        m_bDraggingTopRight = true;
-    }
-    else if(mouseLocation.x() > m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomLeft().x() + 1 &&
-            mouseLocation.y() > m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomLeft().y() + 1)
-    {
-        m_bDraggingBottomLeft = true;
-    }
-    else if(mouseLocation.x() > m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomRight().x() + 1 &&
-            mouseLocation.y() > m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomRight().y() + 1)
-    {
-        m_bDraggingBottomRight = true;
-    }
-}
-
-void PaintableClipboard::mouseReleaseEvent(QMouseEvent *releaseEvent)
-{
-    m_bDraggingTopLeft = false;
-    m_bDraggingTopRight = false;
-    m_bDraggingBottomLeft = false;
-    m_bDraggingBottomRight = false;
-}
-
 void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDimensions)
 {
     QImage oldImage = imageToScale;
@@ -2082,13 +2051,17 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
     clipboardPainter.drawImage(newDimensions, oldImage, oldDimensions);
 }
 
-void PaintableClipboard::mouseMoveEvent(QMouseEvent *event)
+bool PaintableClipboard::nubblesDrag(QMouseEvent *event)
 {
-    if(m_bDraggingTopLeft == true)
+    QPoint mouseLocation = getMousePosRelative(mouseEvent->pos());
+
+    if(mouseLocation.x() > m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.topLeft().x() + 1 &&
+       mouseLocation.y() > m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.topLeft().y() + 1)
     {
+        //Dragging top left
+
         const QRect oldDimensions = m_dimensionsRect;
 
-        QPoint mouseLocation = getMousePosRelative(event->pos());
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
@@ -2096,18 +2069,28 @@ void PaintableClipboard::mouseMoveEvent(QMouseEvent *event)
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
+        return true;
     }
-    else if(m_bDraggingTopRight == true)
+    else if(mouseLocation.x() > m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.topRight().x() + 1 &&
+            mouseLocation.y() > m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.topRight().y() + 1)
     {
-        QPoint mouseLocation = getMousePosRelative(event->pos());
+        //Dragging top right
+
+        return true;
     }
-    else if(m_bDraggingBottomLeft == true)
+    else if(mouseLocation.x() > m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomLeft().x() + 1 &&
+            mouseLocation.y() > m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomLeft().y() + 1)
     {
-        QPoint mouseLocation = getMousePosRelative(event->pos());
+        //Dragging bottom left
+
+        return true;
     }
-    else if(m_bDraggingBottomRight == true)
+    else if(mouseLocation.x() > m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomRight().x() + 1 &&
+            mouseLocation.y() > m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomRight().y() + 1)
     {
-        QPoint mouseLocation = getMousePosRelative(event->pos());
+        //Dragging bottom right
+
+        return true;
     }
 }
 
