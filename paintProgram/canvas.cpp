@@ -2064,9 +2064,9 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 
-    if(m_bDraggingTopLeftNubble ||
+    if(m_bDraggingTopLeftNubble || (
        mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
-       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1)
+       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1))
     {
         m_bDraggingTopLeftNubble = true;
 
@@ -2081,9 +2081,9 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         setImage(m_clipboardImage);
         return true;
     }
-    else if(m_bDraggingTopRightNubble ||
+    else if(m_bDraggingTopRightNubble || (
             mouseLocation.x() >= m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topRight().x() + 1 &&
-            mouseLocation.y() >= m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topRight().y() + 1)
+            mouseLocation.y() >= m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topRight().y() + 1))
     {
         m_bDraggingTopRightNubble = true;
 
@@ -2099,9 +2099,9 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
         return true;
     }
-    else if(m_bDraggingBottomLeftNubble ||
+    else if(m_bDraggingBottomLeftNubble || (
             mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + 1 &&
-            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + 1)
+            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + 1))
     {
         m_bDraggingBottomLeftNubble = true;
 
@@ -2117,9 +2117,9 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
         return true;
     }
-    else if(m_bDraggingBottomRightNubble ||
+    else if(m_bDraggingBottomRightNubble || (
             mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + 1 &&
-            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + 1)
+            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + 1))
     {
         m_bDraggingBottomRightNubble = true;
 
@@ -2135,6 +2135,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
         return true;
     }
+
+    return false;
 }
 
 void PaintableClipboard::stopNubblesDrag()
