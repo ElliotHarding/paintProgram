@@ -2089,6 +2089,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
+        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
+
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
         return true;
@@ -2117,6 +2119,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
+
+        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
@@ -2148,6 +2152,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
+        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
+
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
 
@@ -2177,6 +2183,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
+
+        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
