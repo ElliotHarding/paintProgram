@@ -1478,7 +1478,20 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     else if(m_tool == TOOL_DRAG)
     {
         m_pClipboardPixels->raise();
-        m_pClipboardPixels->stopNubblesDrag();
+        if(m_pClipboardPixels->stopNubblesDrag())
+        {
+            Clipboard clip;
+
+            clip.m_clipboardImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+            clip.m_clipboardImage.fill(Qt::transparent);
+
+            QPainter clipPainter(&clip.m_clipboardImage);
+            m_pClipboardPixels->dumpImage(clipPainter);
+            clipPainter.end();
+            clip.m_pixels = m_pClipboardPixels->getPixelsOffset();
+
+            m_pClipboardPixels->setClipboard(clip);
+        }
     }
 }
 
@@ -2187,28 +2200,29 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     return false;
 }
 
-void PaintableClipboard::stopNubblesDrag()
+bool PaintableClipboard::stopNubblesDrag()
 {
     if(m_bDraggingTopLeftNubble)
     {
         m_bDraggingTopLeftNubble = false;
-        m_previousDragPos = m_dimensionsRect.center();
+        return true;
     }
     else if(m_bDraggingTopRightNubble)
     {
         m_bDraggingTopRightNubble = false;
-        m_previousDragPos = m_dimensionsRect.center();
+        return true;
     }
     else if(m_bDraggingBottomLeftNubble)
     {
         m_bDraggingBottomLeftNubble = false;
-        m_previousDragPos = m_dimensionsRect.center();
+        return true;
     }
     else if(m_bDraggingBottomRightNubble)
     {
         m_bDraggingBottomRightNubble = false;
-        m_previousDragPos = m_dimensionsRect.center();
+        return true;
     }
+    return false;
 }
 
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)

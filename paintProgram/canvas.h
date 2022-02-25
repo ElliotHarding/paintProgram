@@ -92,7 +92,7 @@ public:
 
     ///Nubbles
     bool nubblesDrag(QMouseEvent* event, const float& zoom, const float& offsetX, const float& offsetY);
-    void stopNubblesDrag();
+    bool stopNubblesDrag();
 
 private:
     ///Drawing
