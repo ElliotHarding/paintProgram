@@ -86,27 +86,23 @@ public:
     bool isDragging();
     void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
+    bool nubblesDrag(QMouseEvent* event, const float& zoom, const float& offsetX, const float& offsetY);
 
     ///Reset/clear
     void reset();
 
-    ///Nubbles
-    bool nubblesDrag(QMouseEvent* event, const float& zoom, const float& offsetX, const float& offsetY);
-    bool stopNubblesDrag();
+    ///Finish dragging or nubbles dragging
+    void completeOperation();
 
 private:
     ///Drawing
     void paintEvent(QPaintEvent* paintEvent) override;
 
-    ///Dimensions rect
-    QRect m_dimensionsRect = QRect();
-    void updateDimensionsRect();
-    QImage m_nubbleImage;
-
     ///Dragging
     int m_dragX = 0;
     int m_dragY = 0;
     QPoint m_previousDragPos;
+    void completeNormalDrag();
 
     ///Nubble dragging
     bool m_bDraggingTopLeftNubble = false;
@@ -115,7 +111,12 @@ private:
     bool m_bDraggingBottomRightNubble = false;
     QImage m_clipboardImageBeforeNubbleDrag = QImage();
     QRect m_dimensionsRectBeforeNubbleDrag = QRect();
-    void finishNubbleDrag();
+    void completeNubbleDrag();
+
+    ///Nubble dimensions rect
+    QRect m_dimensionsRect = QRect();
+    void updateDimensionsRect();
+    QImage m_nubbleImage;
 
     Canvas* m_pParentCanvas;
 };

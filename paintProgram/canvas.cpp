@@ -1483,11 +1483,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if(m_tool == TOOL_DRAG)
     {
-        if(m_pClipboardPixels->stopNubblesDrag())
-        {
-            //TODO - Add clipboard pixels to history so can undo nubble drag
-            qDebug() << "Canvas::mouseReleaseEvent - Completed nubble dragging";
-        }
+        m_pClipboardPixels->completeOperation();
     }
 }
 
@@ -2073,7 +2069,6 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     QPointF mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 
-    //Todo - also event->localPos pass QPF into getPosRel
     const float nubbleSize = 6 / zoom;
     const float halfNubbleSize = nubbleSize/2;
 
@@ -2200,56 +2195,6 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
     return false;
 }
 
-void PaintableClipboard::finishNubbleDrag()
-{
-    //Create new clipboard image
-    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
-    newClipboardImage.fill(Qt::transparent);
-
-    //Dump nubble changed (re-scaled) current clipboard image onto new one
-    QPainter clipPainter(&newClipboardImage);
-    clipPainter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
-    clipPainter.end();
-
-    //Set new values & reset & redraw
-    m_clipboardImage = newClipboardImage;
-    m_pixels = getPixelsOffset();
-    m_previousDragPos = Constants::NullDragPoint;
-    m_dragX = 0;
-    m_dragY = 0;
-    updateDimensionsRect();
-    update();
-}
-
-bool PaintableClipboard::stopNubblesDrag()
-{
-    if(m_bDraggingTopLeftNubble)
-    {
-        m_bDraggingTopLeftNubble = false;
-        finishNubbleDrag();
-        return true;
-    }
-    else if(m_bDraggingTopRightNubble)
-    {
-        m_bDraggingTopRightNubble = false;
-        finishNubbleDrag();
-        return true;
-    }
-    else if(m_bDraggingBottomLeftNubble)
-    {
-        m_bDraggingBottomLeftNubble = false;
-        finishNubbleDrag();
-        return true;
-    }
-    else if(m_bDraggingBottomRightNubble)
-    {
-        m_bDraggingBottomRightNubble = false;
-        finishNubbleDrag();
-        return true;
-    }
-    return false;
-}
-
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
     QPainter painter(this);
@@ -2331,6 +2276,72 @@ void PaintableClipboard::updateDimensionsRect()
     }
 }
 
+void PaintableClipboard::completeOperation()
+{
+    if(isDragging())
+    {
+        completeNormalDrag();
+    }
+    else if(m_bDraggingTopLeftNubble)
+    {
+        m_bDraggingTopLeftNubble = false;
+        completeNubbleDrag();
+    }
+    else if(m_bDraggingTopRightNubble)
+    {
+        m_bDraggingTopRightNubble = false;
+        completeNubbleDrag();
+    }
+    else if(m_bDraggingBottomLeftNubble)
+    {
+        m_bDraggingBottomLeftNubble = false;
+        completeNubbleDrag();
+    }
+    else if(m_bDraggingBottomRightNubble)
+    {
+        m_bDraggingBottomRightNubble = false;
+        completeNubbleDrag();
+    }
+}
+
+void PaintableClipboard::completeNormalDrag()
+{
+    //Create new clipboard image
+    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
+    newClipboardImage.fill(Qt::transparent);
+
+    //Dump nubble changed (re-scaled) current clipboard image onto new one
+    QPainter clipPainter(&newClipboardImage);
+    clipPainter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+    clipPainter.end();
+
+    //Set new values & reset & redraw
+    m_clipboardImage = newClipboardImage;
+    m_pixels = getPixelsOffset();
+    m_previousDragPos = Constants::NullDragPoint;
+    m_dragX = 0;
+    m_dragY = 0;
+    updateDimensionsRect();
+    update();
+}
+
+void PaintableClipboard::completeNubbleDrag()
+{
+    //Create new clipboard image
+    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
+    newClipboardImage.fill(Qt::transparent);
+
+    //Dump nubble changed (re-scaled) current clipboard image onto new one
+    QPainter clipPainter(&newClipboardImage);
+    clipPainter.drawImage(m_clipboardImage.rect(), m_clipboardImage);
+    clipPainter.end();
+
+    //Set new values & reset & redraw
+    m_clipboardImage = newClipboardImage;
+    m_pixels = getPixelsOffset();
+    updateDimensionsRect();
+    update();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// CanvasHistory
