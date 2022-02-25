@@ -1238,14 +1238,20 @@ void Canvas::showEvent(QShowEvent *)
     emit selectionAreaResize(0,0);
 }
 
-QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, const float& zoomFactor, const float& offsetX, const float& offsetY)
+QPointF getPositionRelativeCenterdAndZoomedCanvas(QPointF globalPos, QPoint& center, const float& zoomFactor, const float& offsetX, const float& offsetY)
 {
     QTransform transform;
     transform.translate(center.x(), center.y());
     transform.scale(zoomFactor, zoomFactor);
     transform.translate(-center.x(), -center.y());
-    const QPoint zoomPoint = transform.inverted().map(QPoint(globalPos.x(), globalPos.y()));
-    return QPoint(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
+    const QPointF zoomPoint = transform.inverted().map(QPointF(globalPos.x(), globalPos.y()));
+    return QPointF(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
+}
+
+QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, const float& zoomFactor, const float& offsetX, const float& offsetY)
+{
+    QPointF pos = getPositionRelativeCenterdAndZoomedCanvas(QPointF(globalPos), center, zoomFactor, offsetX, offsetY);
+    return pos.toPoint();
 }
 
 void paintBrush(QImage& canvas, const uint x, const uint y, const QColor col, const uint widthHeight, const BrushShape brushShape)
@@ -2065,15 +2071,15 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
 bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, const float& offsetX, const float& offsetY)
 {
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-    QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
+    QPointF mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 
     //Todo - also event->localPos pass QPF into getPosRel
     const float nubbleSize = 6 / zoom;
     const float halfNubbleSize = nubbleSize/2;
 
     if(m_bDraggingTopLeftNubble || (
-       mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
-       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1))
+       mouseLocation.x() >= m_dimensionsRect.topLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + halfNubbleSize &&
+       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + halfNubbleSize))
     {
         //If were starting nubble drag, save clipboard image and dimension rect before changes
         if(!m_bDraggingTopLeftNubble)
@@ -2101,8 +2107,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         return true;
     }
     else if(m_bDraggingTopRightNubble || (
-            mouseLocation.x() >= m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topRight().x() + 1 &&
-            mouseLocation.y() >= m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topRight().y() + 1))
+            mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topRight().x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.topRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topRight().y() + halfNubbleSize))
     {
         //If were starting nubble drag, save clipboard image and dimension rect before changes
         if(!m_bDraggingTopRightNubble)
@@ -2131,8 +2137,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         return true;
     }
     else if(m_bDraggingBottomLeftNubble || (
-            mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + 1 &&
-            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + 1))
+            mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + halfNubbleSize))
     {
         //If were starting nubble drag, save clipboard image and dimension rect before changes
         if(!m_bDraggingBottomLeftNubble)
@@ -2161,8 +2167,8 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         return true;
     }
     else if(m_bDraggingBottomRightNubble || (
-            mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + 1 &&
-            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + 1))
+            mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + halfNubbleSize))
     {
         //If were starting nubble drag, save clipboard image and dimension rect before changes
         if(!m_bDraggingBottomRightNubble)
