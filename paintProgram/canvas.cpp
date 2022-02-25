@@ -1551,6 +1551,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     //check if mouse is over selection area
                     if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                     {
+                        //If no clipboard exists to drag, generate one based on selected pixels
                         if(m_pClipboardPixels->isImageDefault())
                         {
                             m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);

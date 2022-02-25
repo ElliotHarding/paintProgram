@@ -90,6 +90,7 @@ public:
     ///Reset/clear
     void reset();
 
+    ///Nubbles
     bool nubblesDrag(QMouseEvent* event, const float& zoom, const float& offsetX, const float& offsetY);
     void stopNubblesDrag();
 
@@ -107,6 +108,7 @@ private:
     int m_dragY = 0;
     QPoint m_previousDragPos;
 
+    ///Nubble dragging
     bool m_bDraggingTopLeftNubble = false;
     bool m_bDraggingTopRightNubble = false;
     bool m_bDraggingBottomLeftNubble = false;
