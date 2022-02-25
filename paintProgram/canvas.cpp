@@ -1238,7 +1238,7 @@ void Canvas::showEvent(QShowEvent *)
     emit selectionAreaResize(0,0);
 }
 
-QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, float& zoomFactor, float& offsetX, float& offsetY)
+QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, const float& zoomFactor, const float& offsetX, const float& offsetY)
 {
     QTransform transform;
     transform.translate(center.x(), center.y());
@@ -2039,6 +2039,60 @@ void PaintableClipboard::reset()
     m_dimensionsRect = QRect();
 }
 
+void PaintableClipboard::mousePressEvent(QMouseEvent *mouseEvent)
+{
+    QPoint mouseLocation = getMousePosRelative(mouseEvent->pos());
+
+    if(mouseLocation.x() > m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.topLeft().x() + 1 &&
+       mouseLocation.y() > m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.topLeft().y() + 1)
+    {
+        m_bDraggingTopLeft = true;
+    }
+    else if(mouseLocation.x() > m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.topRight().x() + 1 &&
+            mouseLocation.y() > m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.topRight().y() + 1)
+    {
+        m_bDraggingTopRight = true;
+    }
+    else if(mouseLocation.x() > m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomLeft().x() + 1 &&
+            mouseLocation.y() > m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomLeft().y() + 1)
+    {
+        m_bDraggingBottomLeft = true;
+    }
+    else if(mouseLocation.x() > m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() < m_dimensionsRect.bottomRight().x() + 1 &&
+            mouseLocation.y() > m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() < m_dimensionsRect.bottomRight().y() + 1)
+    {
+        m_bDraggingBottomRight = true;
+    }
+}
+
+void PaintableClipboard::mouseReleaseEvent(QMouseEvent *releaseEvent)
+{
+    m_bDraggingTopLeft = false;
+    m_bDraggingTopRight = false;
+    m_bDraggingBottomLeft = false;
+    m_bDraggingBottomRight = false;
+}
+
+void PaintableClipboard::mouseMoveEvent(QMouseEvent *event)
+{
+    if(m_bDraggingTopLeft == true)
+    {
+        QPoint mouseLocation = getMousePosRelative(event->pos());
+    }
+    else if(m_bDraggingTopRight == true)
+    {
+        QPoint mouseLocation = getMousePosRelative(event->pos());
+    }
+    else if(m_bDraggingBottomLeft == true)
+    {
+        QPoint mouseLocation = getMousePosRelative(event->pos());
+    }
+    else if(m_bDraggingBottomRight == true)
+    {
+        QPoint mouseLocation = getMousePosRelative(event->pos());
+    }
+}
+
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
     QPainter painter(this);
@@ -2118,6 +2172,16 @@ void PaintableClipboard::updateDimensionsRect()
             m_dimensionsRect.setBottom(p.y());
         }
     }
+}
+
+QPoint PaintableClipboard::getMousePosRelative(QPoint pos)
+{
+    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+    float zoom = m_pParentCanvas->getZoom();
+    float offsetX = 0;
+    float offsetY = 0;
+    m_pParentCanvas->getPanOffset(offsetX, offsetY);
+    return getPositionRelativeCenterdAndZoomedCanvas(pos, center, zoom, offsetX + m_dragX, offsetY + m_dragY);
 }
 
 
