@@ -113,6 +113,8 @@ private:
     bool m_bDraggingTopRightNubble = false;
     bool m_bDraggingBottomLeftNubble = false;
     bool m_bDraggingBottomRightNubble = false;
+    QImage m_clipboardImageBeforeNubbleDrag = QImage();
+    QRect m_dimensionsRectBeforeNubbleDrag = QRect();
 
     Canvas* m_pParentCanvas;
 };

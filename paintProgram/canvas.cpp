@@ -2068,14 +2068,26 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
        mouseLocation.x() >= m_dimensionsRect.topLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + 1 &&
        mouseLocation.y() >= m_dimensionsRect.topLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + 1))
     {
-        m_bDraggingTopLeftNubble = true;
+        //If were starting nubble drag, save clipboard image and dimension rect before changes
+        if(!m_bDraggingTopLeftNubble)
+        {
+            m_bDraggingTopLeftNubble = true;
+            m_clipboardImageBeforeNubbleDrag = m_clipboardImage;
+            m_dimensionsRectBeforeNubbleDrag = m_dimensionsRect;
+        }
 
-        const QRect oldDimensions = m_dimensionsRect;
+        //Get original image to scale from
+        else
+        {
+            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
+        }
 
+        //set new dimensions based of nubble drag
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
-        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+        //Scale
+        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
@@ -2085,14 +2097,26 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
             mouseLocation.x() >= m_dimensionsRect.topRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.topRight().x() + 1 &&
             mouseLocation.y() >= m_dimensionsRect.topRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.topRight().y() + 1))
     {
-        m_bDraggingTopRightNubble = true;
+        //If were starting nubble drag, save clipboard image and dimension rect before changes
+        if(!m_bDraggingTopRightNubble)
+        {
+            m_bDraggingTopRightNubble = true;
+            m_clipboardImageBeforeNubbleDrag = m_clipboardImage;
+            m_dimensionsRectBeforeNubbleDrag = m_dimensionsRect;
+        }
 
-        const QRect oldDimensions = m_dimensionsRect;
+        //Get original image to scale from
+        else
+        {
+            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
+        }
 
+        //set new dimensions based of nubble drag
         m_dimensionsRect.setRight(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
-        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+        //Scale
+        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
@@ -2103,14 +2127,26 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
             mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + 1 &&
             mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + 1))
     {
-        m_bDraggingBottomLeftNubble = true;
+        //If were starting nubble drag, save clipboard image and dimension rect before changes
+        if(!m_bDraggingBottomLeftNubble)
+        {
+            m_bDraggingBottomLeftNubble = true;
+            m_clipboardImageBeforeNubbleDrag = m_clipboardImage;
+            m_dimensionsRectBeforeNubbleDrag = m_dimensionsRect;
+        }
 
-        const QRect oldDimensions = m_dimensionsRect;
+        //Get original image to scale from
+        else
+        {
+            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
+        }
 
+        //set new dimensions based of nubble drag
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setBottom(mouseLocation.y());
 
-        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+        //Scale
+        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
@@ -2121,14 +2157,26 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
             mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - 1 && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + 1 &&
             mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - 1 && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + 1))
     {
-        m_bDraggingBottomRightNubble = true;
+        //If were starting nubble drag, save clipboard image and dimension rect before changes
+        if(!m_bDraggingBottomRightNubble)
+        {
+            m_bDraggingBottomRightNubble = true;
+            m_clipboardImageBeforeNubbleDrag = m_clipboardImage;
+            m_dimensionsRectBeforeNubbleDrag = m_dimensionsRect;
+        }
 
-        const QRect oldDimensions = m_dimensionsRect;
+        //Get original image to scale from
+        else
+        {
+            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
+        }
 
+        //set new dimensions based of nubble drag
         m_dimensionsRect.setRight(mouseLocation.x());
         m_dimensionsRect.setBottom(mouseLocation.y());
 
-        scaleImageOntoSelf(m_clipboardImage, oldDimensions, m_dimensionsRect);
+        //Scale
+        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
