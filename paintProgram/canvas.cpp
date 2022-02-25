@@ -1980,16 +1980,8 @@ void PaintableClipboard::setImage(QImage image)
     update();
 }
 
-//Returns false if no image dumped
-bool PaintableClipboard::dumpImage(QPainter &painter)
+void PaintableClipboard::dumpImageNoReset(QPainter &painter)
 {
-    if(m_clipboardImage == QImage() && m_pixels.size() == 0)
-    {
-        //Just in case
-        update();
-        return false;
-    }
-
     //Draw image part of clipboard
     painter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
@@ -2004,6 +1996,19 @@ bool PaintableClipboard::dumpImage(QPainter &painter)
             painter.fillRect(QRect(p.x() + m_dragX, p.y() + m_dragY, 1, 1), Qt::transparent);
         }
     }
+}
+
+//Returns false if no image dumped
+bool PaintableClipboard::dumpImage(QPainter &painter)
+{
+    if(m_clipboardImage == QImage() && m_pixels.size() == 0)
+    {
+        //Just in case
+        update();
+        return false;
+    }
+
+    dumpImageNoReset(painter);
 
     reset();
     update();
@@ -2205,6 +2210,22 @@ bool PaintableClipboard::stopNubblesDrag()
     if(m_bDraggingTopLeftNubble)
     {
         m_bDraggingTopLeftNubble = false;
+
+        QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
+        newClipboardImage.fill(Qt::transparent);
+
+        QPainter clipPainter(&newClipboardImage);
+        clipPainter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+        clipPainter.end();
+
+        m_clipboardImage = newClipboardImage;
+        m_pixels = getPixelsOffset();
+        m_previousDragPos = Constants::NullDragPoint;
+        m_dragX = 0;
+        m_dragY = 0;
+        updateDimensionsRect();
+        update();
+
         return true;
     }
     else if(m_bDraggingTopRightNubble)
