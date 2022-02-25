@@ -2089,8 +2089,6 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
-        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
-
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
         return true;
@@ -2119,8 +2117,6 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
 
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
@@ -2152,8 +2148,6 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
-        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
-
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
 
@@ -2184,8 +2178,6 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
-        m_previousDragPos = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), center, zoom, offsetX, offsetY);
-
         //Redraws, updates m_dimensionsRect and m_pixels
         setImage(m_clipboardImage);
 
@@ -2197,10 +2189,26 @@ bool PaintableClipboard::nubblesDrag(QMouseEvent *event, const float& zoom, cons
 
 void PaintableClipboard::stopNubblesDrag()
 {
-    m_bDraggingTopLeftNubble = false;
-    m_bDraggingTopRightNubble = false;
-    m_bDraggingBottomLeftNubble = false;
-    m_bDraggingBottomRightNubble = false;
+    if(m_bDraggingTopLeftNubble)
+    {
+        m_bDraggingTopLeftNubble = false;
+        m_previousDragPos = m_dimensionsRect.center();
+    }
+    else if(m_bDraggingTopRightNubble)
+    {
+        m_bDraggingTopRightNubble = false;
+        m_previousDragPos = m_dimensionsRect.center();
+    }
+    else if(m_bDraggingBottomLeftNubble)
+    {
+        m_bDraggingBottomLeftNubble = false;
+        m_previousDragPos = m_dimensionsRect.center();
+    }
+    else if(m_bDraggingBottomRightNubble)
+    {
+        m_bDraggingBottomRightNubble = false;
+        m_previousDragPos = m_dimensionsRect.center();
+    }
 }
 
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
