@@ -2178,7 +2178,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         }
     }
 
-    //Draw draggy things to scale dimension of clipboard
+    //Draw nubbles to scale dimension of clipboard
     if(m_pixels.size() > 0)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((m_dragX + offsetX), (m_dragY + offsetY));
@@ -2186,8 +2186,8 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         const float halfNubbleSize = nubbleSize/2;
         translatedDimensions.setCoords(translatedDimensions.x() - halfNubbleSize,
                                        translatedDimensions.y() - halfNubbleSize,
-                                       translatedDimensions.right() + halfNubbleSize,
-                                       translatedDimensions.bottom() + halfNubbleSize);
+                                       translatedDimensions.right() - halfNubbleSize,
+                                       translatedDimensions.bottom() - halfNubbleSize);
 
         painter.drawImage(QRectF(translatedDimensions.topLeft().x(), translatedDimensions.topLeft().y(), nubbleSize, nubbleSize),
                           m_nubbleImage,
