@@ -1536,7 +1536,13 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            if(!m_pClipboardPixels->nubblesDrag(event, m_zoomFactor, m_panOffsetX, m_panOffsetY))
+            if(m_pClipboardPixels->nubblesDrag(event, m_zoomFactor, m_panOffsetX, m_panOffsetY))
+            {
+                //Clear selected pixels and set to clipboard pixels
+                m_pSelectedPixels->clear();
+                m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
+            }
+            else
             {
                 //If starting dragging
                 if(!m_pClipboardPixels->isDragging())
