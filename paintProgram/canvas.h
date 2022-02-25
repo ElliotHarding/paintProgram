@@ -98,8 +98,6 @@ private:
     ///Drawing
     void paintEvent(QPaintEvent* paintEvent) override;
 
-    void dumpImageNoReset(QPainter &painter);
-
     ///Dimensions rect
     QRect m_dimensionsRect = QRect();
     void updateDimensionsRect();

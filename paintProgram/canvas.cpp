@@ -1970,8 +1970,16 @@ void PaintableClipboard::setImage(QImage image)
     update();
 }
 
-void PaintableClipboard::dumpImageNoReset(QPainter &painter)
+//Returns false if no image dumped
+bool PaintableClipboard::dumpImage(QPainter &painter)
 {
+    if(m_clipboardImage == QImage() && m_pixels.size() == 0)
+    {
+        //Just in case
+        update();
+        return false;
+    }
+
     //Draw image part of clipboard
     painter.drawImage(QRect(m_dragX, m_dragY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
@@ -1986,19 +1994,6 @@ void PaintableClipboard::dumpImageNoReset(QPainter &painter)
             painter.fillRect(QRect(p.x() + m_dragX, p.y() + m_dragY, 1, 1), Qt::transparent);
         }
     }
-}
-
-//Returns false if no image dumped
-bool PaintableClipboard::dumpImage(QPainter &painter)
-{
-    if(m_clipboardImage == QImage() && m_pixels.size() == 0)
-    {
-        //Just in case
-        update();
-        return false;
-    }
-
-    dumpImageNoReset(painter);
 
     reset();
     update();
