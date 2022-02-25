@@ -90,7 +90,7 @@ public:
     ///Reset/clear
     void reset();
 
-    bool nubblesDrag(QMouseEvent* event);
+    bool nubblesDrag(QMouseEvent* event, const float& zoom, const float& offsetX, const float& offsetY);
 
 private:
     ///Drawing
@@ -105,8 +105,6 @@ private:
     int m_dragX = 0;
     int m_dragY = 0;
     QPoint m_previousDragPos;
-
-    QPoint getMousePosRelative(QPoint pos);
 
     Canvas* m_pParentCanvas;
 };
