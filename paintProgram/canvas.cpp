@@ -2091,6 +2091,12 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
         return true;
     }
 
+    //Temp
+    if(zoom > geometry().width() / m_clipboardImage.width())
+    {
+        return false;
+    }
+
     float nubbleSize = Constants::DragNubbleSize / zoom;
     if(nubbleSize < 0.5)
     {
@@ -2144,10 +2150,11 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.scale(zoom, zoom);
     painter.translate(-center);
 
-
     QPoint offset = m_pParentCanvas->getPanOffset();
     const int offsetX = offset.x() + m_dragX;
     const int offsetY = offset.y() + m_dragY;
+
+    qDebug() << zoom;
 
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
@@ -2167,7 +2174,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     }
 
     //Draw nubbles to scale dimension of clipboard
-    if(m_pixels.size() > 0)
+    if(m_pixels.size() > 0 && zoom < geometry().width() / m_clipboardImage.width() /* <-- temp*/)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
         const float nubbleSize = Constants::DragNubbleSize / zoom;
