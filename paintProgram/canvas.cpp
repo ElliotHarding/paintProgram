@@ -2078,6 +2078,8 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
     const float nubbleSize = 6 / zoom;
     const float halfNubbleSize = nubbleSize/2;
 
+    bool scale = false;
+
     if(m_bDraggingTopLeftNubble || (
        mouseLocation.x() >= m_dimensionsRect.topLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + halfNubbleSize &&
        mouseLocation.y() >= m_dimensionsRect.topLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + halfNubbleSize))
@@ -2100,41 +2102,7 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
-        //Scale
-        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        //Scale selected transparent pixels (cheat by converting to black)
-        QImage transparentPixels = QImage(QSize(m_clipboardImageBeforeNubbleDrag.width(), m_clipboardImageBeforeNubbleDrag.height()), QImage::Format_ARGB32);
-        transparentPixels.fill(Qt::transparent);
-        for(QPoint p : m_pixels)
-        {
-            if(m_clipboardImageBeforeNubbleDrag.pixelColor(p.x(), p.y()).alpha() == 0)
-            {
-                transparentPixels.setPixelColor(p.x(), p.y(), Qt::black);
-            }
-        }
-        scaleImageOntoSelf(transparentPixels, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        //Set new pixels based off scaled image
-        m_pixels.clear();
-        for(int x = 0; x < m_clipboardImage.width(); x++)
-        {
-            for(int y = 0; y < m_clipboardImage.height(); y++)
-            {
-                if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
-                {
-                    m_pixels.push_back(QPoint(x,y));
-                }
-                else if(transparentPixels.pixelColor(x,y).alpha() > 0)
-                {
-                    m_pixels.push_back(QPoint(x,y));
-                }
-            }
-        }
-
-        updateDimensionsRect();
-        update();
-        return true;
+        scale = true;
     }
     else if(m_bDraggingTopRightNubble || (
             mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topRight().x() + halfNubbleSize &&
@@ -2158,42 +2126,7 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
         m_dimensionsRect.setRight(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
-        //Scale
-        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        //Scale selected transparent pixels (cheat by converting to black)
-        QImage transparentPixels = QImage(QSize(m_clipboardImageBeforeNubbleDrag.width(), m_clipboardImageBeforeNubbleDrag.height()), QImage::Format_ARGB32);
-        transparentPixels.fill(Qt::transparent);
-        for(QPoint p : m_pixels)
-        {
-            if(m_clipboardImageBeforeNubbleDrag.pixelColor(p.x(), p.y()).alpha() == 0)
-            {
-                transparentPixels.setPixelColor(p.x(), p.y(), Qt::black);
-            }
-        }
-        scaleImageOntoSelf(transparentPixels, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        //Set new pixels based off scaled image
-        m_pixels.clear();
-        for(int x = 0; x < m_clipboardImage.width(); x++)
-        {
-            for(int y = 0; y < m_clipboardImage.height(); y++)
-            {
-                if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
-                {
-                    m_pixels.push_back(QPoint(x,y));
-                }
-                else if(transparentPixels.pixelColor(x,y).alpha() > 0)
-                {
-                    m_pixels.push_back(QPoint(x,y));
-                }
-            }
-        }
-
-        updateDimensionsRect();
-        update();
-
-        return true;
+        scale = true;
     }
     else if(m_bDraggingBottomLeftNubble || (
             mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
@@ -2217,42 +2150,7 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setBottom(mouseLocation.y());
 
-        //Scale
-        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        //Scale selected transparent pixels (cheat by converting to black)
-        QImage transparentPixels = QImage(QSize(m_clipboardImageBeforeNubbleDrag.width(), m_clipboardImageBeforeNubbleDrag.height()), QImage::Format_ARGB32);
-        transparentPixels.fill(Qt::transparent);
-        for(QPoint p : m_pixels)
-        {
-            if(m_clipboardImageBeforeNubbleDrag.pixelColor(p.x(), p.y()).alpha() == 0)
-            {
-                transparentPixels.setPixelColor(p.x(), p.y(), Qt::black);
-            }
-        }
-        scaleImageOntoSelf(transparentPixels, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
-
-        //Set new pixels based off scaled image
-        m_pixels.clear();
-        for(int x = 0; x < m_clipboardImage.width(); x++)
-        {
-            for(int y = 0; y < m_clipboardImage.height(); y++)
-            {
-                if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
-                {
-                    m_pixels.push_back(QPoint(x,y));
-                }
-                else if(transparentPixels.pixelColor(x,y).alpha() > 0)
-                {
-                    m_pixels.push_back(QPoint(x,y));
-                }
-            }
-        }
-
-        updateDimensionsRect();
-        update();
-
-        return true;
+        scale = true;
     }
     else if(m_bDraggingBottomRightNubble || (
             mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + halfNubbleSize &&
@@ -2276,6 +2174,11 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
         m_dimensionsRect.setRight(mouseLocation.x());
         m_dimensionsRect.setBottom(mouseLocation.y());
 
+        scale = true;
+    }
+
+    if(scale)
+    {
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
