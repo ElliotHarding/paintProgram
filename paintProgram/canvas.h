@@ -112,6 +112,7 @@ private:
     QImage m_clipboardImageBeforeNubbleDrag = QImage();
     QImage m_clipboardImageBeforeNubbleDragTransparent = QImage();
     QRect m_dimensionsRectBeforeNubbleDrag = QRect();
+    void doNubbleDragScale();
     void prepNubblesDrag();
     void completeNubbleDrag();
 
