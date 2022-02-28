@@ -1235,7 +1235,7 @@ void Canvas::showEvent(QShowEvent *)
     emit selectionAreaResize(0,0);
 }
 
-QPointF getPositionRelativeCenterdAndZoomedCanvas(QPointF globalPos, QPoint& center, const float& zoomFactor, const float& offsetX, const float& offsetY)
+QPointF getPositionRelativeCenterdAndZoomedCanvas(QPointF globalPos, QPoint& center, const float& zoomFactor, const int& offsetX, const int& offsetY)
 {
     QTransform transform;
     transform.translate(center.x(), center.y());
@@ -1245,7 +1245,7 @@ QPointF getPositionRelativeCenterdAndZoomedCanvas(QPointF globalPos, QPoint& cen
     return QPointF(zoomPoint.x() - offsetX, zoomPoint.y() - offsetY);
 }
 
-QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, const float& zoomFactor, const float& offsetX, const float& offsetY)
+QPoint getPositionRelativeCenterdAndZoomedCanvas(QPoint globalPos, QPoint& center, const float& zoomFactor, const int& offsetX, const int& offsetY)
 {
     QPointF pos = getPositionRelativeCenterdAndZoomedCanvas(QPointF(globalPos), center, zoomFactor, offsetX, offsetY);
     return pos.toPoint();
