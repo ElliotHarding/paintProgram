@@ -2059,92 +2059,32 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
 
     bool scale = false;
 
-    if(m_bDraggingTopLeftNubble || (
-       mouseLocation.x() >= m_dimensionsRect.topLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + halfNubbleSize &&
-       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + halfNubbleSize))
+    if(m_bDraggingTopLeftNubble)
     {
-        //If were starting nubble drag, save clipboard image and dimension rect before changes
-        if(!m_bDraggingTopLeftNubble)
-        {
-            m_bDraggingTopLeftNubble = true;
-            prepNubblesDrag();
-        }
-
-        //Get original image to scale from
-        else
-        {
-            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
-        }
-
         //set new dimensions based of nubble drag
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
         scale = true;
     }
-    else if(m_bDraggingTopRightNubble || (
-            mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topRight().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.topRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topRight().y() + halfNubbleSize))
+    else if(m_bDraggingTopRightNubble)
     {
-        //If were starting nubble drag, save clipboard image and dimension rect before changes
-        if(!m_bDraggingTopRightNubble)
-        {
-            m_bDraggingTopRightNubble = true;
-            prepNubblesDrag();
-        }
-
-        //Get original image to scale from
-        else
-        {
-            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
-        }
-
         //set new dimensions based of nubble drag
         m_dimensionsRect.setRight(mouseLocation.x());
         m_dimensionsRect.setY(mouseLocation.y());
 
         scale = true;
     }
-    else if(m_bDraggingBottomLeftNubble || (
-            mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + halfNubbleSize))
+    else if(m_bDraggingBottomLeftNubble)
     {
-        //If were starting nubble drag, save clipboard image and dimension rect before changes
-        if(!m_bDraggingBottomLeftNubble)
-        {
-            m_bDraggingBottomLeftNubble = true;
-            prepNubblesDrag();
-        }
-
-        //Get original image to scale from
-        else
-        {
-            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
-        }
-
         //set new dimensions based of nubble drag
         m_dimensionsRect.setX(mouseLocation.x());
         m_dimensionsRect.setBottom(mouseLocation.y());
 
         scale = true;
     }
-    else if(m_bDraggingBottomRightNubble || (
-            mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + halfNubbleSize))
+    else if(m_bDraggingBottomRightNubble)
     {
-        //If were starting nubble drag, save clipboard image and dimension rect before changes
-        if(!m_bDraggingBottomRightNubble)
-        {
-            m_bDraggingBottomRightNubble = true;
-            prepNubblesDrag();
-        }
-
-        //Get original image to scale from
-        else
-        {
-            m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
-        }
-
         //set new dimensions based of nubble drag
         m_dimensionsRect.setRight(mouseLocation.x());
         m_dimensionsRect.setBottom(mouseLocation.y());
@@ -2154,6 +2094,8 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
 
     if(scale)
     {
+        m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
+
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
 
@@ -2180,6 +2122,42 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
 
         updateDimensionsRect();
         update();
+        return true;
+    }
+
+    //If selecting top left nubble
+    if(mouseLocation.x() >= m_dimensionsRect.topLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + halfNubbleSize &&
+       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + halfNubbleSize)
+    {
+        m_bDraggingTopLeftNubble = true;
+        prepNubblesDrag();
+        return true;
+    }
+    //If selecting top right nubble
+    else if(m_bDraggingTopRightNubble || (
+            mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topRight().x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.topRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topRight().y() + halfNubbleSize))
+    {
+        m_bDraggingTopRightNubble = true;
+        prepNubblesDrag();
+        return true;
+    }
+    //If selecting bottom left nubble
+    else if(m_bDraggingBottomLeftNubble || (
+            mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + halfNubbleSize))
+    {
+        m_bDraggingBottomLeftNubble = true;
+        prepNubblesDrag();
+        return true;
+    }
+    //If selecting bottom right nubble
+    else if(m_bDraggingBottomRightNubble || (
+            mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + halfNubbleSize))
+    {
+        m_bDraggingBottomRightNubble = true;
+        prepNubblesDrag();
         return true;
     }
 
