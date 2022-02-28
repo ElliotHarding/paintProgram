@@ -1535,7 +1535,8 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            if(m_pClipboardPixels->nubblesDrag(mouseLocation, m_zoomFactor))
+            const bool isDragging = m_pClipboardPixels->isDragging();
+            if(!isDragging && m_pClipboardPixels->nubblesDrag(mouseLocation, m_zoomFactor))
             {
                 //Clear selected pixels and set to clipboard pixels
                 m_pSelectedPixels->clear();
@@ -1544,7 +1545,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             else
             {
                 //If starting dragging
-                if(!m_pClipboardPixels->isDragging())
+                if(!isDragging)
                 {
                     //check if mouse is over selection area
                     if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
