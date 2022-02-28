@@ -110,6 +110,7 @@ private:
     bool m_bDraggingBottomLeftNubble = false;
     bool m_bDraggingBottomRightNubble = false;
     QImage m_clipboardImageBeforeNubbleDrag = QImage();
+    QImage m_clipboardImageBeforeNubbleDragTransparent = QImage();
     QRect m_dimensionsRectBeforeNubbleDrag = QRect();
     void completeNubbleDrag();
 
