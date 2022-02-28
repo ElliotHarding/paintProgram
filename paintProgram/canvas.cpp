@@ -1476,7 +1476,10 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }
     else if(m_tool == TOOL_DRAG)
     {
-        m_pClipboardPixels->completeOperation();
+        if(m_pClipboardPixels->completeOperation())
+        {
+            //Todo record history of clipboard operation
+        }
     }
 }
 
@@ -1550,11 +1553,12 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     //check if mouse is over selection area
                     if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                     {
+                        /*  Now done on switch of tool
                         //If no clipboard exists to drag, generate one based on selected pixels
                         if(m_pClipboardPixels->isImageDefault()) //Todo - might not need this anymore...
                         {
                             m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
-                        }
+                        }*/
 
                         m_pClipboardPixels->startDragging(mouseLocation);
                     }
@@ -2224,32 +2228,38 @@ void PaintableClipboard::updateDimensionsRect()
     }
 }
 
-void PaintableClipboard::completeOperation()
+bool PaintableClipboard::completeOperation()
 {
     if(isDragging())
     {
         completeNormalDrag();
+        return true;
     }
     else if(m_bDraggingTopLeftNubble)
     {
         m_bDraggingTopLeftNubble = false;
         completeNubbleDrag();
+        return true;
     }
     else if(m_bDraggingTopRightNubble)
     {
         m_bDraggingTopRightNubble = false;
         completeNubbleDrag();
+        return true;
     }
     else if(m_bDraggingBottomLeftNubble)
     {
         m_bDraggingBottomLeftNubble = false;
         completeNubbleDrag();
+        return true;
     }
     else if(m_bDraggingBottomRightNubble)
     {
         m_bDraggingBottomRightNubble = false;
         completeNubbleDrag();
+        return true;
     }
+    return false;
 }
 
 void PaintableClipboard::completeNormalDrag()

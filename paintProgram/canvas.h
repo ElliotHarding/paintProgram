@@ -92,7 +92,7 @@ public:
     void reset();
 
     ///Finish dragging or nubbles dragging
-    void completeOperation();
+    bool completeOperation();
 
 private:
     ///Drawing
