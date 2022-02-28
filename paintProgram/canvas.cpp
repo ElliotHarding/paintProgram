@@ -1535,7 +1535,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            if(m_pClipboardPixels->nubblesDrag(getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
+            if(m_pClipboardPixels->nubblesDrag(mouseLocation, m_zoomFactor))
             {
                 //Clear selected pixels and set to clipboard pixels
                 m_pSelectedPixels->clear();
