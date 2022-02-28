@@ -8,6 +8,7 @@
 #include <QBuffer>
 #include <QFileInfo>
 #include <cmath>
+#include <math.h>
 
 #include "mainwindow.h"
 
@@ -25,6 +26,7 @@ const QString CanvasSaveFileType = "paintProgram";
 const QString CanvasSaveLayerBegin = "BEGIN_LAYER";
 const QString CanvasSaveLayerEnd = "END_LAYER";
 const float ZoomIncrement = 1.1;
+const int DragNubbleSize = 8;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -1123,11 +1125,10 @@ float Canvas::getZoom()
     return m_zoomFactor;
 }
 
-void Canvas::getPanOffset(float& offsetX, float& offsetY)
+QPoint Canvas::getPanOffset()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    offsetX = m_panOffsetX;
-    offsetY = m_panOffsetY;
+    return QPoint(m_panOffsetX, m_panOffsetY);
 }
 
 void Canvas::resizeEvent(QResizeEvent *event)
@@ -1534,7 +1535,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            if(m_pClipboardPixels->nubblesDrag(mouseLocation, m_zoomFactor))
+            if(m_pClipboardPixels->nubblesDrag(getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
             {
                 //Clear selected pixels and set to clipboard pixels
                 m_pSelectedPixels->clear();
@@ -1835,9 +1836,7 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
     painter.translate(-center);
 
     //Offsets
-    float offsetX = 0;
-    float offsetY = 0;
-    m_pParentCanvas->getPanOffset(offsetX, offsetY);
+    QPoint offset = m_pParentCanvas->getPanOffset();
 
     //Outline
     m_bOutlineColorToggle = !m_bOutlineColorToggle;
@@ -1850,30 +1849,30 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
         const uint x = p.x();
         const uint y = p.y();
 
-        painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColorA);
+        painter.fillRect(QRect(x + offset.x(), y + offset.y(), 1, 1), Constants::SelectionAreaColorA);
 
         //border right
         if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
         {
-            painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
+            painter.drawLine(QPoint(x + offset.x() + 1, y + offset.y()), QPoint(x + offset.x() + 1, y + offset.y() + 1));
         }
 
         //border left
         if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
         {
-            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
+            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x(), y + offset.y() + 1));
         }
 
         //border bottom
         if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
         {
-            painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
+            painter.drawLine(QPoint(x + offset.x(), y + offset.y() + 1.0), QPoint(x + offset.x() + 1.0, y + offset.y() + 1.0));
         }
 
         //border top
         if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
         {
-            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
+            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x() + 1.0, y + offset.y()));
         }
     }
 }
@@ -1906,10 +1905,10 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 {
     setGeometry(0, 0, parent->width(), parent->height());
 
-    m_nubbleImage = QImage(QSize(5, 5), QImage::Format_ARGB32);
+    m_nubbleImage = QImage(QSize(Constants::DragNubbleSize-1, Constants::DragNubbleSize-1), QImage::Format_ARGB32);
     m_nubbleImage.fill(Qt::black);
     QPainter nubbleImagePainter(&m_nubbleImage);
-    nubbleImagePainter.fillRect(QRect(1, 1, 3, 3), Qt::white);
+    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize/2, Constants::DragNubbleSize/2), Qt::white);
     nubbleImagePainter.end();
 }
 
@@ -2052,7 +2051,7 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
     clipboardPainter.drawImage(newDimensions, oldImage, oldDimensions);
 }
 
-bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
+bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
 {
 
     if(m_bDraggingTopLeftNubble)
@@ -2092,7 +2091,11 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
         return true;
     }
 
-    const float nubbleSize = 6 / zoom;
+    float nubbleSize = Constants::DragNubbleSize / zoom;
+    if(nubbleSize < 0.2)
+    {
+        nubbleSize = 0.2;
+    }
     const float halfNubbleSize = nubbleSize/2;
 
     //If selecting top left nubble
@@ -2144,12 +2147,13 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.scale(zoom, zoom);
     painter.translate(-center);
 
-    float offsetX = 0;
-    float offsetY = 0;
-    m_pParentCanvas->getPanOffset(offsetX, offsetY);
+
+    QPoint offset = m_pParentCanvas->getPanOffset();
+    const int offsetX = offset.x() + m_dragX;
+    const int offsetY = offset.y() + m_dragY;
 
     //Draw clipboard
-    painter.drawImage(QRect(m_dragX + offsetX, m_dragY + offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+    painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     for(QPoint p : m_pixels)
@@ -2161,15 +2165,15 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
                                      :
                         (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
 
-            painter.fillRect(QRect(p.x() + m_dragX + offsetX, p.y() + m_dragY + offsetY, 1, 1), col);
+            painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), col);
         }
     }
 
     //Draw nubbles to scale dimension of clipboard
     if(m_pixels.size() > 0)
     {
-        QRectF translatedDimensions = m_dimensionsRect.translated((m_dragX + offsetX), (m_dragY + offsetY));
-        const float nubbleSize = 6 / zoom;
+        QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
+        const float nubbleSize = Constants::DragNubbleSize / zoom;
         const float halfNubbleSize = nubbleSize/2;
         translatedDimensions.setCoords(translatedDimensions.x() - halfNubbleSize,
                                        translatedDimensions.y() - halfNubbleSize,

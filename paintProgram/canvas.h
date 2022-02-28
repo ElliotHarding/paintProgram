@@ -86,7 +86,7 @@ public:
     bool isDragging();
     void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
-    bool nubblesDrag(QPoint mouseLocation, const float& zoom);
+    bool nubblesDrag(QPointF mouseLocation, const float& zoom);
 
     ///Reset/clear
     void reset();
@@ -203,7 +203,7 @@ public:
 
     ///Stuff called by childen
     float getZoom();
-    void getPanOffset(float& offsetX, float& offsetY);
+    QPoint getPanOffset();
 
 signals:
     void selectionAreaResize(const int x, const int y);
@@ -242,8 +242,8 @@ private:
     ///Panning
     const QPoint m_c_nullPanPos = QPoint(-1,-1);
     QPoint m_previousPanPos = m_c_nullPanPos;
-    float m_panOffsetX = 0;
-    float m_panOffsetY = 0;
+    int m_panOffsetX = 0;
+    int m_panOffsetY = 0;
 
     ///Selecting
     SelectedPixels* m_pSelectedPixels = nullptr;
