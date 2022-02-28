@@ -31,7 +31,6 @@ QImage genTransparentPixelsBackground(const int width, const int height)
 {
     //TODO ~ Test if quicker to paint all white, then fill grey squares after
     QImage transparentBackground = QImage(QSize(width, height), QImage::Format_ARGB32);
-    QPainter painter(&transparentBackground);
     for(int x = 0; x < width; x++)
     {
         for(int y = 0; y < height; y++)
@@ -40,11 +39,9 @@ QImage genTransparentPixelsBackground(const int width, const int height)
                         (y % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
                                      :
                         (y % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
-
-            painter.fillRect(QRect(x, y, 1, 1), col);
+            transparentBackground.setPixelColor(x, y, col);
         }
     }
-
     return transparentBackground;
 }
 
@@ -513,14 +510,10 @@ void Canvas::onDeleteKeyPressed()
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
-        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selected layer
-        painter.setCompositionMode (QPainter::CompositionMode_Clear);
-
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, Qt::transparent);//Assumes there is a selected layer
         });
-
         m_pSelectedPixels->clear();
 
         m_canvasHistory.recordHistory(m_canvasLayers);
@@ -562,19 +555,13 @@ void Canvas::onCutKeysPressed()
     {
         //Copy cut pixels to clipboard
         clipBoard.m_clipboardImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
-
-        QPainter dragPainter(&clipBoard.m_clipboardImage);
-        dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
-        dragPainter.fillRect(clipBoard.m_clipboardImage.rect(), Qt::transparent);
-
-        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selected layer
-        painter.setCompositionMode (QPainter::CompositionMode_Clear);
+        clipBoard.m_clipboardImage.fill(Qt::transparent);
 
         //Go through selected pixels cutting from canvas and copying to clipboard
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            dragPainter.fillRect(QRect(x, y, 1, 1), m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y)); //Assumes there is a selected layer
-            painter.fillRect(QRect(x, y, 1, 1), Qt::transparent);
+            clipBoard.m_clipboardImage.setPixelColor(x, y, m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y));//Assumes there is a selected layer
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, Qt::transparent);//Assumes there is a selected layer
             clipBoard.m_pixels.push_back(QPoint(x,y));
         });
     }
@@ -1337,9 +1324,6 @@ void floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, 
     {
         const QColor originalPixelColor = QColor(image.pixel(startX, startY));
 
-        QPainter painter(&image);
-        painter.setCompositionMode (QPainter::CompositionMode_Source);
-
         std::stack<QPoint> stack;
         stack.push(QPoint(startX,startY));
 
@@ -1364,8 +1348,7 @@ void floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, 
                     )
             {
                 //Switch color
-                QRect rect = QRect(x, y, 1, 1);
-                painter.fillRect(rect, newColor);
+                image.setPixelColor(x, y, newColor);
 
                 stack.push(QPoint(x + 1, y));
                 stack.push(QPoint(x - 1, y));
@@ -1903,17 +1886,13 @@ void Clipboard::generateClipboard(QImage &canvas, SelectedPixels* pSelectedPixel
 {
     //Prep selected pixels for dragging
     m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
-    QPainter dragPainter(&m_clipboardImage);
-    dragPainter.setCompositionMode (QPainter::CompositionMode_Clear);
-    dragPainter.fillRect(m_clipboardImage.rect(), Qt::transparent);
-
-    dragPainter.setCompositionMode (QPainter::CompositionMode_Source);
+    m_clipboardImage.fill(Qt::transparent);
 
     m_pixels.clear();
 
     pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
     {
-        dragPainter.fillRect(QRect(x, y, 1, 1), canvas.pixelColor(x,y));
+        m_clipboardImage.setPixelColor(x, y, canvas.pixelColor(x,y));
         m_pixels.push_back(QPoint(x,y));
     });
 }
