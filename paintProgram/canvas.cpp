@@ -2054,9 +2054,6 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
 
 bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
 {
-    const float nubbleSize = 6 / zoom;
-    const float halfNubbleSize = nubbleSize/2;
-
     bool scale = false;
 
     if(m_bDraggingTopLeftNubble)
@@ -2124,6 +2121,9 @@ bool PaintableClipboard::nubblesDrag(QPoint mouseLocation, const float& zoom)
         update();
         return true;
     }
+
+    const float nubbleSize = 6 / zoom;
+    const float halfNubbleSize = nubbleSize/2;
 
     //If selecting top left nubble
     if(mouseLocation.x() >= m_dimensionsRect.topLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + halfNubbleSize &&
