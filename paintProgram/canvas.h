@@ -37,6 +37,7 @@ public:
     ///Pixel info
     bool isHighlighted(const uint x, const uint y);
     bool containsPixels();
+    QList<QPoint> getPixels();
 
 private:
     ///Containers of selected pixels (two differnt for speed instead of memory)
@@ -124,16 +125,24 @@ private:
     Canvas* m_pParentCanvas;
 };
 
+class CanvasHistoryItem
+{
+public:
+    QList<CanvasLayer> m_layers;
+    Clipboard m_clipboard;
+    QList<QPoint> m_selectedPixels;
+};
+
 ///Holds the history of actions on the canvas ~ may incorporate actual CanvasLayers later...
 class CanvasHistory
 {
 public:
-    void recordHistory(QList<CanvasLayer> canvasSnapShot);
-    void redoHistory(QList<CanvasLayer>& canvasLayers);
-    void undoHistory(QList<CanvasLayer>& canvasLayers);
+    void recordHistory(CanvasHistoryItem canvasSnapShot);
+    bool redoHistory(CanvasHistoryItem& canvasSnapShot);
+    bool undoHistory(CanvasHistoryItem& canvasSnapShot);
 
 private:
-    QList<QList<CanvasLayer>> m_history;
+    QList<CanvasHistoryItem> m_history;
     uint m_historyIndex = 0;
 };
 
@@ -204,6 +213,9 @@ public:
     ///Stuff called by childen
     float getZoom();
     QPoint getPanOffset();
+
+    ///History stuff
+    CanvasHistoryItem getSnapshot();
 
 signals:
     void selectionAreaResize(const int x, const int y);
