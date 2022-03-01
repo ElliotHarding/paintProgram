@@ -214,9 +214,6 @@ public:
     float getZoom();
     QPoint getPanOffset();
 
-    ///History stuff
-    CanvasHistoryItem getSnapshot();
-
 signals:
     void selectionAreaResize(const int x, const int y);
     void mousePositionChange(const int x, const int y);
@@ -267,6 +264,7 @@ private:
 
     ///Undo/redo
     CanvasHistory m_canvasHistory;
+    CanvasHistoryItem getSnapshot();
 
     ///Geometry
     uint m_canvasWidth;
