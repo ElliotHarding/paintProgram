@@ -2145,11 +2145,7 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
         return true;
     }
 
-    float nubbleSize = Constants::DragNubbleSize / zoom;
-    if(nubbleSize < 0.5)
-    {
-        nubbleSize = 0.5;
-    }
+    const float nubbleSize = Constants::DragNubbleSize / zoom;
     const float halfNubbleSize = nubbleSize/2;
 
     QTransform transform;
