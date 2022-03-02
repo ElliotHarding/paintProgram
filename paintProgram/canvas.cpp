@@ -1481,6 +1481,15 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         m_drawShapeOrigin = mouseLocation;
     }
+    else if(m_tool == TOOL_DRAG)
+    {
+        if(m_pClipboardPixels->nubblesDrag(getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
+        {
+            //Clear selected pixels and set to clipboard pixels
+            m_pSelectedPixels->clear();
+            m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
+        }
+    }
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
@@ -1574,7 +1583,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         else if(m_tool == TOOL_DRAG)
         {
             const bool isDragging = m_pClipboardPixels->isDragging();
-            if(!isDragging && m_pClipboardPixels->nubblesDrag(mouseLocation, m_zoomFactor))
+            if(!isDragging && m_pClipboardPixels->nubblesDrag(getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
             {
                 //Clear selected pixels and set to clipboard pixels
                 m_pSelectedPixels->clear();
@@ -2158,7 +2167,7 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
         return true;
     }
     //If selecting top right nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topRight().x() + halfNubbleSize &&
+    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() && mouseLocation.x() <= m_dimensionsRect.topRight().x() + nubbleSize + halfNubbleSize &&
             mouseLocation.y() >= m_dimensionsRect.topRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topRight().y() + halfNubbleSize)
     {
         m_bDraggingTopRightNubble = true;
@@ -2167,15 +2176,15 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
     }
     //If selecting bottom left nubble
     else if(mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + halfNubbleSize)
+            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + nubbleSize + halfNubbleSize)
     {
         m_bDraggingBottomLeftNubble = true;
         prepNubblesDrag();
         return true;
     }
     //If selecting bottom right nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + halfNubbleSize)
+    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + nubbleSize + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + nubbleSize + halfNubbleSize)
     {
         m_bDraggingBottomRightNubble = true;
         prepNubblesDrag();
