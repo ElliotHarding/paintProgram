@@ -2199,8 +2199,6 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     const int offsetX = offset.x() + m_dragX;
     const int offsetY = offset.y() + m_dragY;
 
-    qDebug() << zoom;
-
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
@@ -2247,7 +2245,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 void PaintableClipboard::updateDimensionsRect()
 {
     m_dimensionsRect = QRect();
-    for(QPoint p : m_pixels)
+    for(QPoint& p : m_pixels)
     {
         if(m_dimensionsRect.x() == 0 || m_dimensionsRect.x() > p.x())
         {
@@ -2362,7 +2360,7 @@ void PaintableClipboard::prepNubblesDrag()
 
     m_clipboardImageBeforeNubbleDragTransparent = QImage(QSize(m_clipboardImageBeforeNubbleDrag.width(), m_clipboardImageBeforeNubbleDrag.height()), QImage::Format_ARGB32);
     m_clipboardImageBeforeNubbleDragTransparent.fill(Qt::transparent);
-    for(QPoint p : m_pixels)
+    for(QPoint& p : m_pixels)
     {
         if(m_clipboardImageBeforeNubbleDrag.pixelColor(p.x(), p.y()).alpha() == 0)
         {
