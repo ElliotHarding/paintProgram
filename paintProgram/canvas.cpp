@@ -2027,7 +2027,7 @@ bool PaintableClipboard::dumpImage(QPainter &painter)
 
     //Draw transparent part of clipboard
     painter.setCompositionMode (QPainter::CompositionMode_Clear);
-    for(QPoint p : m_pixels)
+    for(QPoint& p : m_pixels)
     {
         if(p.x() > 0 && p.x() < (int)m_clipboardImage.width() &&
            p.y()> 0 && p.y() < (int)m_clipboardImage.height() &&
@@ -2205,7 +2205,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
-    for(QPoint p : m_pixels)
+    for(QPoint& p : m_pixels)
     {
         if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
         {
@@ -2316,6 +2316,17 @@ void PaintableClipboard::completeNormalDrag()
     //Set new values & reset & redraw
     m_clipboardImage = newClipboardImage;
     m_pixels = getPixelsOffset();
+
+    //Temp bug fix. Later I want to make it so you can drag off canvas and then drag back on....
+    for(int i = 0; i < m_pixels.size(); i++)
+    {
+        if(m_pixels[i].x() < 0 || m_pixels[i].x() > m_clipboardImage.width() || m_pixels[i].y() < 0 || m_pixels[i].y() > m_clipboardImage.height())
+        {
+            m_pixels.removeAt(i);
+            i--;
+        }
+    }
+
     m_previousDragPos = Constants::NullDragPoint;
     m_dragX = 0;
     m_dragY = 0;
