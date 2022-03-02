@@ -1950,10 +1950,10 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 {
     setGeometry(0, 0, parent->width(), parent->height());
 
-    m_nubbleImage = QImage(QSize(Constants::DragNubbleSize-1, Constants::DragNubbleSize-1), QImage::Format_ARGB32);
+    m_nubbleImage = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
     m_nubbleImage.fill(Qt::black);
     QPainter nubbleImagePainter(&m_nubbleImage);
-    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize/2, Constants::DragNubbleSize/2), Qt::white);
+    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
     nubbleImagePainter.end();
 }
 
