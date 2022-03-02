@@ -2145,12 +2145,6 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
         return true;
     }
 
-    //Temp
-    if(zoom > geometry().width() / m_clipboardImage.width())
-    {
-        return false;
-    }
-
     float nubbleSize = Constants::DragNubbleSize / zoom;
     if(nubbleSize < 0.5)
     {
@@ -2226,7 +2220,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     }
 
     //Draw nubbles to scale dimension of clipboard
-    if(m_pixels.size() > 0 && zoom < geometry().width() / m_clipboardImage.width() /* <-- temp*/)
+    if(m_pixels.size() > 0)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
         const float nubbleSize = Constants::DragNubbleSize / zoom;
