@@ -75,7 +75,7 @@ enum DragNubblePos
 class DragNubble
 {
 public:
-    DragNubble(std::function<void(QRect&, const QPointF&)> operation, QPoint offsetScale);
+    DragNubble(std::function<void(QRect&, const QPointF&)> operation);
     DragNubble(){}
 
     ///Dragging
@@ -94,8 +94,6 @@ private:
     bool m_bIsDragging = false;
 
     QPoint m_location;
-
-    QPoint m_offsetScale;
 
     inline static QImage m_image = QImage();
 };

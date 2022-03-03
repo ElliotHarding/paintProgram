@@ -1962,22 +1962,22 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
     {
         dimensions.setX(mouseLocation.x());
         dimensions.setY(mouseLocation.y());
-    }, QPoint(0,0)));
+    }));
     m_dragNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         dimensions.setRight(mouseLocation.x());
         dimensions.setY(mouseLocation.y());
-    }, QPoint(1,0)));
+    }));
     m_dragNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         dimensions.setX(mouseLocation.x());
         dimensions.setBottom(mouseLocation.y());
-    }, QPoint(0,1)));
+    }));
     m_dragNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         dimensions.setRight(mouseLocation.x());
         dimensions.setBottom(mouseLocation.y());
-    }, QPoint(1,1)));
+    }));
 }
 
 void PaintableClipboard::generateClipboard(QImage &canvas, SelectedPixels *pSelectedPixels)
