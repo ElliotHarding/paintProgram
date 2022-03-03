@@ -86,7 +86,7 @@ public:
 
     void setLocation(const QPoint &p);
 
-    void draw(QPainter &painter, const int &offsetX, const int &offsetY);
+    void draw(QPainter &painter, const float& zoom, const int &offsetX, const int &offsetY);
 
 private:
     std::function<void (QRect&, const QPointF&)> m_operation;

@@ -2188,7 +2188,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     {
         for(const auto& nubblePos : m_dragNubbles.keys())
         {
-            m_dragNubbles[nubblePos].draw(painter, offsetX, offsetY);
+            m_dragNubbles[nubblePos].draw(painter, zoom, offsetX, offsetY);
         }
     }
 }
@@ -2426,9 +2426,12 @@ void DragNubble::setLocation(const QPoint &p)
     m_location = p;
 }
 
-void DragNubble::draw(QPainter &painter, const int &offsetX, const int &offsetY)
+void DragNubble::draw(QPainter &painter, const float& zoom, const int &offsetX, const int &offsetY)
 {
-    painter.drawImage(QRectF(m_location.x() - Constants::DragNubbleSize/2 + offsetX, m_location.y() - Constants::DragNubbleSize/2 + offsetY, Constants::DragNubbleSize, Constants::DragNubbleSize),
+    const float nubbleSize = Constants::DragNubbleSize / zoom;
+    const float halfNubbleSize = nubbleSize/2;
+
+    painter.drawImage(QRectF(m_location.x() - halfNubbleSize + offsetX, m_location.y() - halfNubbleSize + offsetY, nubbleSize, nubbleSize),
                       m_image,
                       m_image.rect());
 }
