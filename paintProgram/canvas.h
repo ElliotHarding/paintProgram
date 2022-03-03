@@ -81,19 +81,15 @@ public:
     ///Dragging
     bool isDragging();
     void setDragging(const bool dragging);
-    bool isStartDragging(const QPointF &mouseLocation, const float& zoom);
+    bool isStartDragging(const QPointF &mouseLocation, QPointF location, const float& zoom);
     void doDragging(const QPointF &mouseLocation, QRect& rect);
 
-    void setLocation(const QPoint &p);
-
-    void draw(QPainter &painter, const float& zoom, const int &offsetX, const int &offsetY);
+    void draw(QPainter &painter, const float& zoom, const QPointF location);
 
 private:
     std::function<void (QRect&, const QPointF&)> m_operation;
 
     bool m_bIsDragging = false;
-
-    QPoint m_location;
 
     inline static QImage m_image = QImage();
 };

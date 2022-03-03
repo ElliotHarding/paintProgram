@@ -2119,6 +2119,24 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
     clipboardPainter.drawImage(newDimensions, oldImage, oldDimensions);
 }
 
+QPointF getLocation(QRectF rect, DragNubblePos nubblePos)
+{
+    switch (nubblePos)
+    {
+        case DragNubblePos::TopLeft:
+            return rect.topLeft();
+        case DragNubblePos::TopRight:
+            return rect.topRight();
+        case DragNubblePos::BottomLeft:
+            return rect.bottomLeft();
+        case DragNubblePos::BottomRight:
+            return rect.bottomRight();
+    }
+
+    qDebug() << "getLocation(QRectF rect, DragNubblePos nubblePos) : nubble pos not found!";
+    return rect.topLeft();
+}
+
 bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
 {
 
@@ -2136,7 +2154,7 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
     //Check if a nubble is being selected
     for(const auto& nubblePos : m_dragNubbles.keys())
     {
-        if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, zoom))
+        if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
         {
             prepNubblesDrag();
             return true;
@@ -2180,9 +2198,11 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw nubbles to scale dimension of clipboard
     if(m_pixels.size() > 0)
     {
+        QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
+
         for(const auto& nubblePos : m_dragNubbles.keys())
         {
-            m_dragNubbles[nubblePos].draw(painter, zoom, offsetX, offsetY);
+            m_dragNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
         }
     }
 }
@@ -2209,11 +2229,6 @@ void PaintableClipboard::updateDimensionsRect()
             m_dimensionsRect.setBottom(p.y());
         }
     }
-
-    m_dragNubbles[DragNubblePos::TopLeft].setLocation(m_dimensionsRect.topLeft());
-    m_dragNubbles[DragNubblePos::TopRight].setLocation(m_dimensionsRect.topRight());
-    m_dragNubbles[DragNubblePos::BottomLeft].setLocation(m_dimensionsRect.bottomLeft());
-    m_dragNubbles[DragNubblePos::BottomRight].setLocation(m_dimensionsRect.bottomRight());
 }
 
 bool PaintableClipboard::completeOperation()
@@ -2396,12 +2411,12 @@ void DragNubble::setDragging(bool dragging)
     m_bIsDragging = dragging;
 }
 
-bool DragNubble::isStartDragging(const QPointF& mouseLocation, const float& zoom)
+bool DragNubble::isStartDragging(const QPointF& mouseLocation, QPointF location, const float& zoom)
 {
     const float nubbleSize = Constants::DragNubbleSize/zoom;
     const float halfNubbleSize = nubbleSize/2;
-    if(mouseLocation.x() >= m_location.x() - halfNubbleSize && mouseLocation.x() <= m_location.x() + halfNubbleSize &&
-       mouseLocation.y() >= m_location.y() - halfNubbleSize && mouseLocation.y() <= m_location.y() + halfNubbleSize)
+    if(mouseLocation.x() >= location.x() - halfNubbleSize && mouseLocation.x() <= location.x() + halfNubbleSize &&
+       mouseLocation.y() >= location.y() - halfNubbleSize && mouseLocation.y() <= location.y() + halfNubbleSize)
     {
         m_bIsDragging = true;
         return true;
@@ -2415,17 +2430,12 @@ void DragNubble::doDragging(const QPointF &mouseLocation, QRect& rect)
     m_operation(rect, mouseLocation);
 }
 
-void DragNubble::setLocation(const QPoint &p)
-{
-    m_location = p;
-}
-
-void DragNubble::draw(QPainter &painter, const float& zoom, const int &offsetX, const int &offsetY)
+void DragNubble::draw(QPainter &painter, const float& zoom, const QPointF location)
 {
     const float nubbleSize = Constants::DragNubbleSize / zoom;
     const float halfNubbleSize = nubbleSize/2;
 
-    painter.drawImage(QRectF(m_location.x() - halfNubbleSize + offsetX, m_location.y() - halfNubbleSize + offsetY, nubbleSize, nubbleSize),
+    painter.drawImage(QRectF(location.x() - halfNubbleSize, location.y() - halfNubbleSize, nubbleSize, nubbleSize),
                       m_image,
                       m_image.rect());
 }
