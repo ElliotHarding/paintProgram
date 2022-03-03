@@ -2373,9 +2373,8 @@ bool CanvasHistory::undoHistory(CanvasHistoryItem& canvasSnapShot)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// DragNubble
 ///
-DragNubble::DragNubble(std::function<void(QRect&, const QPointF&)> operation, QPoint offsetScale) :
-    m_operation(operation),
-    m_offsetScale(offsetScale)
+DragNubble::DragNubble(std::function<void(QRect&, const QPointF&)> operation) :
+    m_operation(operation)
 {
     //Static m_image shared across all instances of DragNubble
     if(m_image.isNull())
