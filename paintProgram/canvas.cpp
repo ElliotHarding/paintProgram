@@ -1183,6 +1183,8 @@ void Canvas::resizeEvent(QResizeEvent *event)
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
 {
+    Q_UNUSED(paintEvent);
+
     m_canvasMutex.lock();
 
     //Setup painter
@@ -1493,6 +1495,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
 void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
+    Q_UNUSED(releaseEvent);
+
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_bMouseDown = false;
 
@@ -1877,6 +1881,8 @@ QList<QPoint> SelectedPixels::getPixels()
 
 void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
 {
+    Q_UNUSED(paintEvent);
+
     QPainter painter(this);
 
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
@@ -2211,6 +2217,8 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
 
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
+    Q_UNUSED(paintEvent);
+
     QPainter painter(this);
 
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
