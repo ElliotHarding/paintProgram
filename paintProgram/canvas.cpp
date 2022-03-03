@@ -2133,16 +2133,10 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
         }
     }
 
-    //Calculate offset of nubble hitbox detection due to zoom scale
-    QTransform transform;
-    transform.scale(zoom, zoom);
-    const float nubbleSize = Constants::DragNubbleSize / zoom;
-    const QPointF offset = transform.map(QPointF(nubbleSize, nubbleSize));
-
     //Check if a nubble is being selected
     for(const auto& nubblePos : m_dragNubbles.keys())
     {
-        if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, offset))
+        if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, zoom))
         {
             prepNubblesDrag();
             return true;
@@ -2403,11 +2397,12 @@ void DragNubble::setDragging(bool dragging)
     m_bIsDragging = dragging;
 }
 
-bool DragNubble::isStartDragging(const QPointF& mouseLocation, const QPointF& offset)
+bool DragNubble::isStartDragging(const QPointF& mouseLocation, const float& zoom)
 {
-    const float halfNubbleSize = Constants::DragNubbleSize/2;
-    if(mouseLocation.x() >= m_location.x() - halfNubbleSize && mouseLocation.x() <= m_location.x() + halfNubbleSize + m_offsetScale.x() * offset.x() &&
-       mouseLocation.y() >= m_location.y() - halfNubbleSize && mouseLocation.y() <= m_location.y() + halfNubbleSize + m_offsetScale.y() * offset.y())
+    const float nubbleSize = Constants::DragNubbleSize/zoom;
+    const float halfNubbleSize = nubbleSize/2;
+    if(mouseLocation.x() >= m_location.x() - halfNubbleSize && mouseLocation.x() <= m_location.x() + halfNubbleSize &&
+       mouseLocation.y() >= m_location.y() - halfNubbleSize && mouseLocation.y() <= m_location.y() + halfNubbleSize)
     {
         m_bIsDragging = true;
         return true;

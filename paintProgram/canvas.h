@@ -81,7 +81,7 @@ public:
     ///Dragging
     bool isDragging();
     void setDragging(const bool dragging);
-    bool isStartDragging(const QPointF &mouseLocation, const QPointF &offset);
+    bool isStartDragging(const QPointF &mouseLocation, const float& zoom);
     void doDragging(const QPointF &mouseLocation, QRect& rect);
 
     void setLocation(const QPoint &p);
