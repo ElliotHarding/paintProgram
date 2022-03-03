@@ -1960,39 +1960,64 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 
     m_dragNubbles.insert(DragNubblePos::TopLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setX(mouseLocation.x());
-        dimensions.setY(mouseLocation.y());
+        if(mouseLocation.x() < dimensions.right() && mouseLocation.y() < dimensions.bottom())
+        {
+             dimensions.setX(mouseLocation.x());
+             dimensions.setY(mouseLocation.y());
+        }
     }));
     m_dragNubbles.insert(DragNubblePos::TopMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setY(mouseLocation.y());
+        if(mouseLocation.y() < dimensions.bottom())
+        {
+            dimensions.setY(mouseLocation.y());
+        }
     }));
     m_dragNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setRight(mouseLocation.x());
-        dimensions.setY(mouseLocation.y());
+        if(mouseLocation.x() > dimensions.left() && mouseLocation.y() < dimensions.bottom())
+        {
+            dimensions.setRight(mouseLocation.x());
+            dimensions.setY(mouseLocation.y());
+        }
     }));
     m_dragNubbles.insert(DragNubblePos::LeftMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setX(mouseLocation.x());
+        if(mouseLocation.x() < dimensions.right())
+        {
+            dimensions.setX(mouseLocation.x());
+        }
     }));
     m_dragNubbles.insert(DragNubblePos::RightMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setRight(mouseLocation.x());
+        if(mouseLocation.x() > dimensions.left())
+        {
+            dimensions.setRight(mouseLocation.x());
+        }
     }));
     m_dragNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setX(mouseLocation.x());
-        dimensions.setBottom(mouseLocation.y());
+        if(mouseLocation.x() < dimensions.right() && mouseLocation.y() > dimensions.top())
+        {
+            dimensions.setX(mouseLocation.x());
+            dimensions.setBottom(mouseLocation.y());
+        }
+
     }));
     m_dragNubbles.insert(DragNubblePos::BottomMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setBottom(mouseLocation.y());
+        if(mouseLocation.y() > dimensions.top())
+        {
+            dimensions.setBottom(mouseLocation.y());
+        }
     }));
     m_dragNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
-        dimensions.setRight(mouseLocation.x());
-        dimensions.setBottom(mouseLocation.y());
+        if(mouseLocation.x() > dimensions.left() && mouseLocation.y() > dimensions.top())
+        {
+            dimensions.setRight(mouseLocation.x());
+            dimensions.setBottom(mouseLocation.y());
+        }
     }));
 }
 
