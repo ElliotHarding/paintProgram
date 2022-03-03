@@ -67,8 +67,12 @@ public:
 enum DragNubblePos
 {
     TopLeft,
+    TopMiddle,
     TopRight,
+    LeftMiddle,
+    RightMiddle,
     BottomLeft,
+    BottomMiddle,
     BottomRight
 };
 

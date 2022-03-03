@@ -1963,14 +1963,30 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
         dimensions.setX(mouseLocation.x());
         dimensions.setY(mouseLocation.y());
     }));
+    m_dragNubbles.insert(DragNubblePos::TopMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setY(mouseLocation.y());
+    }));
     m_dragNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         dimensions.setRight(mouseLocation.x());
         dimensions.setY(mouseLocation.y());
     }));
+    m_dragNubbles.insert(DragNubblePos::LeftMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setX(mouseLocation.x());
+    }));
+    m_dragNubbles.insert(DragNubblePos::RightMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setRight(mouseLocation.x());
+    }));
     m_dragNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         dimensions.setX(mouseLocation.x());
+        dimensions.setBottom(mouseLocation.y());
+    }));
+    m_dragNubbles.insert(DragNubblePos::BottomMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
         dimensions.setBottom(mouseLocation.y());
     }));
     m_dragNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
@@ -2131,6 +2147,14 @@ QPointF getLocation(QRectF rect, DragNubblePos nubblePos)
             return rect.bottomLeft();
         case DragNubblePos::BottomRight:
             return rect.bottomRight();
+        case DragNubblePos::TopMiddle:
+            return QPointF(rect.center().x(), rect.topLeft().y());
+        case DragNubblePos::BottomMiddle:
+            return QPointF(rect.center().x(), rect.bottomLeft().y());
+        case DragNubblePos::LeftMiddle:
+            return QPointF(rect.topLeft().x(), rect.center().y());
+        case DragNubblePos::RightMiddle:
+            return QPointF(rect.topRight().x(), rect.center().y());
     }
 
     qDebug() << "getLocation(QRectF rect, DragNubblePos nubblePos) : nubble pos not found!";
