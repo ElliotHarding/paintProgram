@@ -1187,7 +1187,6 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
 
     //Setup painter
     QPainter painter(this);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
     //Zoom painter
     painter.translate(m_center);
@@ -1621,12 +1620,9 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             m_pClipboardPixels->reset();
 
             QImage newShapeImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+            newShapeImage.fill(Qt::transparent);
 
             QPainter shapePainter(&newShapeImage);
-            shapePainter.setCompositionMode (QPainter::CompositionMode_Clear);
-            shapePainter.fillRect(newShapeImage.rect(), Qt::transparent);
-            shapePainter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-            shapePainter.setCompositionMode (QPainter::CompositionMode_Source);
 
             if(m_pParent->getCurrentShape() == SHAPE_LINE)
             {
