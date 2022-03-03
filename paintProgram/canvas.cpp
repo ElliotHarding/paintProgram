@@ -269,7 +269,7 @@ bool Canvas::save(QString path)
 
 void Canvas::onLayerAdded()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);  
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     CanvasLayer canvasLayer;
     canvasLayer.m_image = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
@@ -482,7 +482,7 @@ void Canvas::onCurrentToolUpdated(const Tool t)
     {
         QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-        //Reset selection rectangle tool        
+        //Reset selection rectangle tool
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
         emit selectionAreaResize(0,0);
@@ -537,7 +537,7 @@ void Canvas::onDeleteKeyPressed()
 }
 
 void Canvas::onCopyKeysPressed()
-{   
+{
     m_canvasMutex.lock();
     Clipboard clipboard;
     clipboard.generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels); //Assumes there is a selected layer
@@ -1182,14 +1182,14 @@ void Canvas::resizeEvent(QResizeEvent *event)
 }
 
 void Canvas::paintEvent(QPaintEvent *paintEvent)
-{   
+{
     m_canvasMutex.lock();
 
     //Setup painter
     QPainter painter(this);
     painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 
-    //Zoom painter    
+    //Zoom painter
     painter.translate(m_center);
     painter.scale(m_zoomFactor, m_zoomFactor);
     painter.translate(-m_center);
@@ -1430,7 +1430,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
     }
     else if(m_tool == TOOL_SPREAD_ON_SIMILAR)
-    {        
+    {
         if(!m_pParent->isCtrlPressed())
         {
             m_pSelectedPixels->clear();
@@ -1577,7 +1577,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
                 m_previousPanPos = mouseLocation;
 
-                update();                
+                update();
             }
         }
         else if(m_tool == TOOL_DRAG)
@@ -1617,7 +1617,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             }
         }
         else if(m_tool == TOOL_SHAPE)
-        {           
+        {
             m_pClipboardPixels->reset();
 
             QImage newShapeImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
@@ -1707,7 +1707,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
             shapePainter.end();
             m_pClipboardPixels->setImage(newShapeImage);
-        }        
+        }
     }
     m_canvasMutex.unlock();
 }
@@ -2160,7 +2160,7 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
         return true;
     }
     //If selecting top right nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() && mouseLocation.x() <= m_dimensionsRect.topRight().x() + offset.x() + halfNubbleSize &&
+    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize&& mouseLocation.x() <= m_dimensionsRect.topRight().x() + offset.x() + halfNubbleSize &&
             mouseLocation.y() >= m_dimensionsRect.topRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topRight().y() + halfNubbleSize)
     {
         m_bDraggingTopRightNubble = true;
@@ -2169,15 +2169,15 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
     }
     //If selecting bottom left nubble
     else if(mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + offset.y() + halfNubbleSize)
+            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + offset.y() + halfNubbleSize)
     {
         m_bDraggingBottomLeftNubble = true;
         prepNubblesDrag();
         return true;
     }
     //If selecting bottom right nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + offset.x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + offset.y() + halfNubbleSize)
+    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + offset.x() + halfNubbleSize &&
+            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + offset.y() + halfNubbleSize)
     {
         m_bDraggingBottomRightNubble = true;
         prepNubblesDrag();
