@@ -2215,6 +2215,11 @@ void PaintableClipboard::updateDimensionsRect()
             m_dimensionsRect.setBottom(p.y());
         }
     }
+
+    m_dragNubbles[DragNubblePos::TopLeft].setLocation(m_dimensionsRect.topLeft());
+    m_dragNubbles[DragNubblePos::TopRight].setLocation(m_dimensionsRect.topRight());
+    m_dragNubbles[DragNubblePos::BottomLeft].setLocation(m_dimensionsRect.bottomLeft());
+    m_dragNubbles[DragNubblePos::BottomRight].setLocation(m_dimensionsRect.bottomRight());
 }
 
 bool PaintableClipboard::completeOperation()
@@ -2229,6 +2234,7 @@ bool PaintableClipboard::completeOperation()
     {
         if(m_dragNubbles[nubblePos].isDragging())
         {
+            m_dragNubbles[nubblePos].setDragging(false);
             completeNubbleDrag();
             return true;
         }
@@ -2377,10 +2383,14 @@ DragNubble::DragNubble(std::function<void(QRect&, const QPointF&)> operation, QP
     m_operation(operation),
     m_offsetScale(offsetScale)
 {
-    m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
-    m_image.fill(Qt::black);
-    QPainter nubbleImagePainter(&m_image);
-    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
+    //Static m_image shared across all instances of DragNubble
+    if(m_image.isNull())
+    {
+        m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
+        m_image.fill(Qt::black);
+        QPainter nubbleImagePainter(&m_image);
+        nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
+    }
 }
 
 bool DragNubble::isDragging()

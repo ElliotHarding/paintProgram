@@ -76,6 +76,7 @@ class DragNubble
 {
 public:
     DragNubble(std::function<void(QRect&, const QPointF&)> operation, QPoint offsetScale);
+    DragNubble(){}
 
     ///Dragging
     bool isDragging();
@@ -96,7 +97,7 @@ private:
 
     QPoint m_offsetScale;
 
-    QImage m_image;
+    inline static QImage m_image = QImage();
 };
 
 ///A clipboard that also paints. Used for dragging around or cutting/pasting
