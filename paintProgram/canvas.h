@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QTimer>
 #include <functional>
+#include <QMap>
 
 #include "tools.h"
 #include "canvaslayer.h"
@@ -63,6 +64,41 @@ public:
     QImage m_clipboardImage;
 };
 
+enum DragNubblePos
+{
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight
+};
+
+class DragNubble
+{
+public:
+    DragNubble(std::function<void(QRect&, const QPointF&)> operation, QPoint offsetScale);
+
+    ///Dragging
+    bool isDragging();
+    void setDragging(const bool dragging);
+    bool isStartDragging(const QPointF &mouseLocation, const QPointF &offset);
+    void doDragging(const QPointF &mouseLocation, QRect& rect);
+
+    void setLocation(const QPoint &p);
+
+    void draw(QPainter &painter, const int &offsetX, const int &offsetY);
+
+private:
+    std::function<void (QRect&, const QPointF&)> m_operation;
+
+    bool m_bIsDragging = false;
+
+    QPoint m_location;
+
+    QPoint m_offsetScale;
+
+    QImage m_image;
+};
+
 ///A clipboard that also paints. Used for dragging around or cutting/pasting
 class PaintableClipboard : public Clipboard, public QWidget
 {
@@ -106,10 +142,7 @@ private:
     void completeNormalDrag();
 
     ///Nubble dragging
-    bool m_bDraggingTopLeftNubble = false;
-    bool m_bDraggingTopRightNubble = false;
-    bool m_bDraggingBottomLeftNubble = false;
-    bool m_bDraggingBottomRightNubble = false;
+    QMap<DragNubblePos, DragNubble> m_dragNubbles;
     QImage m_clipboardImageBeforeNubbleDrag = QImage();
     QImage m_clipboardImageBeforeNubbleDragTransparent = QImage();
     QRect m_dimensionsRectBeforeNubbleDrag = QRect();
@@ -120,7 +153,6 @@ private:
     ///Nubble dimensions rect
     QRect m_dimensionsRect = QRect();
     void updateDimensionsRect();
-    QImage m_nubbleImage;
 
     Canvas* m_pParentCanvas;
 };

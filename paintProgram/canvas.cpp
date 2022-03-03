@@ -1958,11 +1958,26 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 {
     setGeometry(0, 0, parent->width(), parent->height());
 
-    m_nubbleImage = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
-    m_nubbleImage.fill(Qt::black);
-    QPainter nubbleImagePainter(&m_nubbleImage);
-    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
-    nubbleImagePainter.end();
+    m_dragNubbles.insert(DragNubblePos::TopLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setX(mouseLocation.x());
+        dimensions.setY(mouseLocation.y());
+    }, QPoint(0,0)));
+    m_dragNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setRight(mouseLocation.x());
+        dimensions.setY(mouseLocation.y());
+    }, QPoint(1,0)));
+    m_dragNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setX(mouseLocation.x());
+        dimensions.setBottom(mouseLocation.y());
+    }, QPoint(0,1)));
+    m_dragNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    {
+        dimensions.setRight(mouseLocation.x());
+        dimensions.setBottom(mouseLocation.y());
+    }, QPoint(1,1)));
 }
 
 void PaintableClipboard::generateClipboard(QImage &canvas, SelectedPixels *pSelectedPixels)
@@ -2107,81 +2122,31 @@ void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDime
 bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
 {
 
-    if(m_bDraggingTopLeftNubble)
+    //If one of the nubbles is already dragging, continue dragging
+    for(const auto& nubblePos : m_dragNubbles.keys())
     {
-        //set new dimensions based of nubble drag
-        m_dimensionsRect.setX(mouseLocation.x());
-        m_dimensionsRect.setY(mouseLocation.y());
-
-        doNubbleDragScale();
-        return true;
-    }
-    else if(m_bDraggingTopRightNubble)
-    {
-        //set new dimensions based of nubble drag
-        m_dimensionsRect.setRight(mouseLocation.x());
-        m_dimensionsRect.setY(mouseLocation.y());
-
-        doNubbleDragScale();
-        return true;
-    }
-    else if(m_bDraggingBottomLeftNubble)
-    {
-        //set new dimensions based of nubble drag
-        m_dimensionsRect.setX(mouseLocation.x());
-        m_dimensionsRect.setBottom(mouseLocation.y());
-
-        doNubbleDragScale();
-        return true;
-    }
-    else if(m_bDraggingBottomRightNubble)
-    {
-        //set new dimensions based of nubble drag
-        m_dimensionsRect.setRight(mouseLocation.x());
-        m_dimensionsRect.setBottom(mouseLocation.y());
-
-        doNubbleDragScale();
-        return true;
+        if(m_dragNubbles[nubblePos].isDragging())
+        {
+            m_dragNubbles[nubblePos].doDragging(mouseLocation, m_dimensionsRect);
+            doNubbleDragScale();
+            return true;
+        }
     }
 
-    const float nubbleSize = Constants::DragNubbleSize / zoom;
-    const float halfNubbleSize = nubbleSize/2;
-
+    //Calculate offset of nubble hitbox detection due to zoom scale
     QTransform transform;
     transform.scale(zoom, zoom);
+    const float nubbleSize = Constants::DragNubbleSize / zoom;
     const QPointF offset = transform.map(QPointF(nubbleSize, nubbleSize));
 
-    //If selecting top left nubble
-    if(mouseLocation.x() >= m_dimensionsRect.topLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.topLeft().x() + halfNubbleSize &&
-       mouseLocation.y() >= m_dimensionsRect.topLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topLeft().y() + halfNubbleSize)
+    //Check if a nubble is being selected
+    for(const auto& nubblePos : m_dragNubbles.keys())
     {
-        m_bDraggingTopLeftNubble = true;
-        prepNubblesDrag();
-        return true;
-    }
-    //If selecting top right nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.topRight().x() - halfNubbleSize&& mouseLocation.x() <= m_dimensionsRect.topRight().x() + offset.x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.topRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.topRight().y() + halfNubbleSize)
-    {
-        m_bDraggingTopRightNubble = true;
-        prepNubblesDrag();
-        return true;
-    }
-    //If selecting bottom left nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.bottomLeft().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomLeft().x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomLeft().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomLeft().y() + offset.y() + halfNubbleSize)
-    {
-        m_bDraggingBottomLeftNubble = true;
-        prepNubblesDrag();
-        return true;
-    }
-    //If selecting bottom right nubble
-    else if(mouseLocation.x() >= m_dimensionsRect.bottomRight().x() - halfNubbleSize && mouseLocation.x() <= m_dimensionsRect.bottomRight().x() + offset.x() + halfNubbleSize &&
-            mouseLocation.y() >= m_dimensionsRect.bottomRight().y() - halfNubbleSize && mouseLocation.y() <= m_dimensionsRect.bottomRight().y() + offset.y() + halfNubbleSize)
-    {
-        m_bDraggingBottomRightNubble = true;
-        prepNubblesDrag();
-        return true;
+        if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, offset))
+        {
+            prepNubblesDrag();
+            return true;
+        }
     }
 
     return false;
@@ -2221,26 +2186,10 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw nubbles to scale dimension of clipboard
     if(m_pixels.size() > 0)
     {
-        QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
-        const float nubbleSize = Constants::DragNubbleSize / zoom;
-        const float halfNubbleSize = nubbleSize/2;
-        translatedDimensions.setCoords(translatedDimensions.x() - halfNubbleSize,
-                                       translatedDimensions.y() - halfNubbleSize,
-                                       translatedDimensions.right() - halfNubbleSize,
-                                       translatedDimensions.bottom() - halfNubbleSize);
-
-        painter.drawImage(QRectF(translatedDimensions.topLeft().x(), translatedDimensions.topLeft().y(), nubbleSize, nubbleSize),
-                          m_nubbleImage,
-                          m_nubbleImage.rect());
-        painter.drawImage(QRectF(translatedDimensions.topRight().x(), translatedDimensions.topRight().y(), nubbleSize, nubbleSize),
-                          m_nubbleImage,
-                          m_nubbleImage.rect());
-        painter.drawImage(QRectF(translatedDimensions.bottomLeft().x(), translatedDimensions.bottomLeft().y(), nubbleSize, nubbleSize),
-                          m_nubbleImage,
-                          m_nubbleImage.rect());
-        painter.drawImage(QRectF(translatedDimensions.bottomRight().x(), translatedDimensions.bottomRight().y(), nubbleSize, nubbleSize),
-                          m_nubbleImage,
-                          m_nubbleImage.rect());
+        for(const auto& nubblePos : m_dragNubbles.keys())
+        {
+            m_dragNubbles[nubblePos].draw(painter, offsetX, offsetY);
+        }
     }
 }
 
@@ -2275,30 +2224,16 @@ bool PaintableClipboard::completeOperation()
         completeNormalDrag();
         return true;
     }
-    else if(m_bDraggingTopLeftNubble)
+
+    for(const auto& nubblePos : m_dragNubbles.keys())
     {
-        m_bDraggingTopLeftNubble = false;
-        completeNubbleDrag();
-        return true;
+        if(m_dragNubbles[nubblePos].isDragging())
+        {
+            completeNubbleDrag();
+            return true;
+        }
     }
-    else if(m_bDraggingTopRightNubble)
-    {
-        m_bDraggingTopRightNubble = false;
-        completeNubbleDrag();
-        return true;
-    }
-    else if(m_bDraggingBottomLeftNubble)
-    {
-        m_bDraggingBottomLeftNubble = false;
-        completeNubbleDrag();
-        return true;
-    }
-    else if(m_bDraggingBottomRightNubble)
-    {
-        m_bDraggingBottomRightNubble = false;
-        completeNubbleDrag();
-        return true;
-    }
+
     return false;
 }
 
@@ -2433,4 +2368,57 @@ bool CanvasHistory::undoHistory(CanvasHistoryItem& canvasSnapShot)
         return true;
     }
     return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// DragNubble
+///
+DragNubble::DragNubble(std::function<void(QRect&, const QPointF&)> operation, QPoint offsetScale) :
+    m_operation(operation),
+    m_offsetScale(offsetScale)
+{
+    m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
+    m_image.fill(Qt::black);
+    QPainter nubbleImagePainter(&m_image);
+    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
+}
+
+bool DragNubble::isDragging()
+{
+    return m_bIsDragging;
+}
+
+void DragNubble::setDragging(bool dragging)
+{
+    m_bIsDragging = dragging;
+}
+
+bool DragNubble::isStartDragging(const QPointF& mouseLocation, const QPointF& offset)
+{
+    const float halfNubbleSize = Constants::DragNubbleSize/2;
+    if(mouseLocation.x() >= m_location.x() - halfNubbleSize && mouseLocation.x() <= m_location.x() + halfNubbleSize + m_offsetScale.x() * offset.x() &&
+       mouseLocation.y() >= m_location.y() - halfNubbleSize && mouseLocation.y() <= m_location.y() + halfNubbleSize + m_offsetScale.y() * offset.y())
+    {
+        m_bIsDragging = true;
+        return true;
+    }
+
+    return false;
+}
+
+void DragNubble::doDragging(const QPointF &mouseLocation, QRect& rect)
+{
+    m_operation(rect, mouseLocation);
+}
+
+void DragNubble::setLocation(const QPoint &p)
+{
+    m_location = p;
+}
+
+void DragNubble::draw(QPainter &painter, const int &offsetX, const int &offsetY)
+{
+    painter.drawImage(QRectF(m_location.x() - Constants::DragNubbleSize/2 + offsetX, m_location.y() - Constants::DragNubbleSize/2 + offsetY, Constants::DragNubbleSize, Constants::DragNubbleSize),
+                      m_image,
+                      m_image.rect());
 }
