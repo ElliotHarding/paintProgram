@@ -163,9 +163,6 @@ void Canvas::init(uint width, uint height)
     m_pClipboardPixels = new PaintableClipboard(this);
     m_pClipboardPixels->raise();
 
-    m_pSelectedPixels = new SelectedPixels(this, m_canvasWidth, m_canvasHeight);
-    m_pSelectedPixels->raise();
-
     m_canvasHistory.recordHistory(getSnapshot());
 
     setMouseTracking(true);
@@ -175,9 +172,6 @@ Canvas::~Canvas()
 {
     if(m_selectionTool)
         delete m_selectionTool;
-
-    if(m_pSelectedPixels)
-        delete m_pSelectedPixels;
 }
 
 void Canvas::onAddedToTab()
@@ -239,8 +233,6 @@ void Canvas::onWriteText(QString letter, QFont font)
         textPainter.drawText(m_textDrawLocation, m_textToDraw);
 
         m_pClipboardPixels->setImage(textImage);
-        m_pSelectedPixels->clear();
-        m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixels());
 
         m_canvasMutex.unlock();
 
@@ -452,9 +444,6 @@ void Canvas::onUpdateSettings(int width, int height, QString name)
 
     emit canvasSizeChange(width, height);
 
-    //Clear selected pixels
-    m_pSelectedPixels->clearAndResize(width, height);
-
     m_canvasMutex.unlock();
 
     if(m_savePath != "")
@@ -502,10 +491,9 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
         if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
         {
-            if(m_pSelectedPixels->containsPixels())
+            if(m_pClipboardPixels->containsPixels())
             {
-                //Clear selected pixels
-                m_pSelectedPixels->clear();
+                m_pClipboardPixels->reset(); //todo - make it so it just resets selected pixels...
 
                 m_canvasHistory.recordHistory(getSnapshot());
             }
@@ -516,10 +504,11 @@ void Canvas::onCurrentToolUpdated(const Tool t)
         doUpdate = true;
     }
 
+    /* Todo - check we dont need this. (Now clipboard pixels will always have clipboard as soon as selected pixels exist...
     if(m_tool == TOOL_DRAG && m_pSelectedPixels->containsPixels())
     {
         m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
-    }
+    }*/
 
     if (doUpdate)
         update();
@@ -530,11 +519,12 @@ void Canvas::onDeleteKeyPressed()
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)
     {
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, Qt::transparent);//Assumes there is a selected layer
         });
-        m_pSelectedPixels->clear();
+
+        m_pClipboardPixels->reset();
 
         m_canvasHistory.recordHistory(getSnapshot());
 
@@ -545,7 +535,6 @@ void Canvas::onDeleteKeyPressed()
     else if(m_tool == TOOL_DRAG)
     {
         m_pClipboardPixels->reset();
-        m_pSelectedPixels->clear();
     }
 }
 
@@ -553,7 +542,17 @@ void Canvas::onCopyKeysPressed()
 {
     m_canvasMutex.lock();
     Clipboard clipboard;
-    clipboard.generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels); //Assumes there is a selected layer
+
+    //IF were just selecting. Not dragging
+    if(!m_pClipboardPixels->isDragging())
+    {
+        clipboard.generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels()); //Assumes there is a selected layer
+    }
+    else
+    {
+        clipboard.generateClipboard(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels());
+    }
+
     m_pParent->setCopyBuffer(clipboard);
     m_canvasMutex.unlock();
 
@@ -578,7 +577,7 @@ void Canvas::onCutKeysPressed()
         clipBoard.m_clipboardImage.fill(Qt::transparent);
 
         //Go through selected pixels cutting from canvas and copying to clipboard
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             clipBoard.m_clipboardImage.setPixelColor(x, y, m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y));//Assumes there is a selected layer
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, Qt::transparent);//Assumes there is a selected layer
@@ -588,7 +587,6 @@ void Canvas::onCutKeysPressed()
 
     //Reset
     m_pClipboardPixels->reset();
-    m_pSelectedPixels->clear();
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
     m_canvasHistory.recordHistory(getSnapshot());
@@ -605,14 +603,7 @@ void Canvas::onPasteKeysPressed()
 
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    m_pClipboardPixels->reset();
-
     m_pClipboardPixels->setClipboard(m_pParent->getCopyBuffer());
-
-    m_pSelectedPixels->clear();
-    m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixels());
-
-    m_pSelectedPixels->raise();
 
     canvasMutexLocker.unlock();
 }
@@ -626,8 +617,6 @@ void Canvas::onUndoPressed()
     {
         m_canvasLayers = snapShot.m_layers;
         m_pClipboardPixels->setClipboard(snapShot.m_clipboard);
-        m_pSelectedPixels->clear();
-        m_pSelectedPixels->addPixels(snapShot.m_selectedPixels);
 
         //Incase m_selectedLayer is now out of bounds due to m_canvasLayers changing
         if((int)m_selectedLayer >= m_canvasLayers.size())
@@ -650,8 +639,6 @@ void Canvas::onRedoPressed()
     {
         m_canvasLayers = snapShot.m_layers;
         m_pClipboardPixels->setClipboard(snapShot.m_clipboard);
-        m_pSelectedPixels->clear();
-        m_pSelectedPixels->addPixels(snapShot.m_selectedPixels);
 
         m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
 
@@ -681,12 +668,12 @@ void Canvas::onBlackAndWhite()
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->containsPixels())
     {
         //Loop through selected pixels, turning to white&black
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, greyScaleColor(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y))); //Assumes there is a selected layer
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, greyScaleColor(m_pClipboardPixels->m_clipboardImage.pixelColor(x, y)));
         });
     }
     else
@@ -717,7 +704,7 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, invertColor(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y))); //Assumes there is a selected layer
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, invertColor(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y)));
         });
     }
     else
@@ -769,6 +756,9 @@ void Canvas::onSketchEffect(const int sensitivity)
     QImage inkSketch = QImage(QSize(m_canvasLayers[m_selectedLayer].m_image.width(), m_canvasLayers[m_selectedLayer].m_image.height()), QImage::Format_ARGB32);
     const QColor sketchColor = m_pParent->getSelectedColor() != Qt::white ? m_pParent->getSelectedColor() : Qt::black;
 
+    //Todo add funciton that takes original image and inksketch image and pixel locations and applies sketch...
+    //Instead of having duplicate code...
+
     //check if were doing the whole image or just some selected pixels
     if(m_pSelectedPixels->containsPixels())
     {
@@ -777,19 +767,19 @@ void Canvas::onSketchEffect(const int sensitivity)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
+            if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x+1, y, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
+            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x-1, y, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
+            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y+1, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
+            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y-1, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, sketchColor);
             }
@@ -799,7 +789,7 @@ void Canvas::onSketchEffect(const int sensitivity)
             }
         });
 
-        QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].m_image);
+        QPainter sketchPainter(&m_pClipboardPixels->m_clipboardImage);
         sketchPainter.drawImage(0,0,inkSketch);
     }
     else
@@ -859,19 +849,19 @@ void Canvas::onOutlineEffect(const int sensitivity)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
+            if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x+1, y, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
+            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x-1, y, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
+            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y+1, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
+            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y-1, sensitivity))
             {
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
@@ -937,7 +927,7 @@ void Canvas::onBrightness(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeBrightness(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, changeBrightness(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
         });
     }
     else
@@ -1006,7 +996,7 @@ void Canvas::onContrast(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeContrast(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, changeContrast(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
         });
     }
     else
@@ -1049,7 +1039,7 @@ void Canvas::onRedLimit(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitRed(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, limitRed(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
         });
     }
     else
@@ -1083,7 +1073,7 @@ void Canvas::onBlueLimit(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitBlue(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, limitBlue(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
         });
     }
     else
@@ -1117,7 +1107,7 @@ void Canvas::onGreenLimit(const int value)
         //Loop through selected pixels
         m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitGreen(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
+            m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, limitGreen(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
         });
     }
     else
@@ -1620,7 +1610,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         //If no clipboard exists to drag, generate one based on selected pixels
                         if(m_pClipboardPixels->isImageDefault())
                         {
-                            m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
+                            m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image);
                         }
 
                         m_pClipboardPixels->startDragging(mouseLocation);
@@ -1749,7 +1739,7 @@ void Canvas::updateCenter()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Clipboard
 ///
-void Clipboard::generateClipboard(QImage &canvas, PaintableClipboard* pSelectedPixels)
+void Clipboard::generateClipboard(QImage &canvas, const QVector<QPoint>& selectedPixels)
 {
     //Prep selected pixels for dragging
     m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
@@ -1757,11 +1747,11 @@ void Clipboard::generateClipboard(QImage &canvas, PaintableClipboard* pSelectedP
 
     m_pixels.clear();
 
-    pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+    for(QPoint& p: selectedPixels)
     {
-        m_clipboardImage.setPixelColor(x, y, canvas.pixelColor(x,y));
-        m_pixels.push_back(QPoint(x,y));
-    });
+        m_clipboardImage.setPixelColor(p.x(), p.y(), canvas.pixelColor(p.x(),p.y()));
+        m_pixels.push_back(QPoint(p.x(),p.y()));
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1842,9 +1832,9 @@ PaintableClipboard::~PaintableClipboard()
         delete m_pOutlineDrawTimer;
 }
 
-void PaintableClipboard::generateClipboard(QImage &canvas, PaintableClipboard* pSelectedPixels)
+void PaintableClipboard::generateClipboard(QImage &canvas)
 {
-    Clipboard::generateClipboard(canvas, pSelectedPixels);
+    Clipboard::generateClipboard(canvas, getPixels());
     updateDimensionsRect();
     update();
 }
@@ -1892,7 +1882,7 @@ void PaintableClipboard::setImage(QImage image)
 //Returns false if no image dumped
 bool PaintableClipboard::dumpImage(QPainter &painter)
 {
-    if(m_clipboardImage == QImage() && m_pixels.size() == 0)
+    if(m_clipboardImage == QImage())
     {
         //Just in case
         update();

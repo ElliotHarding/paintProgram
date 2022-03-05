@@ -21,7 +21,7 @@ class PaintableClipboard;
 class Clipboard
 {
 public:
-    void generateClipboard(QImage& canvas, PaintableClipboard* pSelectedPixels);
+    void generateClipboard(QImage& canvas, const QVector<QPoint>& selectedPixels);
 
     QVector<QPoint> m_pixels;
     QImage m_clipboardImage;
@@ -69,7 +69,7 @@ public:
     ~PaintableClipboard();
 
     ///Clipboard (image + pixels)
-    void generateClipboard(QImage& canvas, PaintableClipboard* pSelectedPixels);
+    void generateClipboard(QImage& canvas);
     void setClipboard(Clipboard clipboard);
     Clipboard getClipboard();
 
@@ -137,7 +137,6 @@ class CanvasHistoryItem
 public:
     QList<CanvasLayer> m_layers;
     Clipboard m_clipboard;
-    QList<QPoint> m_selectedPixels;
 };
 
 ///Holds the history of actions on the canvas ~ may incorporate actual CanvasLayers later...
