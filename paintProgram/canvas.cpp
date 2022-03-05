@@ -1584,14 +1584,14 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         {
             if(m_previousPanPos == m_c_nullPanPos)
             {
-                m_previousPanPos = mouseLocation;
+                m_previousPanPos = event->pos();
             }
             else
             {
-                m_panOffsetX += mouseLocation.x() - m_previousPanPos.x();
-                m_panOffsetY += mouseLocation.y() - m_previousPanPos.y();
+                m_panOffsetX += (event->pos().x() - m_previousPanPos.x())/m_zoomFactor;
+                m_panOffsetY += (event->pos().y() - m_previousPanPos.y())/m_zoomFactor;
 
-                m_previousPanPos = mouseLocation;
+                m_previousPanPos = event->pos();
 
                 update();
             }
