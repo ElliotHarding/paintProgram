@@ -603,7 +603,17 @@ void Canvas::onPasteKeysPressed()
 
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
+    if(m_pClipboardPixels->clipboardActive())
+    {
+        //Dump clipboard, if something actually dumped record image history
+        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
+        m_pClipboardPixels->dumpImage(painter);
+        update();
+    }
+
     m_pClipboardPixels->setClipboard(m_pParent->getCopyBuffer());
+
+    m_canvasHistory.recordHistory(getSnapshot());
 
     canvasMutexLocker.unlock();
 }
@@ -1878,6 +1888,13 @@ bool PaintableClipboard::clipboardActive()
     return m_clipboardImage != QImage();
 }
 
+//TODO - These two do the same ^V
+
+bool PaintableClipboard::isImageDefault()
+{
+    return m_clipboardImage == QImage();
+}
+
 void PaintableClipboard::setImage(QImage image)
 {
     m_clipboardImage = image;
@@ -1926,11 +1943,6 @@ bool PaintableClipboard::dumpImage(QPainter &painter)
 
     reset();
     return true;
-}
-
-bool PaintableClipboard::isImageDefault()
-{
-    return m_clipboardImage == QImage();
 }
 
 bool PaintableClipboard::isHighlighted(const uint x, const uint y)
