@@ -35,6 +35,7 @@ const QString CanvasSaveLayerEnd = "END_LAYER";
 
 //Zooming
 const float ZoomIncrement = 1.1;
+const float ZoomPanFactor = 0.1;
 
 //Dragging
 const int DragNubbleSize = 8;
@@ -1241,10 +1242,10 @@ void Canvas::wheelEvent(QWheelEvent* event)
     const int direction = event->angleDelta().y() > 0 ? 1 : -1;
 
     const int xFromCenter = event->position().x() - m_center.x();
-    m_panOffsetX -= xFromCenter * 0.05 * direction / m_zoomFactor;
+    m_panOffsetX -= xFromCenter * Constants::ZoomPanFactor * direction / m_zoomFactor;
 
     const int yFromCenter = event->position().y() - m_center.y();
-    m_panOffsetY -= yFromCenter * 0.05 * direction / m_zoomFactor;
+    m_panOffsetY -= yFromCenter * Constants::ZoomPanFactor * direction / m_zoomFactor;
 
     if(event->angleDelta().y() > 0)
     {
