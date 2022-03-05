@@ -14,19 +14,31 @@
 
 namespace Constants
 {
-const QPoint NullDragPoint = QPoint(0,0);
+
+//Colors
 const QColor ImageBorderColor = QColor(200,200,200,255);
 const QColor TransparentGrey = QColor(190,190,190,255);
 const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
-const QColor SelectionAreaColorA = QColor(0,40,100,50);
+const QColor SelectionAreaColor = QColor(0,40,100,50);
+
+//Drawing
 const int SelectedPixelsOutlineFlashFrequency = 200;
+
+//History-undo-redo
 const uint MaxCanvasHistory = 20;
+
+//Saving/loading
 const QString CanvasSaveFileType = "paintProgram";
 const QString CanvasSaveLayerBegin = "BEGIN_LAYER";
 const QString CanvasSaveLayerEnd = "END_LAYER";
+
+//Zooming
 const float ZoomIncrement = 1.1;
+
+//Dragging
 const int DragNubbleSize = 8;
+const QPoint NullDragPoint = QPoint(0,0);
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -1904,7 +1916,7 @@ void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
         const uint x = p.x();
         const uint y = p.y();
 
-        painter.fillRect(QRect(x + offset.x(), y + offset.y(), 1, 1), Constants::SelectionAreaColorA);
+        painter.fillRect(QRect(x + offset.x(), y + offset.y(), 1, 1), Constants::SelectionAreaColor);
 
         //border right
         if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
