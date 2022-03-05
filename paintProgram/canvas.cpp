@@ -1538,6 +1538,10 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         if(m_pClipboardPixels->completeOperation())
         {
+            //TODO - Test, might not need this
+            m_pSelectedPixels->clear();
+            m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixels());
+
             m_canvasHistory.recordHistory(getSnapshot());
         }
     }

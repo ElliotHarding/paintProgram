@@ -178,6 +178,10 @@ private:
 };
 
 
+/*
+ TODO - MAKE IT SO YOU CAN APPLY EFFECTS TO CLIPBOARD....
+ */
+
 ///Tab widget in charge of displaying & interacting with the image edited by paint program
 class Canvas : public QTabWidget
 {
