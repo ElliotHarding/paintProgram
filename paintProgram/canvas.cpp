@@ -1844,7 +1844,7 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
             dimensions.setRight(mouseLocation.x());
             dimensions.setBottom(mouseLocation.y());
         }
-                         }));
+     }));
 }
 
 PaintableClipboard::~PaintableClipboard()
@@ -1993,6 +1993,7 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
     //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
 
+    updateDimensionsRect();
     update();
 }
 
@@ -2012,6 +2013,7 @@ void PaintableClipboard::addPixels(std::vector<std::vector<bool>>& selectedPixel
     //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
 
+    updateDimensionsRect();
     update();
 }
 
@@ -2025,6 +2027,7 @@ void PaintableClipboard::addPixels(QList<QPoint> pixels) //do we need this
     //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
 
+    updateDimensionsRect();
     update();
 }
 
@@ -2168,7 +2171,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         const uint x = p.x();
         const uint y = p.y();
 
-        painter.fillRect(QRect(x + offset.x(), y + offset.y(), 1, 1), Constants::SelectionAreaColor);
+        painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColor);
 
         /*  TODO - redo border highlight
 
