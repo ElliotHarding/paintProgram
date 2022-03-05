@@ -750,6 +750,31 @@ bool compareNeighbour(QImage& image, const int x, const int y, const int neighbo
     return false;
 }
 
+bool checkCreateSketchOnPixel(QImage& original, QImage& sketch, const int& x, const int& y, const QColor sketchColor, const int& sensitivity)
+{
+    if(compareNeighbour(original, x, y, x+1, y, sensitivity))
+    {
+        sketch.setPixelColor(x, y, sketchColor);
+    }
+    else if(compareNeighbour(original, x, y, x-1, y, sensitivity))
+    {
+        sketch.setPixelColor(x, y, sketchColor);
+    }
+    else if(compareNeighbour(original, x, y, x, y+1, sensitivity))
+    {
+        sketch.setPixelColor(x, y, sketchColor);
+    }
+    else if(compareNeighbour(original, x, y, x, y-1, sensitivity))
+    {
+        sketch.setPixelColor(x, y, sketchColor);
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
 void Canvas::onSketchEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
@@ -776,24 +801,8 @@ void Canvas::onSketchEffect(const int sensitivity)
 
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
-        {
-            if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x+1, y, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x-1, y, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y+1, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y-1, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else
+        {            
+            if(!checkCreateSketchOnPixel(m_pClipboardPixels->m_clipboardImage, inkSketch, x, y, sketchColor, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, Qt::white);
             }
@@ -809,23 +818,7 @@ void Canvas::onSketchEffect(const int sensitivity)
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else
+            if(!checkCreateSketchOnPixel(m_canvasLayers[m_selectedLayer].m_image, inkSketch, x, y, sketchColor, sensitivity))
             {
                 inkSketch.setPixelColor(x, y, Qt::white);
             }
@@ -840,22 +833,7 @@ void Canvas::onSketchEffect(const int sensitivity)
 
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
-            {
-                inkSketch.setPixelColor(x, y, sketchColor);
-            }
+            checkCreateSketchOnPixel(m_canvasLayers[m_selectedLayer].m_image, inkSketch, x, y, sketchColor, sensitivity);
         });
 
         m_canvasLayers[m_selectedLayer].m_image = inkSketch;
@@ -894,22 +872,7 @@ void Canvas::onOutlineEffect(const int sensitivity)
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x+1, y, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x-1, y, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y+1, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x, y-1, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
+            checkCreateSketchOnPixel(m_pClipboardPixels->m_clipboardImage, outlineSketch, x, y, sketchColor, sensitivity);
         });
 
         //Dump outline sketch onto m_canvasImage
@@ -921,22 +884,7 @@ void Canvas::onOutlineEffect(const int sensitivity)
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
+            checkCreateSketchOnPixel(m_canvasLayers[m_selectedLayer].m_image, outlineSketch, x, y, sketchColor, sensitivity);
         });
 
         //Dump outline sketch onto m_canvasImage
@@ -948,22 +896,7 @@ void Canvas::onOutlineEffect(const int sensitivity)
         //Loop through pixels, if a border pixel set it to sketchColor
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
-            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
-            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
-            {
-                outlineSketch.setPixelColor(x, y, sketchColor);
-            }
+            checkCreateSketchOnPixel(m_canvasLayers[m_selectedLayer].m_image, outlineSketch, x, y, sketchColor, sensitivity);
         });
 
         //Dump outline sketch onto m_canvasImage
