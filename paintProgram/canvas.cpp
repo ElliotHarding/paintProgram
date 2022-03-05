@@ -1209,7 +1209,6 @@ CanvasHistoryItem Canvas::getSnapshot()
     CanvasHistoryItem canvasHistoryItem;
     canvasHistoryItem.m_layers = m_canvasLayers;
     canvasHistoryItem.m_clipboard = m_pClipboardPixels->getClipboard();
-    canvasHistoryItem.m_selectedPixels = m_pSelectedPixels->getPixels();
     return canvasHistoryItem;
 }
 
@@ -1221,7 +1220,6 @@ void Canvas::resizeEvent(QResizeEvent *event)
 
     updateCenter();
 
-    m_pSelectedPixels->setGeometry(geometry());
     m_pClipboardPixels->setGeometry(geometry());
 
     m_panOffsetX = m_center.x() - (m_canvasWidth / 2);
@@ -1476,7 +1474,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         if(!m_pParent->isCtrlPressed())
         {
-            m_pSelectedPixels->clear();
+            m_pClipboardPixels->reset();
         }
 
         m_selectionToolOrigin = mouseLocation;
@@ -1486,12 +1484,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         if(!m_pParent->isCtrlPressed())
         {
-            m_pSelectedPixels->clear();
+            m_pClipboardPixels->reset();
         }
 
         std::vector<std::vector<bool>> newSelectedPixels = std::vector<std::vector<bool>>(m_canvasWidth, std::vector<bool>(m_canvasHeight, false));
         spreadSelectSimilarColor(m_canvasLayers[m_selectedLayer].m_image, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
-        m_pSelectedPixels->addPixels(newSelectedPixels);
+        m_pClipboardPixels->addPixels(newSelectedPixels);
 
         m_canvasHistory.recordHistory(getSnapshot());
 
@@ -1530,18 +1528,13 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         m_canvasHistory.recordHistory(getSnapshot());
 
-        m_pSelectedPixels->clear();
+        m_pClipboardPixels->reset();
 
         m_drawShapeOrigin = mouseLocation;
     }
     else if(m_tool == TOOL_DRAG)
     {
-        if(m_pClipboardPixels->nubblesDrag(getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
-        {
-            //Clear selected pixels and set to clipboard pixels
-            m_pSelectedPixels->clear();
-            m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
-        }
+        m_pClipboardPixels->nubblesDrag(m_canvasLayers[m_selectedLayer].m_image, getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor);
     }
 }
 
@@ -1554,7 +1547,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
     if(m_tool == TOOL_SELECT)
     {
-        m_pSelectedPixels->addPixels(m_selectionTool);
+        m_pClipboardPixels->addPixels(m_selectionTool);
         m_canvasHistory.recordHistory(getSnapshot());
         update();
     }
@@ -1565,22 +1558,11 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     else if (m_tool == TOOL_PAINT || m_tool == TOOL_ERASER)
     {
         m_canvasHistory.recordHistory(getSnapshot());
-    }
-    else if(m_tool == TOOL_SHAPE)
-    {
-        m_pSelectedPixels->clear();
-        m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixels());
-
-        update();
-    }
+    }   
     else if(m_tool == TOOL_DRAG)
     {
         if(m_pClipboardPixels->completeOperation())
         {
-            //TODO - Test, might not need this
-            m_pSelectedPixels->clear();
-            m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixels());
-
             m_canvasHistory.recordHistory(getSnapshot());
         }
     }
@@ -1642,19 +1624,13 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         else if(m_tool == TOOL_DRAG)
         {
             const bool isDragging = m_pClipboardPixels->isDragging();
-            if(!isDragging && m_pClipboardPixels->nubblesDrag(getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
+
+            if(!isDragging)
             {
-                //Clear selected pixels and set to clipboard pixels
-                m_pSelectedPixels->clear();
-                m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
-            }
-            else
-            {
-                //If starting dragging
-                if(!isDragging)
+                if(!m_pClipboardPixels->nubblesDrag(m_canvasLayers[m_selectedLayer].m_image, getPositionRelativeCenterdAndZoomedCanvas(event->localPos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY), m_zoomFactor))
                 {
                     //check if mouse is over selection area
-                    if(m_pSelectedPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
+                    if(m_pClipboardPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                     {
                         //If no clipboard exists to drag, generate one based on selected pixels
                         if(m_pClipboardPixels->isImageDefault())
@@ -1665,14 +1641,10 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                         m_pClipboardPixels->startDragging(mouseLocation);
                     }
                 }
-                else //If currently dragging
-                {
-                    m_pClipboardPixels->doDragging(mouseLocation);
-
-                    //Clear selected pixels and set to clipboard pixels
-                    m_pSelectedPixels->clear();
-                    m_pSelectedPixels->addPixels(m_pClipboardPixels->getPixelsOffset());
-                }
+            }
+            else
+            {
+                m_pClipboardPixels->doDragging(mouseLocation);
             }
         }
         else if(m_tool == TOOL_SHAPE)
@@ -1796,7 +1768,7 @@ void Clipboard::generateClipboard(QImage &canvas, const QVector<QPoint>& selecte
 
     m_pixels.clear();
 
-    for(QPoint& p: selectedPixels)
+    for(const QPoint& p: selectedPixels)
     {
         m_clipboardImage.setPixelColor(p.x(), p.y(), canvas.pixelColor(p.x(),p.y()));
         m_pixels.push_back(QPoint(p.x(),p.y()));
@@ -2113,7 +2085,7 @@ QPointF getLocation(QRectF rect, DragNubblePos nubblePos)
     return rect.topLeft();
 }
 
-bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
+bool PaintableClipboard::nubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom)
 {
 
     //If one of the nubbles is already dragging, continue dragging
@@ -2132,6 +2104,11 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
     {
         if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
         {
+            if(isImageDefault())
+            {
+                generateClipboard(canvasImage);
+            }
+
             prepNubblesDrag();
             return true;
         }
