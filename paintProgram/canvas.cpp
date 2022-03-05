@@ -1747,213 +1747,9 @@ void Canvas::updateCenter()
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// SelectedPixels
-///
-SelectedPixels::SelectedPixels(Canvas* parent, const uint width, const uint height) : QWidget(parent),
-    m_pParentCanvas(parent)
-{
-    m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-
-    setGeometry(0, 0, parent->width(), parent->height());
-
-    m_pOutlineDrawTimer = new QTimer(this);
-    connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
-    m_pOutlineDrawTimer->start(Constants::SelectedPixelsOutlineFlashFrequency);
-}
-
-SelectedPixels::~SelectedPixels()
-{
-    if(m_pOutlineDrawTimer)
-        delete m_pOutlineDrawTimer;
-}
-
-void SelectedPixels::clearAndResize(const uint width, const uint height)
-{
-    m_selectedPixels = std::vector<std::vector<bool>>(width, std::vector<bool>(height, false));
-    m_selectedPixelsList.clear();
-}
-
-void SelectedPixels::clear()
-{
-    m_selectedPixelsList.clear();
-    if(m_selectedPixels.size() > 0)
-    {
-        m_selectedPixels = std::vector<std::vector<bool>>(m_selectedPixels.size(), std::vector<bool>(m_selectedPixels[0].size(), false));
-        update();
-    }
-    else
-    {
-        qDebug() << "SelectedPixels::clear - No pixels to clear";
-    }
-
-}
-
-void SelectedPixels::operateOnSelectedPixels(std::function<void (int, int)> func)
-{
-    for(QPoint p : m_selectedPixelsList)
-    {
-        func(p.x(), p.y());
-    }
-}
-
-void SelectedPixels::addPixels(QRubberBand *newSelectionArea)
-{
-    if(newSelectionArea == nullptr)
-        return;
-
-    const QRect geometry = newSelectionArea->geometry();
-    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
-    {
-        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
-        {
-            if(x > -1 && x < (int)m_selectedPixels.size() && y > -1 && y < (int)m_selectedPixels[0].size())
-            {
-                if(!m_selectedPixels[x][y])
-                {
-                    m_selectedPixelsList.push_back(QPoint(x,y));
-                    m_selectedPixels[x][y] = true;
-                }
-            }
-            else
-            {
-                qDebug() << "SelectedPixels::addPixels(QRubberBand *newSelectionArea) - out of range - " << x << ":" << y;
-            }
-        }
-    }
-
-    update();
-}
-
-void SelectedPixels::addPixels(std::vector<std::vector<bool>>& selectedPixels)
-{
-    //Check m_selectedPixels is the same dimensions as selectedPixels
-    //Could implement a method to add sections of pixels to m_selectedPixels, not needed right now
-    if(!(m_selectedPixels.size() > 0 && selectedPixels.size() > 0 &&
-       m_selectedPixels.size() == selectedPixels.size() &&
-       m_selectedPixels[0].size() == selectedPixels[0].size()))
-    {
-        qDebug() << "SelectedPixels::addPixels - 2D vector added is not the same as m_selectedPixels vector";
-        return;
-    }
-
-    for(uint x = 0; x < m_selectedPixels.size(); x++)
-    {
-        for(uint y = 0; y < m_selectedPixels[x].size(); y++)
-        {
-            if(selectedPixels[x][y])
-            {
-                if(!m_selectedPixels[x][y])
-                {
-                    m_selectedPixelsList.push_back(QPoint(x,y));
-                    m_selectedPixels[x][y] = true;
-                }
-
-            }
-        }
-    }
-
-    update();
-}
-
-void SelectedPixels::addPixels(QList<QPoint> pixels)
-{
-    for(QPoint p : pixels)
-    {
-        if(p.x() < (int)m_selectedPixels.size() && p.x() > -1 &&
-           p.y() < (int)m_selectedPixels[0].size() && p.y() > -1)
-        {
-            if(!m_selectedPixels[p.x()][p.y()])
-            {
-                m_selectedPixelsList.push_back(QPoint(p.x(), p.y()));
-                m_selectedPixels[p.x()][p.y()] = true;
-            }
-        }
-    }
-
-    update();
-}
-
-bool SelectedPixels::isHighlighted(const uint x, const uint y)
-{
-    if((int)x > -1 && x < m_selectedPixels.size() && (int)y > -1 && y < m_selectedPixels[0].size())
-    {
-        return m_selectedPixels[x][y];
-    }
-    else
-    {
-        qDebug() << "SelectedPixels::isHighlighted - Out of range -" << x << ":" << y;
-    }
-    return false;
-}
-
-bool SelectedPixels::containsPixels()
-{
-    return m_selectedPixelsList.size() > 0;
-}
-
-QList<QPoint> SelectedPixels::getPixels()
-{
-    return m_selectedPixelsList;
-}
-
-void SelectedPixels::paintEvent(QPaintEvent *paintEvent)
-{
-    Q_UNUSED(paintEvent);
-
-    QPainter painter(this);
-
-    const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-    painter.translate(center);
-    painter.scale(m_pParentCanvas->getZoom(), m_pParentCanvas->getZoom());
-    painter.translate(-center);
-
-    //Offsets
-    QPoint offset = m_pParentCanvas->getPanOffset();
-
-    //Outline
-    m_bOutlineColorToggle = !m_bOutlineColorToggle;
-    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
-    painter.setPen(selectionOutlinePen);
-
-    //Paint pixels and outline
-    for(QPoint p : m_selectedPixelsList)
-    {
-        const uint x = p.x();
-        const uint y = p.y();
-
-        painter.fillRect(QRect(x + offset.x(), y + offset.y(), 1, 1), Constants::SelectionAreaColor);
-
-        //border right
-        if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
-        {
-            painter.drawLine(QPoint(x + offset.x() + 1, y + offset.y()), QPoint(x + offset.x() + 1, y + offset.y() + 1));
-        }
-
-        //border left
-        if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
-        {
-            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x(), y + offset.y() + 1));
-        }
-
-        //border bottom
-        if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
-        {
-            painter.drawLine(QPoint(x + offset.x(), y + offset.y() + 1.0), QPoint(x + offset.x() + 1.0, y + offset.y() + 1.0));
-        }
-
-        //border top
-        if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
-        {
-            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x() + 1.0, y + offset.y()));
-        }
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Clipboard
 ///
-void Clipboard::generateClipboard(QImage &canvas, SelectedPixels* pSelectedPixels)
+void Clipboard::generateClipboard(QImage &canvas, PaintableClipboard* pSelectedPixels)
 {
     //Prep selected pixels for dragging
     m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
@@ -2037,10 +1833,16 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
             dimensions.setRight(mouseLocation.x());
             dimensions.setBottom(mouseLocation.y());
         }
-    }));
+                         }));
 }
 
-void PaintableClipboard::generateClipboard(QImage &canvas, SelectedPixels *pSelectedPixels)
+PaintableClipboard::~PaintableClipboard()
+{
+    if(m_pOutlineDrawTimer)
+        delete m_pOutlineDrawTimer;
+}
+
+void PaintableClipboard::generateClipboard(QImage &canvas, PaintableClipboard* pSelectedPixels)
 {
     Clipboard::generateClipboard(canvas, pSelectedPixels);
     updateDimensionsRect();
@@ -2122,20 +1924,97 @@ bool PaintableClipboard::isImageDefault()
     return m_clipboardImage == QImage();
 }
 
-QList<QPoint> PaintableClipboard::getPixels()
+bool PaintableClipboard::isHighlighted(const uint x, const uint y)
+{
+    for(QPoint& p : m_pixels)
+    {
+        if(p.x() == x && p.y() == y)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool PaintableClipboard::containsPixels()
+{
+    return m_pixels.size() > 0;
+}
+
+QVector<QPoint> PaintableClipboard::getPixels() //do we need this?
 {
     return m_pixels;
 }
 
-QList<QPoint> PaintableClipboard::getPixelsOffset()
+QVector<QPoint> PaintableClipboard::getPixelsOffset() //do we need this public?
 {
-    QList<QPoint> pixels = m_pixels;
+    QVector<QPoint> pixels = m_pixels;
     for(QPoint& p : pixels)
     {
         p.setX(p.x() + m_dragX);
         p.setY(p.y() + m_dragY);
     }
     return pixels;
+}
+
+void PaintableClipboard::operateOnSelectedPixels(std::function<void (int, int)> func)
+{
+    for(QPoint& p : m_pixels)
+    {
+        func(p.x(), p.y());
+    }
+}
+
+void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
+{
+    if(newSelectionArea == nullptr)
+        return;
+
+    const QRect geometry = newSelectionArea->geometry();
+    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+    {
+        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+        {
+            m_pixels.push_back(QPoint(x,y));
+        }
+    }
+
+    //Remove duplicates
+    m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
+
+    update();
+}
+
+void PaintableClipboard::addPixels(std::vector<std::vector<bool>>& selectedPixels) //do we need this
+{
+    for(uint x = 0; x < selectedPixels.size(); x++)
+    {
+        for(uint y = 0; y < selectedPixels[x].size(); y++)
+        {
+            if(selectedPixels[x][y])
+            {
+                m_pixels.push_back(QPoint(x,y));
+            }
+        }
+    }
+
+    //Remove duplicates
+    m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
+
+    update();
+}
+
+void PaintableClipboard::addPixels(QList<QPoint> pixels) //do we need this
+{
+    for(QPoint& p : pixels)
+    {
+        m_pixels.push_back(p);
+    }
+
+    //Remove duplicates
+    m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
+
+    update();
 }
 
 bool PaintableClipboard::isDragging()
@@ -2158,16 +2037,6 @@ void PaintableClipboard::doDragging(QPoint mouseLocation)
     m_previousDragPos = mouseLocation;
 
     update();
-}
-
-void PaintableClipboard::reset()
-{
-    m_clipboardImage = QImage();
-    m_previousDragPos = Constants::NullDragPoint;
-    m_dragX = 0;
-    m_dragY = 0;
-    m_pixels.clear();
-    m_dimensionsRect = QRect();
 }
 
 void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDimensions)
@@ -2232,6 +2101,16 @@ bool PaintableClipboard::nubblesDrag(QPointF mouseLocation, const float& zoom)
     return false;
 }
 
+void PaintableClipboard::reset()
+{
+    m_clipboardImage = QImage();
+    m_previousDragPos = Constants::NullDragPoint;
+    m_dragX = 0;
+    m_dragY = 0;
+    m_pixels.clear();
+    m_dimensionsRect = QRect();
+}
+
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
     Q_UNUSED(paintEvent);
@@ -2251,6 +2130,12 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
+    //Outline
+    m_bOutlineColorToggle = !m_bOutlineColorToggle;
+    //todo - redo border highlight
+    //QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
+    //painter.setPen(selectionOutlinePen);
+
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     for(QPoint& p : m_pixels)
     {
@@ -2263,6 +2148,37 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
             painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), col);
         }
+
+        const uint x = p.x();
+        const uint y = p.y();
+
+        painter.fillRect(QRect(x + offset.x(), y + offset.y(), 1, 1), Constants::SelectionAreaColor);
+
+        /*  TODO - redo border highlight
+
+        //border right
+        if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
+        {
+            painter.drawLine(QPoint(x + offset.x() + 1, y + offset.y()), QPoint(x + offset.x() + 1, y + offset.y() + 1));
+        }
+
+        //border left
+        if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
+        {
+            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x(), y + offset.y() + 1));
+        }
+
+        //border bottom
+        if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
+        {
+            painter.drawLine(QPoint(x + offset.x(), y + offset.y() + 1.0), QPoint(x + offset.x() + 1.0, y + offset.y() + 1.0));
+        }
+
+        //border top
+        if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
+        {
+            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x() + 1.0, y + offset.y()));
+        }*/
     }
 
     //Draw nubbles to scale dimension of clipboard

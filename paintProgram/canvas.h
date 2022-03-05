@@ -15,52 +15,15 @@
 
 class Canvas;
 class MainWindow;
-
-///Holds selected pixels of parent canvas (also paints these pixels)
-class SelectedPixels : public QWidget
-{
-public:
-    SelectedPixels(Canvas* parent, const uint width, const uint height);
-    ~SelectedPixels();
-
-    ///Clearing
-    void clearAndResize(const uint width, const uint height);
-    void clear();
-
-    ///Pixel operations
-    void operateOnSelectedPixels(std::function<void(int, int)> func);
-
-    ///Adding pixels
-    void addPixels(QRubberBand* newSelectionArea);
-    void addPixels(std::vector<std::vector<bool>>& selectedPixels);
-    void addPixels(QList<QPoint> pixels);
-
-    ///Pixel info
-    bool isHighlighted(const uint x, const uint y);
-    bool containsPixels();
-    QList<QPoint> getPixels();
-
-private:
-    ///Containers of selected pixels (two differnt for speed instead of memory)
-    /// (It is slower adding pixels to two containers but speed saved elsewhere outweighs it)
-    std::vector<std::vector<bool>> m_selectedPixels;//2d array for quick access to specific pixels
-    QList<QPoint> m_selectedPixelsList;//List for quick iteration of only selected pixels
-
-    Canvas* m_pParentCanvas;
-
-    ///Painting
-    bool m_bOutlineColorToggle = false;
-    void paintEvent(QPaintEvent* paintEvent) override;
-    QTimer* m_pOutlineDrawTimer;//Calls draw of outline of selected pixels every interval
-};
+class PaintableClipboard;
 
 ///Clipboard (Image + Pixel info) used for copying/cutting/pasting
 class Clipboard
 {
 public:
-    void generateClipboard(QImage& canvas, SelectedPixels* pSelectedPixels);
+    void generateClipboard(QImage& canvas, PaintableClipboard* pSelectedPixels);
 
-    QList<QPoint> m_pixels;
+    QVector<QPoint> m_pixels;
     QImage m_clipboardImage;
 };
 
@@ -98,14 +61,15 @@ private:
     inline static QImage m_image = QImage();
 };
 
-///A clipboard that also paints. Used for dragging around or cutting/pasting
+///A clipboard that also paints. Used for dragging, selecting cutting, pasting
 class PaintableClipboard : public Clipboard, public QWidget
 {
 public:
     PaintableClipboard(Canvas* parent);
+    ~PaintableClipboard();
 
     ///Clipboard (image + pixels)
-    void generateClipboard(QImage& canvas, SelectedPixels* pSelectedPixels);
+    void generateClipboard(QImage& canvas, PaintableClipboard* pSelectedPixels);
     void setClipboard(Clipboard clipboard);
     Clipboard getClipboard();
 
@@ -114,9 +78,19 @@ public:
     bool dumpImage(QPainter& painter);//Returns false if no image dumped
     bool isImageDefault();
 
-    ///Pixels
-    QList<QPoint> getPixels();
-    QList<QPoint> getPixelsOffset();
+    ///Pixel info
+    bool isHighlighted(const uint x, const uint y);
+    bool containsPixels();
+    QVector<QPoint> getPixels();
+    QVector<QPoint> getPixelsOffset();
+
+    ///Pixel operations
+    void operateOnSelectedPixels(std::function<void(int, int)> func);
+
+    ///Adding pixels
+    void addPixels(QRubberBand* newSelectionArea);
+    void addPixels(std::vector<std::vector<bool>>& selectedPixels);
+    void addPixels(QList<QPoint> pixels);
 
     ///Dragging
     bool isDragging();
@@ -133,6 +107,8 @@ public:
 private:
     ///Drawing
     void paintEvent(QPaintEvent* paintEvent) override;
+    bool m_bOutlineColorToggle = false;
+    QTimer* m_pOutlineDrawTimer;//Calls draw of outline of selected pixels every interval
 
     ///Dragging
     int m_dragX = 0;
@@ -290,7 +266,6 @@ private:
     int m_panOffsetY = 0;
 
     ///Selecting
-    SelectedPixels* m_pSelectedPixels = nullptr;
     QRubberBand* m_selectionTool = nullptr;
     QPoint m_selectionToolOrigin = QPoint(0,0);
 
