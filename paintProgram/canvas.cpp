@@ -694,17 +694,27 @@ QColor invertColor(const QColor col)
     return QColor(255 - col.red(), 255 - col.green(), 255 - col.blue(), col.alpha());
 }
 
+//TODO - FOR ANY EFFECTS, CLIPBOARD DOSENT HAVE AN ORIGINAL STATE SAVED BEFORE EFFECTS ARE APPLIED (NEED BECAUSE NEED TO APPLY EFFECTS FROM ORIGINAL)
+
 void Canvas::onInvert() // todo make option to invert alpha aswell
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, invertColor(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y)));
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, invertColor(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y)));
         });
     }
     else
@@ -760,12 +770,12 @@ void Canvas::onSketchEffect(const int sensitivity)
     //Instead of having duplicate code...
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         inkSketch.fill(Qt::transparent);
 
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x+1, y, sensitivity))
             {
@@ -790,6 +800,38 @@ void Canvas::onSketchEffect(const int sensitivity)
         });
 
         QPainter sketchPainter(&m_pClipboardPixels->m_clipboardImage);
+        sketchPainter.drawImage(0,0,inkSketch);
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        inkSketch.fill(Qt::transparent);
+
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
+            {
+                inkSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
+            {
+                inkSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
+            {
+                inkSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
+            {
+                inkSketch.setPixelColor(x, y, sketchColor);
+            }
+            else
+            {
+                inkSketch.setPixelColor(x, y, Qt::white);
+            }
+        });
+
+        QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].m_image);
         sketchPainter.drawImage(0,0,inkSketch);
     }
     else
@@ -843,11 +885,14 @@ void Canvas::onOutlineEffect(const int sensitivity)
 
     const QColor sketchColor = m_pParent->getSelectedColor();
 
+    //Todo add funciton that takes original image and outlineSketch image and pixel locations and applies sketch...
+    //Instead of having duplicate code...
+
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             if(compareNeighbour(m_pClipboardPixels->m_clipboardImage, x, y, x+1, y, sensitivity))
             {
@@ -866,6 +911,37 @@ void Canvas::onOutlineEffect(const int sensitivity)
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
         });
+
+        //Dump outline sketch onto m_canvasImage
+        QPainter sketchPainter(&m_pClipboardPixels->m_clipboardImage);
+        sketchPainter.drawImage(0,0,outlineSketch);
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x+1, y, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x-1, y, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y+1, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+            else if(compareNeighbour(m_canvasLayers[m_selectedLayer].m_image, x, y, x, y-1, sensitivity))
+            {
+                outlineSketch.setPixelColor(x, y, sketchColor);
+            }
+        });
+
+        //Dump outline sketch onto m_canvasImage
+        QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].m_image);
+        sketchPainter.drawImage(0,0,outlineSketch);
     }
     else
     {
@@ -889,11 +965,11 @@ void Canvas::onOutlineEffect(const int sensitivity)
                 outlineSketch.setPixelColor(x, y, sketchColor);
             }
         });
-    }
 
-    //Dump outline sketch onto m_canvasImage
-    QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].m_image);
-    sketchPainter.drawImage(0,0,outlineSketch);
+        //Dump outline sketch onto m_canvasImage
+        QPainter sketchPainter(&m_canvasLayers[m_selectedLayer].m_image);
+        sketchPainter.drawImage(0,0,outlineSketch);
+    }
 
     //Record history is done in onConfirmEffects()
 
@@ -922,12 +998,20 @@ void Canvas::onBrightness(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, changeBrightness(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeBrightness(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
     else
@@ -991,12 +1075,20 @@ void Canvas::onContrast(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, changeContrast(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeContrast(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
     else
@@ -1034,12 +1126,20 @@ void Canvas::onRedLimit(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, limitRed(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitRed(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
     else
@@ -1068,12 +1168,20 @@ void Canvas::onBlueLimit(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, limitBlue(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitBlue(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
     else
@@ -1102,12 +1210,20 @@ void Canvas::onGreenLimit(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pSelectedPixels->containsPixels())
+    if(m_pClipboardPixels->isDragging())
     {
         //Loop through selected pixels
-        m_pSelectedPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
             m_pClipboardPixels->m_clipboardImage.setPixelColor(x, y, limitGreen(m_pClipboardPixels->m_clipboardImage.pixelColor(x,y), value));
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+            m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitGreen(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
         });
     }
     else
