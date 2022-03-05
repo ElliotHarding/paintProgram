@@ -24,7 +24,7 @@ public:
     void generateClipboard(QImage& canvas, const QVector<QPoint>& selectedPixels);
 
     QVector<QPoint> m_pixels;
-    QImage m_clipboardImage;
+    QImage m_clipboardImage = QImage();
 };
 
 enum DragNubblePos
@@ -72,6 +72,7 @@ public:
     void generateClipboard(QImage& canvas);
     void setClipboard(Clipboard clipboard);
     Clipboard getClipboard();
+    bool clipboardActive();
 
     ///Image
     void setImage(QImage image);    

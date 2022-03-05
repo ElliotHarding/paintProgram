@@ -544,7 +544,7 @@ void Canvas::onCopyKeysPressed()
     Clipboard clipboard;
 
     //IF were just selecting. Not dragging
-    if(!m_pClipboardPixels->isDragging())
+    if(!m_pClipboardPixels->clipboardActive())
     {
         clipboard.generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels()); //Assumes there is a selected layer
     }
@@ -566,7 +566,7 @@ void Canvas::onCutKeysPressed()
     Clipboard clipBoard;
 
     //What if already dragging something around?
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         clipBoard = m_pClipboardPixels->getClipboard();
     }
@@ -701,7 +701,7 @@ void Canvas::onInvert() // todo make option to invert alpha aswell
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -791,11 +791,8 @@ void Canvas::onSketchEffect(const int sensitivity)
     QImage inkSketch = QImage(QSize(m_canvasLayers[m_selectedLayer].m_image.width(), m_canvasLayers[m_selectedLayer].m_image.height()), QImage::Format_ARGB32);
     const QColor sketchColor = m_pParent->getSelectedColor() != Qt::white ? m_pParent->getSelectedColor() : Qt::black;
 
-    //Todo add funciton that takes original image and inksketch image and pixel locations and applies sketch...
-    //Instead of having duplicate code...
-
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         inkSketch.fill(Qt::transparent);
 
@@ -863,11 +860,8 @@ void Canvas::onOutlineEffect(const int sensitivity)
 
     const QColor sketchColor = m_pParent->getSelectedColor();
 
-    //Todo add funciton that takes original image and outlineSketch image and pixel locations and applies sketch...
-    //Instead of having duplicate code...
-
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -931,7 +925,7 @@ void Canvas::onBrightness(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -1008,7 +1002,7 @@ void Canvas::onContrast(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -1059,7 +1053,7 @@ void Canvas::onRedLimit(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -1101,7 +1095,7 @@ void Canvas::onBlueLimit(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -1143,7 +1137,7 @@ void Canvas::onGreenLimit(const int value)
     m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
 
     //check if were doing the whole image or just some selected pixels
-    if(m_pClipboardPixels->isDragging())
+    if(m_pClipboardPixels->clipboardActive())
     {
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -1633,7 +1627,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                     if(m_pClipboardPixels->isHighlighted(mouseLocation.x(), mouseLocation.y()))
                     {
                         //If no clipboard exists to drag, generate one based on selected pixels
-                        if(m_pClipboardPixels->isImageDefault())
+                        if(!m_pClipboardPixels->clipboardActive())
                         {
                             m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image);
                         }
@@ -1879,6 +1873,11 @@ Clipboard PaintableClipboard::getClipboard()
     return clipboard;
 }
 
+bool PaintableClipboard::clipboardActive()
+{
+    return m_clipboardImage != QImage();
+}
+
 void PaintableClipboard::setImage(QImage image)
 {
     m_clipboardImage = image;
@@ -1926,7 +1925,6 @@ bool PaintableClipboard::dumpImage(QPainter &painter)
     }
 
     reset();
-    update();
     return true;
 }
 
@@ -2128,6 +2126,7 @@ void PaintableClipboard::reset()
     m_dragY = 0;
     m_pixels.clear();
     m_dimensionsRect = QRect();
+    update();
 }
 
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
@@ -2158,14 +2157,17 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     for(QPoint& p : m_pixels)
     {
-        if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
+        if(m_clipboardImage != QImage())
         {
-            const QColor col = (p.x() % 2 == 0) ?
-                        (p.y() % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
-                                     :
-                        (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
+            if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
+            {
+                const QColor col = (p.x() % 2 == 0) ?
+                            (p.y() % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
+                                         :
+                            (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
 
-            painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), col);
+                painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), col);
+            }
         }
 
         const uint x = p.x();
