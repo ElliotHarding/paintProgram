@@ -463,36 +463,28 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
     m_tool = t;
 
-    if(m_tool != TOOL_SELECT)
+    if(m_tool != TOOL_SELECT && m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
     {
-        //Reset selection rectangle tool
-        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
-
-        emit selectionAreaResize(0,0);
-
-        if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
+        if(!m_pClipboardPixels->isImageDefault())
         {
-            if(!m_pClipboardPixels->isImageDefault())
+            //Dump dragged contents onto m_canvasImage
+            //If something actually dumps, record image history
+            QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selectedLayer
+            if(m_pClipboardPixels->dumpImage(painter))
             {
-                //Dump dragged contents onto m_canvasImage
-                //If something actually dumps, record image history
-                QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selectedLayer
-                if(m_pClipboardPixels->dumpImage(painter))
-                {
-                    m_canvasHistory.recordHistory(getSnapshot());
-                }
-            }
-            else if(m_pClipboardPixels->containsPixels())
-            {
-                m_pClipboardPixels->reset(); //todo - make it so it just resets selected pixels...
-
                 m_canvasHistory.recordHistory(getSnapshot());
+
+                update();
             }
         }
+        else if(m_pClipboardPixels->containsPixels())
+        {
+            m_pClipboardPixels->reset();
 
-        canvasMutexLocker.unlock();
+            m_canvasHistory.recordHistory(getSnapshot());
 
-        update();
+            update();
+        }
     }
 }
 
@@ -1535,6 +1527,12 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         m_pClipboardPixels->addPixels(m_selectionTool);
         m_canvasHistory.recordHistory(getSnapshot());
+
+        //Reset selection rectangle tool
+        m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
+
+        emit selectionAreaResize(0,0);
+
         update();
     }
     else if(m_tool == TOOL_PAN)
