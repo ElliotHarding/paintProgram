@@ -80,7 +80,7 @@ public:
     bool isImageDefault();
 
     ///Pixel info
-    bool isHighlighted(const uint x, const uint y);
+    bool isHighlighted(const int& x, const int& y);
     bool containsPixels();
     QVector<QPoint> getPixels();
     QVector<QPoint> getPixelsOffset();

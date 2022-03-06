@@ -1770,6 +1770,10 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
 {
     setGeometry(0, 0, parent->width(), parent->height());
 
+    m_pOutlineDrawTimer = new QTimer(this);
+    connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
+    m_pOutlineDrawTimer->start(Constants::SelectedPixelsOutlineFlashFrequency);
+
     m_dragNubbles.insert(DragNubblePos::TopLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right() && mouseLocation.y() < dimensions.bottom())
@@ -1927,7 +1931,7 @@ bool PaintableClipboard::dumpImage(QPainter &painter)
     return true;
 }
 
-bool PaintableClipboard::isHighlighted(const uint x, const uint y)
+bool PaintableClipboard::isHighlighted(const int& x, const int& y)
 {
     for(QPoint& p : m_pixels)
     {
@@ -1944,12 +1948,12 @@ bool PaintableClipboard::containsPixels()
     return m_pixels.size() > 0;
 }
 
-QVector<QPoint> PaintableClipboard::getPixels() //do we need this?
+QVector<QPoint> PaintableClipboard::getPixels()
 {
     return m_pixels;
 }
 
-QVector<QPoint> PaintableClipboard::getPixelsOffset() //do we need this public?
+QVector<QPoint> PaintableClipboard::getPixelsOffset()
 {
     QVector<QPoint> pixels = m_pixels;
     for(QPoint& p : pixels)
