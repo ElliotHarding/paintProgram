@@ -2013,20 +2013,6 @@ void PaintableClipboard::addPixels(std::vector<std::vector<bool>>& selectedPixel
     update();
 }
 
-void PaintableClipboard::addPixels(QList<QPoint> pixels) //do we need this
-{
-    for(QPoint& p : pixels)
-    {
-        m_pixels.push_back(p);
-    }
-
-    //Remove duplicates
-    m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
-
-    updateDimensionsRect();
-    update();
-}
-
 bool PaintableClipboard::isDragging()
 {
     return (m_previousDragPos != Constants::NullDragPoint);

@@ -91,7 +91,6 @@ public:
     ///Adding pixels
     void addPixels(QRubberBand* newSelectionArea);
     void addPixels(std::vector<std::vector<bool>>& selectedPixels);
-    void addPixels(QList<QPoint> pixels);
 
     ///Dragging
     bool isDragging();
