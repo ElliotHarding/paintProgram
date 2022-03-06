@@ -456,34 +456,15 @@ void Canvas::onUpdateSettings(int width, int height, QString name)
 
 void Canvas::onCurrentToolUpdated(const Tool t)
 {
-    bool doUpdate = false;
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     if(m_tool == TOOL_TEXT && t != TOOL_TEXT)
         m_textToDraw = "";
 
     m_tool = t;
 
-    if(m_tool != TOOL_DRAG)
-    {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
-        //Dump dragged contents onto m_canvasImage
-        //If something actually dumps, record image history
-        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selectedLayer
-        if(m_pClipboardPixels->dumpImage(painter))
-        {
-            m_canvasHistory.recordHistory(getSnapshot());
-        }
-
-        canvasMutexLocker.unlock();
-
-        doUpdate = true;
-    }
-
     if(m_tool != TOOL_SELECT)
     {
-        QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
         //Reset selection rectangle tool
         m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
@@ -491,7 +472,17 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
         if(m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
         {
-            if(m_pClipboardPixels->containsPixels())
+            if(!m_pClipboardPixels->isImageDefault())
+            {
+                //Dump dragged contents onto m_canvasImage
+                //If something actually dumps, record image history
+                QPainter painter(&m_canvasLayers[m_selectedLayer].m_image); //Assumes there is a selectedLayer
+                if(m_pClipboardPixels->dumpImage(painter))
+                {
+                    m_canvasHistory.recordHistory(getSnapshot());
+                }
+            }
+            else if(m_pClipboardPixels->containsPixels())
             {
                 m_pClipboardPixels->reset(); //todo - make it so it just resets selected pixels...
 
@@ -501,17 +492,8 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
         canvasMutexLocker.unlock();
 
-        doUpdate = true;
-    }
-
-    /* Todo - check we dont need this. (Now clipboard pixels will always have clipboard as soon as selected pixels exist...
-    if(m_tool == TOOL_DRAG && m_pSelectedPixels->containsPixels())
-    {
-        m_pClipboardPixels->generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pSelectedPixels);
-    }*/
-
-    if (doUpdate)
         update();
+    }
 }
 
 void Canvas::onDeleteKeyPressed()
