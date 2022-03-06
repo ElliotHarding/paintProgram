@@ -1993,7 +1993,7 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
     update();
 }
 
-void PaintableClipboard::addPixels(std::vector<std::vector<bool>>& selectedPixels) //do we need this
+void PaintableClipboard::addPixels(std::vector<std::vector<bool>>& selectedPixels)
 {
     for(uint x = 0; x < selectedPixels.size(); x++)
     {
