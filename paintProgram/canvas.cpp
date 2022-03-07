@@ -424,7 +424,7 @@ void Canvas::onUpdateSettings(int width, int height, QString name)
     m_canvasWidth = width;
     m_canvasHeight = height;
 
-    for(CanvasLayer canvasLayer : m_canvasLayers)
+    for(CanvasLayer& canvasLayer : m_canvasLayers)
     {
         //Create new image based on new settings
         QImage newImage = QImage(QSize(width, height), QImage::Format_ARGB32);
