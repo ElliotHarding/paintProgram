@@ -2104,6 +2104,18 @@ void PaintableClipboard::reset()
     update();
 }
 
+QVector<QVector<bool>> listTo2dVector(const QVector<QPoint>& selectedPixels, const int& width, const int& height)
+{
+     QVector<QVector<bool>> selectedPixelsVector = QVector<QVector<bool>>(width, QVector<bool>(height, false));
+
+     for(const QPoint& p : selectedPixels)
+     {
+        selectedPixelsVector[p.x()][p.y()] = true;
+     }
+
+     return selectedPixelsVector;
+}
+
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
     Q_UNUSED(paintEvent);
@@ -2125,9 +2137,11 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
     //Outline
     m_bOutlineColorToggle = !m_bOutlineColorToggle;
-    //todo - redo border highlight
-    //QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
-    //painter.setPen(selectionOutlinePen);
+
+    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
+    painter.setPen(selectionOutlinePen);
+
+    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels, 200, 200);
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     for(QPoint& p : m_pixels)
@@ -2145,36 +2159,34 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
             }
         }
 
-        const uint x = p.x();
-        const uint y = p.y();
+        const int x = p.x();
+        const int y = p.y();
 
         painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColor);
 
-        /*  TODO - redo border highlight
-
         //border right
-        if(x == m_selectedPixels.size()-1 || (x + 1 < m_selectedPixels.size() && !m_selectedPixels[x+1][y]))
+        if(x == selectedPixelsVector.size()-1 || (x + 1 < selectedPixelsVector.size() && !selectedPixelsVector[x+1][y]))
         {
-            painter.drawLine(QPoint(x + offset.x() + 1, y + offset.y()), QPoint(x + offset.x() + 1, y + offset.y() + 1));
+            painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
         }
 
         //border left
-        if(x == 0 || (x > 0 && !m_selectedPixels[x-1][y]))
+        if(x == 0 || (x > 0 && !selectedPixelsVector[x-1][y]))
         {
-            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x(), y + offset.y() + 1));
+            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
         }
 
         //border bottom
-        if(y == m_selectedPixels[x].size()-1 || (y + 1 < m_selectedPixels.size() && !m_selectedPixels[x][y+1]))
+        if(y == selectedPixelsVector[x].size()-1 || (y + 1 < selectedPixelsVector.size() && !selectedPixelsVector[x][y+1]))
         {
-            painter.drawLine(QPoint(x + offset.x(), y + offset.y() + 1.0), QPoint(x + offset.x() + 1.0, y + offset.y() + 1.0));
+            painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
         }
 
         //border top
-        if(y == 0 || (y > 0 && !m_selectedPixels[x][y-1]))
+        if(y == 0 || (y > 0 && !selectedPixelsVector[x][y-1]))
         {
-            painter.drawLine(QPoint(x + offset.x(), y + offset.y()), QPoint(x + offset.x() + 1.0, y + offset.y()));
-        }*/
+            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
+        }
     }
 
     //Draw nubbles to scale dimension of clipboard
