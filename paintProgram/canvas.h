@@ -77,7 +77,6 @@ public:
     ///Image
     void setImage(QImage image);    
     bool dumpImage(QPainter& painter);//Returns false if no image dumped
-    bool isImageDefault();
 
     ///Pixel info
     bool isHighlighted(const int& x, const int& y);

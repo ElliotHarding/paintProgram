@@ -465,7 +465,7 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
     if(m_tool != TOOL_SELECT && m_tool != TOOL_SPREAD_ON_SIMILAR && m_tool != TOOL_DRAG)
     {
-        if(!m_pClipboardPixels->isImageDefault())
+        if(m_pClipboardPixels->clipboardActive())
         {
             //Dump dragged contents onto m_canvasImage
             //If something actually dumps, record image history
@@ -1427,7 +1427,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
     //If were not dragging, and the clipboard shows something. Dump it - unless editing text
-    if(m_tool != TOOL_DRAG && !m_pClipboardPixels->isImageDefault() && m_tool != TOOL_TEXT)
+    if(m_tool != TOOL_DRAG && m_pClipboardPixels->clipboardActive() && m_tool != TOOL_TEXT)
     {
         //Dump clipboard, if something actually dumped record image history
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
@@ -1872,13 +1872,6 @@ bool PaintableClipboard::clipboardActive()
     return m_clipboardImage != QImage();
 }
 
-//TODO - These two do the same ^V
-
-bool PaintableClipboard::isImageDefault()
-{
-    return m_clipboardImage == QImage();
-}
-
 void PaintableClipboard::setImage(QImage image)
 {
     m_clipboardImage = image;
@@ -2087,7 +2080,7 @@ bool PaintableClipboard::nubblesDrag(QImage& canvasImage, QPointF mouseLocation,
     {
         if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
         {
-            if(isImageDefault())
+            if(!clipboardActive())
             {
                 generateClipboard(canvasImage);
             }
