@@ -139,7 +139,8 @@ public:
     Clipboard m_clipboard;
 };
 
-///Holds the history of actions on the canvas ~ may incorporate actual CanvasLayers later...
+///Holds the history of actions on the canvas ~ may store only changes between
+///  saves later (instead of entire canvas and clipboard each time)
 class CanvasHistory
 {
 public:
@@ -151,11 +152,6 @@ private:
     QList<CanvasHistoryItem> m_history;
     uint m_historyIndex = 0;
 };
-
-
-/*
- TODO - MAKE IT SO YOU CAN APPLY EFFECTS TO CLIPBOARD....
- */
 
 ///Tab widget in charge of displaying & interacting with the image edited by paint program
 class Canvas : public QTabWidget
