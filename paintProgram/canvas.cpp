@@ -1986,9 +1986,9 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
 
 void PaintableClipboard::addPixels(QVector<QVector<bool>>& selectedPixels)
 {
-    for(uint x = 0; x < selectedPixels.size(); x++)
+    for(int x = 0; x < selectedPixels.size(); x++)
     {
-        for(uint y = 0; y < selectedPixels[x].size(); y++)
+        for(int y = 0; y < selectedPixels[x].size(); y++)
         {
             if(selectedPixels[x][y])
             {
