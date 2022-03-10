@@ -2198,8 +2198,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.setPen(selectionOutlinePen);
 
     //2D vectorize selected pixels for quicker outline drawing
-    const QImage& parentImage = m_pParentCanvas->getImageCopy();
-    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels, parentImage.width(), parentImage.height());
+    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels, m_pParentCanvas->width(), m_pParentCanvas->height());
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     //Draw highlight outline
