@@ -250,6 +250,8 @@ private:
     QPoint m_textDrawLocation;
     QImage m_beforeEffectsImage;
     QImage getCanvasImageBeforeEffects();//Requires m_canvasMutex to be locked!
+    Clipboard m_beforeEffectsClipboard;
+    Clipboard getClipboardBeforeEffects();//Requires m_canvasMutex to be locked!
 
     ///Draw shape
     QPoint m_drawShapeOrigin = QPoint(0,0);

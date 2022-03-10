@@ -384,7 +384,7 @@ void Canvas::onSelectedLayerChanged(const uint index)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //Reset effects incase in the middle of effects when switched layer
-    if(m_beforeEffectsImage != QImage())
+    if(m_beforeEffectsImage != QImage() || m_beforeEffectsClipboard.m_clipboardImage != QImage())
     {
         canvasMutexLocker.unlock();
         onCancelEffects();
@@ -763,9 +763,6 @@ void Canvas::onSketchEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
-
     if(sensitivity == 0)
     {
         update();
@@ -778,6 +775,8 @@ void Canvas::onSketchEffect(const int sensitivity)
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         inkSketch.fill(Qt::transparent);
 
         //Loop through selected pixels
@@ -794,6 +793,9 @@ void Canvas::onSketchEffect(const int sensitivity)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
         inkSketch.fill(Qt::transparent);
 
         //Loop through selected pixels
@@ -810,6 +812,9 @@ void Canvas::onSketchEffect(const int sensitivity)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
         inkSketch.fill(Qt::white);
 
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
@@ -829,9 +834,6 @@ void Canvas::onOutlineEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
-
     if(sensitivity == 0)
     {
         update();
@@ -847,6 +849,8 @@ void Canvas::onOutlineEffect(const int sensitivity)
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -859,6 +863,9 @@ void Canvas::onOutlineEffect(const int sensitivity)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -871,6 +878,9 @@ void Canvas::onOutlineEffect(const int sensitivity)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through pixels, if a border pixel set it to sketchColor
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
@@ -905,12 +915,11 @@ void Canvas::onBrightness(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -919,6 +928,9 @@ void Canvas::onBrightness(const int value)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -927,6 +939,9 @@ void Canvas::onBrightness(const int value)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeBrightness(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
@@ -982,12 +997,11 @@ void Canvas::onContrast(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -996,6 +1010,9 @@ void Canvas::onContrast(const int value)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1004,6 +1021,9 @@ void Canvas::onContrast(const int value)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, changeContrast(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
@@ -1033,12 +1053,11 @@ void Canvas::onRedLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1047,6 +1066,9 @@ void Canvas::onRedLimit(const int value)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1055,6 +1077,9 @@ void Canvas::onRedLimit(const int value)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitRed(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
@@ -1075,12 +1100,11 @@ void Canvas::onBlueLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1089,6 +1113,9 @@ void Canvas::onBlueLimit(const int value)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1097,6 +1124,9 @@ void Canvas::onBlueLimit(const int value)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitBlue(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
@@ -1117,12 +1147,11 @@ void Canvas::onGreenLimit(const int value)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    //Get backup of canvas image before effects were applied (create backup if first effect)
-    m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1131,6 +1160,9 @@ void Canvas::onGreenLimit(const int value)
     }
     else if(m_pClipboardPixels->containsPixels())
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         //Loop through selected pixels
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
@@ -1139,6 +1171,9 @@ void Canvas::onGreenLimit(const int value)
     }
     else
     {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects();
+
         operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
         {
             m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, limitGreen(m_canvasLayers[m_selectedLayer].m_image.pixelColor(x,y), value));
@@ -1154,14 +1189,26 @@ void Canvas::onConfirmEffects()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_beforeEffectsImage = QImage();
+    m_beforeEffectsClipboard.m_clipboardImage = QImage();
+    m_beforeEffectsClipboard.m_pixels.clear();
     m_canvasHistory.recordHistory(getSnapshot());
 }
 
 void Canvas::onCancelEffects()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    m_canvasLayers[m_selectedLayer].m_image = m_beforeEffectsImage;
-    m_beforeEffectsImage = QImage();
+
+    if(m_beforeEffectsImage != QImage())
+    {
+        m_canvasLayers[m_selectedLayer].m_image = m_beforeEffectsImage;
+        m_beforeEffectsImage = QImage();
+    }
+    else if(m_beforeEffectsClipboard.m_clipboardImage != QImage())
+    {
+        m_pClipboardPixels->setClipboard(m_beforeEffectsClipboard);
+        m_beforeEffectsClipboard.m_clipboardImage = QImage();
+        m_beforeEffectsClipboard.m_pixels.clear();
+    }
 }
 
 QImage Canvas::getImageCopy()
@@ -1732,6 +1779,16 @@ QImage Canvas::getCanvasImageBeforeEffects()
         m_beforeEffectsImage = m_canvasLayers[m_selectedLayer].m_image; //Assumes there is a selected layer
     }
     return m_beforeEffectsImage;
+}
+
+//Requires m_canvasMutex to be locked!
+Clipboard Canvas::getClipboardBeforeEffects()
+{
+    if(m_beforeEffectsClipboard.m_clipboardImage == QImage())
+    {
+        m_beforeEffectsClipboard = m_pClipboardPixels->getClipboard();
+    }
+    return m_beforeEffectsClipboard;
 }
 
 void Canvas::updateCenter()
