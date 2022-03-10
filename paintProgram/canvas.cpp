@@ -1342,7 +1342,7 @@ void paintBrush(QImage& canvas, const uint x, const uint y, const QColor col, co
     }
 }
 
-void spreadSelectSimilarColor(QImage& image, std::vector<std::vector<bool>>& selectedPixels, QPoint startPixel, int sensitivty)
+void spreadSelectSimilarColor(QImage& image, QVector<QVector<bool>>& selectedPixels, QPoint startPixel, int sensitivty)
 {
     if(startPixel.x() > image.width() || startPixel.x() < 0 || startPixel.y() > image.height() || startPixel.y() < 0)
         return;
@@ -1465,7 +1465,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
             m_pClipboardPixels->reset();
         }
 
-        std::vector<std::vector<bool>> newSelectedPixels = std::vector<std::vector<bool>>(m_canvasWidth, std::vector<bool>(m_canvasHeight, false));
+        QVector<QVector<bool>> newSelectedPixels = QVector<QVector<bool>>(m_canvasWidth, QVector<bool>(m_canvasHeight, false));
         spreadSelectSimilarColor(m_canvasLayers[m_selectedLayer].m_image, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
         m_pClipboardPixels->addPixels(newSelectedPixels);
 
@@ -1984,7 +1984,7 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
     update();
 }
 
-void PaintableClipboard::addPixels(std::vector<std::vector<bool>>& selectedPixels)
+void PaintableClipboard::addPixels(QVector<QVector<bool>>& selectedPixels)
 {
     for(uint x = 0; x < selectedPixels.size(); x++)
     {
