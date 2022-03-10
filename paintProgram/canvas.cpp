@@ -44,7 +44,7 @@ const QPoint NullDragPoint = QPoint(0,0);
 
 QImage genTransparentPixelsBackground(const int width, const int height)
 {
-    //TODO ~ Test if quicker to paint all white, then fill grey squares after
+    // ~ Test if quicker to paint all white, then fill grey squares after
     QImage transparentBackground = QImage(QSize(width, height), QImage::Format_ARGB32);
     for(int x = 0; x < width; x++)
     {
@@ -678,8 +678,6 @@ QColor invertColor(const QColor col)
     return QColor(255 - col.red(), 255 - col.green(), 255 - col.blue(), col.alpha());
 }
 
-//TODO - FOR ANY EFFECTS, CLIPBOARD DOSENT HAVE AN ORIGINAL STATE SAVED BEFORE EFFECTS ARE APPLIED (NEED BECAUSE NEED TO APPLY EFFECTS FROM ORIGINAL)
-
 void Canvas::onInvert() // todo make option to invert alpha aswell
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
@@ -1229,6 +1227,7 @@ QPoint Canvas::getPanOffset()
     return QPoint(m_panOffsetX, m_panOffsetY);
 }
 
+//Requires m_canvasMutex to be locked!
 CanvasHistoryItem Canvas::getSnapshot()
 {
     CanvasHistoryItem canvasHistoryItem;

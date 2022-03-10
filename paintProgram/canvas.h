@@ -271,7 +271,7 @@ private:
 
     ///Undo/redo
     CanvasHistory m_canvasHistory;
-    CanvasHistoryItem getSnapshot();
+    CanvasHistoryItem getSnapshot();//Requires m_canvasMutex to be locked!
 
     ///Geometry
     uint m_canvasWidth;
