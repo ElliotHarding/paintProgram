@@ -1901,6 +1901,7 @@ PaintableClipboard::~PaintableClipboard()
 void PaintableClipboard::generateClipboard(QImage &canvas)
 {
     Clipboard::generateClipboard(canvas, getPixels());
+    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
     updateDimensionsRect();
     update();
 }
@@ -1908,6 +1909,7 @@ void PaintableClipboard::generateClipboard(QImage &canvas)
 void PaintableClipboard::setClipboard(Clipboard clipboard)
 {
     m_clipboardImage = clipboard.m_clipboardImage;
+    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
     m_pixels = clipboard.m_pixels;
     m_previousDragPos = Constants::NullDragPoint;
     m_dragX = 0;
@@ -1932,6 +1934,7 @@ bool PaintableClipboard::clipboardActive()
 void PaintableClipboard::setImage(QImage image)
 {
     m_clipboardImage = image;
+    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
 
     m_pixels.clear();
     for(int x = 0; x < image.width(); x++)
@@ -2153,6 +2156,7 @@ bool PaintableClipboard::nubblesDrag(QImage& canvasImage, QPointF mouseLocation,
 void PaintableClipboard::reset()
 {
     m_clipboardImage = QImage();
+    m_backgroundImage = QImage();
     m_previousDragPos = Constants::NullDragPoint;
     m_dragX = 0;
     m_dragY = 0;
@@ -2208,12 +2212,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         {
             if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
             {
-                const QColor col = (p.x() % 2 == 0) ?
-                            (p.y() % 2 == 0) ? Constants::TransparentWhite : Constants::TransparentGrey
-                                         :
-                            (p.y() % 2 == 0) ? Constants::TransparentGrey : Constants::TransparentWhite;
-
-                painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), col);
+                painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), m_backgroundImage.pixelColor(p.x(), p.y()));
             }
         }
 

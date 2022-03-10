@@ -108,6 +108,7 @@ private:
     void paintEvent(QPaintEvent* paintEvent) override;
     bool m_bOutlineColorToggle = false;
     QTimer* m_pOutlineDrawTimer;//Calls draw of outline of selected pixels every interval
+    QImage m_backgroundImage;
 
     ///Dragging
     int m_dragX = 0;
