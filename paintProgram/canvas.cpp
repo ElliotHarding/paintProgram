@@ -1472,8 +1472,12 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
-    //If were not dragging, and the clipboard shows something. Dump it - unless editing text
-    if(m_tool != TOOL_DRAG && m_pClipboardPixels->clipboardActive() && m_tool != TOOL_TEXT)
+    //If not dragging, and clipboard shows something. Dump it.
+    // Unless : selecting and holding ctrl
+    // Unless : writing text
+    if(m_tool != TOOL_DRAG && m_pClipboardPixels->clipboardActive() &&
+      (!m_pParent->isCtrlPressed() && (m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)) &&
+       m_tool != TOOL_TEXT)
     {
         //Dump clipboard, if something actually dumped record image history
         QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);
