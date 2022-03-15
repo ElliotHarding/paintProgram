@@ -75,7 +75,7 @@ public:
     bool clipboardActive();
 
     ///Image
-    void setImage(QImage image);    
+    void setImage(QImage& image);
     bool dumpImage(QPainter& painter);//Returns false if no image dumped
 
     ///Pixel info

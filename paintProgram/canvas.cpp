@@ -1930,7 +1930,7 @@ bool PaintableClipboard::clipboardActive()
     return m_clipboardImage != QImage();
 }
 
-void PaintableClipboard::setImage(QImage image)
+void PaintableClipboard::setImage(QImage& image)
 {
     m_clipboardImage = image;
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
