@@ -2124,7 +2124,8 @@ bool PaintableClipboard::nubblesDrag(QImage& canvasImage, QPointF mouseLocation,
 {
 
     //If one of the nubbles is already dragging, continue dragging
-    for(const auto& nubblePos : m_dragNubbles.keys())
+    const QList nubbleKeys = m_dragNubbles.keys();
+    for(const auto& nubblePos : nubbleKeys)
     {
         if(m_dragNubbles[nubblePos].isDragging())
         {
@@ -2135,7 +2136,7 @@ bool PaintableClipboard::nubblesDrag(QImage& canvasImage, QPointF mouseLocation,
     }
 
     //Check if a nubble is being selected
-    for(const auto& nubblePos : m_dragNubbles.keys())
+    for(const auto& nubblePos : nubbleKeys)
     {
         if(m_dragNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
         {
@@ -2250,7 +2251,8 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
 
-        for(const auto& nubblePos : m_dragNubbles.keys())
+        const QList nubbleKeys = m_dragNubbles.keys();
+        for(const auto& nubblePos : nubbleKeys)
         {
             m_dragNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
         }
@@ -2289,7 +2291,8 @@ bool PaintableClipboard::completeOperation()
         return true;
     }
 
-    for(const auto& nubblePos : m_dragNubbles.keys())
+    const QList nubbleKeys = m_dragNubbles.keys();
+    for(const auto& nubblePos : nubbleKeys)
     {
         if(m_dragNubbles[nubblePos].isDragging())
         {
