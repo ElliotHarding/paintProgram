@@ -2071,8 +2071,6 @@ bool PaintableClipboard::isDragging()
 void PaintableClipboard::startDragging(QPoint mouseLocation)
 {
     m_previousDragPos = mouseLocation;
-    m_dragX = 0;
-    m_dragY = 0;
 }
 
 void PaintableClipboard::doDragging(QPoint mouseLocation)
