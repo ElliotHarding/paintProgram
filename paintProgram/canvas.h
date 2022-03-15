@@ -95,7 +95,7 @@ public:
     bool isDragging();
     void startDragging(QPoint mouseLocation);
     void doDragging(QPoint mouseLocation);
-    bool nubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
+    bool nubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
 
     ///Reset/clear
     void reset();
