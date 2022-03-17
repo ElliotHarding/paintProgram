@@ -12,10 +12,6 @@
 
 #include "mainwindow.h"
 
-//when adding pixels to clipboard, need to copy over image pixels over to clipboard image.
-//this means whenever pixels are added a clipboard is made. meaning effects operations
-//will allways be on clipboard image not canvas image.
-
 namespace Constants
 {
 
