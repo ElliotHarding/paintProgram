@@ -1579,7 +1579,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
     if(m_tool == TOOL_SELECT)
     {
-        m_pClipboardPixels->addPixels(m_selectionTool);
+        m_pClipboardPixels->addPixels(m_canvasLayers[m_selectedLayer].m_image, m_selectionTool); //Assumes there is a selected layer
         m_canvasHistory.recordHistory(getSnapshot());
 
         //Reset selection rectangle tool
@@ -2030,10 +2030,13 @@ void PaintableClipboard::operateOnSelectedPixels(std::function<void (int, int)> 
     }
 }
 
-void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
+void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea)
 {
     if(newSelectionArea == nullptr)
         return;
+
+    QImage newPixelsImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
+    newPixelsImage.fill(Qt::transparent);
 
     m_pixels = getPixelsOffset();
 
@@ -2043,6 +2046,11 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
         for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
         {
             m_pixels.push_back(QPoint(x,y));
+
+            if(x >= 0 && x < newPixelsImage.width() && y >=0 && y < newPixelsImage.height())
+            {
+                newPixelsImage.setPixelColor(x, y, canvas.pixelColor(x,y));
+            }
         }
     }
 
@@ -2109,10 +2117,11 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
     QImage newClipboardImage = QImage(QSize(width, height), QImage::Format_ARGB32);
     newClipboardImage.fill(Qt::transparent);
     QPainter painter(&newClipboardImage);
+    painter.drawImage(newPixelsImage.rect().translated(-m_dragX, -m_dragY), newPixelsImage, newPixelsImage.rect());
     painter.drawImage(m_clipboardImage.rect().translated(oldDragX - m_dragX, oldDragY - m_dragY), m_clipboardImage, m_clipboardImage.rect());
     painter.end();
     m_clipboardImage = newClipboardImage;
-
+    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
 
     updateDimensionsRect();
     update();

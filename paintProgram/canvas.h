@@ -88,7 +88,7 @@ public:
     void operateOnSelectedPixels(std::function<void(int, int)> func);
 
     ///Adding pixels
-    void addPixels(QRubberBand* newSelectionArea);
+    void addPixels(QImage& canvas, QRubberBand* newSelectionArea);
     void addPixels(QVector<QVector<bool>>& selectedPixels);
 
     ///Dragging
