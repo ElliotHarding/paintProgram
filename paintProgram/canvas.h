@@ -111,7 +111,7 @@ private:
     QImage m_backgroundImage;
 
     ///Pixels
-    void addPixelsPrivate(QImage& newPixelsImage, bool firstPixels);
+    void addImageToActiveClipboard(QImage& newPixelsImage);
 
     ///Dragging
     int m_dragX = 0;
