@@ -25,6 +25,8 @@ public:
 
     QVector<QPoint> m_pixels;
     QImage m_clipboardImage = QImage();
+    int m_dragX = 0;
+    int m_dragY = 0;
 };
 
 enum DragNubblePos
@@ -109,8 +111,6 @@ private:
     QVector<QPoint> getPixelsOffset();
 
     ///Normal Dragging
-    int m_dragX = 0;
-    int m_dragY = 0;
     QPoint m_previousDragPos;
     void completeNormalDrag();
     bool isNormalDragging();

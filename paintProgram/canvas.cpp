@@ -1883,8 +1883,8 @@ void PaintableClipboard::setClipboard(Clipboard clipboard)
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
     m_pixels = clipboard.m_pixels;
     m_previousDragPos = Constants::NullDragPoint;
-    m_dragX = 0;
-    m_dragY = 0;
+    m_dragX = clipboard.m_dragX;
+    m_dragY = clipboard.m_dragY;
     updateDimensionsRect();
     update();
 }
@@ -1894,6 +1894,8 @@ Clipboard PaintableClipboard::getClipboard()
     Clipboard clipboard;
     clipboard.m_clipboardImage = m_clipboardImage;
     clipboard.m_pixels = m_pixels;
+    clipboard.m_dragX = m_dragX;
+    clipboard.m_dragY = m_dragY;
     return clipboard;
 }
 
