@@ -2064,14 +2064,19 @@ void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea
     if(newSelectionArea == nullptr)
         return;
 
+    //Get selection area geometry and limit it to valid canvas locations
     const QRect geometry = newSelectionArea->geometry();
+    const int selectionLeft = geometry.x() >= 0 ? geometry.x() : 0;
+    const int selectionRight = geometry.right() <= canvas.width() ? geometry.right() : canvas.width();
+    const int selectionTop = geometry.top() >= 0 ? geometry.top() : 0;
+    const int selectionBottom = geometry.bottom() <= canvas.height() ? geometry.bottom() : canvas.height();
 
     //If theres no active clipboard (no dragging or re-shaping has been done) then just add pixels
     if(!clipboardActive())
     {
-        for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+        for (int x = selectionLeft; x < selectionRight; x++)
         {
-            for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+            for (int y = selectionTop; y < selectionBottom; y++)
             {
                 m_pixels.push_back(QPoint(x,y));
             }
@@ -2093,16 +2098,12 @@ void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea
 
     //Gather all pixels in position relative to parent canvas
     m_pixels = getPixelsOffset();
-    for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
+    for (int x = selectionLeft; x < selectionRight; x++)
     {
-        for (int y = geometry.y(); y < geometry.y() + geometry.height(); y++)
+        for (int y = selectionTop; y < selectionBottom; y++)
         {
             m_pixels.push_back(QPoint(x,y));
-
-            if(x >= 0 && x < newPixelsImage.width() && y >=0 && y < newPixelsImage.height())
-            {
-                newPixelsImage.setPixelColor(x, y, canvas.pixelColor(x,y));
-            }
+            newPixelsImage.setPixelColor(x, y, canvas.pixelColor(x,y));
         }
     }
 
