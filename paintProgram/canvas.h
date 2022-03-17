@@ -81,7 +81,6 @@ public:
     ///Pixel info
     bool containsPixels();
     QVector<QPoint> getPixels();
-    QVector<QPoint> getPixelsOffset();
 
     ///Pixel operations
     void operateOnSelectedPixels(std::function<void(int, int)> func);
@@ -107,6 +106,7 @@ private:
     ///Pixels
     void addImageToActiveClipboard(QImage& newPixelsImage);
     bool isHighlighted(const int& x, const int& y);
+    QVector<QPoint> getPixelsOffset();
 
     ///Normal Dragging
     int m_dragX = 0;
