@@ -79,7 +79,6 @@ public:
     bool dumpImage(QPainter& painter);//Returns false if no image dumped
 
     ///Pixel info
-    bool isHighlighted(const int& x, const int& y);
     bool containsPixels();
     QVector<QPoint> getPixels();
     QVector<QPoint> getPixelsOffset();
@@ -92,16 +91,11 @@ public:
     void addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels);
 
     ///Dragging
-    bool isDragging();
-    void startDragging(QPoint mouseLocation);
-    void doDragging(QPoint mouseLocation);
-    bool nubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    bool checkFinishDragging();
 
     ///Reset/clear
     void reset();
-
-    ///Finish dragging or nubbles dragging
-    bool completeOperation();
 
 private:
     ///Drawing
@@ -112,18 +106,23 @@ private:
 
     ///Pixels
     void addImageToActiveClipboard(QImage& newPixelsImage);
+    bool isHighlighted(const int& x, const int& y);
 
-    ///Dragging
+    ///Normal Dragging
     int m_dragX = 0;
     int m_dragY = 0;
     QPoint m_previousDragPos;
     void completeNormalDrag();
+    bool isNormalDragging();
+    void startNormalDragging(QPoint mouseLocation);
+    void doNormalDragging(QPoint mouseLocation);
 
     ///Nubble dragging
     QMap<DragNubblePos, DragNubble> m_dragNubbles;
     QImage m_clipboardImageBeforeNubbleDrag = QImage();
     QImage m_clipboardImageBeforeNubbleDragTransparent = QImage();
     QRect m_dimensionsRectBeforeNubbleDrag = QRect();
+    bool doNubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     void doNubbleDragScale();
     void prepNubblesDrag();
     void completeNubbleDrag();
