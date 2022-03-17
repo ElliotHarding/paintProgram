@@ -2035,6 +2035,8 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
     if(newSelectionArea == nullptr)
         return;
 
+    m_pixels = getPixelsOffset();
+
     const QRect geometry = newSelectionArea->geometry();
     for (int x = geometry.x(); x < geometry.x() + geometry.width(); x++)
     {
@@ -2046,6 +2048,60 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
 
     //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
+
+    QRect dimensionsRect = QRect();
+    for(QPoint& p : m_pixels)
+    {
+        if(dimensionsRect.x() == 0 || dimensionsRect.x() > p.x())
+        {
+            dimensionsRect.setX(p.x());
+        }
+        if(dimensionsRect.y() == 0 || dimensionsRect.y() > p.y())
+        {
+            dimensionsRect.setY(p.y());
+        }
+        if(dimensionsRect.right() < p.x())
+        {
+            dimensionsRect.setRight(p.x());
+        }
+        if(dimensionsRect.bottom() < p.y())
+        {
+            dimensionsRect.setBottom(p.y());
+        }
+    }
+
+    int width = dimensionsRect.width();
+    int height = dimensionsRect.height();
+
+    //Got real world pixels
+
+    //If left or top negative, set m_drag to negative & apply opposite of offset to pixels.
+    if(dimensionsRect.left() < 0)
+    {
+        m_dragX = dimensionsRect.left();
+    }
+    else
+    {
+        m_dragX = 0;
+    }
+
+    if(dimensionsRect.top() < 0)
+    {
+        m_dragY = dimensionsRect.top();
+    }
+    else
+    {
+        m_dragY = 0;
+    }
+
+    if(m_dragX != 0 || m_dragY != 0)
+    {
+        for(QPoint& p : m_pixels)
+        {
+            p.setX(p.x() - m_dragX);
+            p.setY(p.y() - m_dragY);
+        }
+    }
 
     updateDimensionsRect();
     update();
