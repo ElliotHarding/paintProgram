@@ -2070,8 +2070,8 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
         }
     }
 
-    int width = dimensionsRect.width();
-    int height = dimensionsRect.height();
+    int oldDragX = m_dragX;
+    int oldDragY = m_dragY;
 
     //Got real world pixels
 
@@ -2102,6 +2102,17 @@ void PaintableClipboard::addPixels(QRubberBand* newSelectionArea)
             p.setY(p.y() - m_dragY);
         }
     }
+
+    int width = dimensionsRect.right() - m_dragX;
+    int height = dimensionsRect.bottom() - m_dragY;
+
+    QImage newClipboardImage = QImage(QSize(width, height), QImage::Format_ARGB32);
+    newClipboardImage.fill(Qt::transparent);
+    QPainter painter(&newClipboardImage);
+    painter.drawImage(m_clipboardImage.rect().translated(oldDragX - m_dragX, oldDragY - m_dragY), m_clipboardImage, m_clipboardImage.rect());
+    painter.end();
+    m_clipboardImage = newClipboardImage;
+
 
     updateDimensionsRect();
     update();
