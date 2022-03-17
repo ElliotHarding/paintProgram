@@ -89,7 +89,7 @@ public:
 
     ///Adding pixels
     void addPixels(QImage& canvas, QRubberBand* newSelectionArea);
-    void addPixels(QVector<QVector<bool>>& selectedPixels);
+    void addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels);
 
     ///Dragging
     bool isDragging();
@@ -109,6 +109,9 @@ private:
     bool m_bOutlineColorToggle = false;
     QTimer* m_pOutlineDrawTimer;//Calls draw of outline of selected pixels every interval
     QImage m_backgroundImage;
+
+    ///Pixels
+    void addPixelsPrivate(QImage& newPixelsImage, bool firstPixels);
 
     ///Dragging
     int m_dragX = 0;

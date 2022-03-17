@@ -1521,7 +1521,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         QVector<QVector<bool>> newSelectedPixels = QVector<QVector<bool>>(m_canvasWidth, QVector<bool>(m_canvasHeight, false));
         spreadSelectSimilarColor(m_canvasLayers[m_selectedLayer].m_image, newSelectedPixels, mouseLocation, m_pParent->getSpreadSensitivity());
-        m_pClipboardPixels->addPixels(newSelectedPixels);
+        m_pClipboardPixels->addPixels(m_canvasLayers[m_selectedLayer].m_image, newSelectedPixels);
 
         m_canvasHistory.recordHistory(getSnapshot());
 
@@ -2056,6 +2056,69 @@ QRect getPixelsDimensions(QVector<QPoint>& pixels)
     return returnRect;
 }
 
+void PaintableClipboard::addPixelsPrivate(QImage& newPixelsImage, bool firstPixels)
+{
+    if(!firstPixels)
+    {
+        //Save old m_drags
+        int oldDragX = m_dragX;
+        int oldDragY = m_dragY;
+
+        int newClipboardWidth;
+        int newClipboardHeight;
+
+        if(m_dragX != 0 || m_dragY != 0)
+        {
+            //Get new m_drags
+            QRect dimensionsRect = getPixelsDimensions(m_pixels);
+            m_dragX = dimensionsRect.left() < 0 ? dimensionsRect.left() : 0;
+            m_dragY = dimensionsRect.top() < 0 ? dimensionsRect.top() : 0;
+
+            //Offset pixels based on new m_drags
+            if(m_dragX != 0 || m_dragY != 0)
+            {
+                for(QPoint& p : m_pixels)
+                {
+                    p.setX(p.x() - m_dragX);
+                    p.setY(p.y() - m_dragY);
+                }
+            }
+
+            newClipboardWidth = dimensionsRect.right() - m_dragX;
+            newClipboardHeight = dimensionsRect.bottom() - m_dragY;
+        }
+        else
+        {
+            newClipboardWidth = newPixelsImage.width();
+            newClipboardHeight = newPixelsImage.height();
+        }
+
+        //Create new clipboard image
+        QImage newClipboardImage = QImage(QSize(newClipboardWidth, newClipboardHeight), QImage::Format_ARGB32);
+        newClipboardImage.fill(Qt::transparent);
+
+        //Paint and combine new pixels and old clipboard onto new clipboard
+        QPainter painter(&newClipboardImage);
+        painter.drawImage(newPixelsImage.rect().translated(-m_dragX, -m_dragY), newPixelsImage, newPixelsImage.rect());
+        painter.drawImage(m_clipboardImage.rect().translated(oldDragX - m_dragX, oldDragY - m_dragY), m_clipboardImage, m_clipboardImage.rect());
+        painter.end();
+
+        //Set new clipboard
+        m_clipboardImage = newClipboardImage;
+    }
+    else
+    {
+        m_clipboardImage = newPixelsImage;
+        m_dragX = 0;
+        m_dragY = 0;
+    }
+
+    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+
+    updateDimensionsRect();
+    update();
+}
+
 void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea)
 {
     if(newSelectionArea == nullptr)
@@ -2064,6 +2127,7 @@ void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea
     QImage newPixelsImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
     newPixelsImage.fill(Qt::transparent);
 
+    bool noPixelsBefore = m_pixels.size() == 0;
     m_pixels = getPixelsOffset();
 
     const QRect geometry = newSelectionArea->geometry();
@@ -2083,47 +2147,17 @@ void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea
     //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
 
-    //Save old m_drags
-    int oldDragX = m_dragX;
-    int oldDragY = m_dragY;
-
-    //Get new m_drags
-    QRect dimensionsRect = getPixelsDimensions(m_pixels);
-    m_dragX = dimensionsRect.left() < 0 ? dimensionsRect.left() : 0;
-    m_dragY = dimensionsRect.top() < 0 ? dimensionsRect.top() : 0;
-
-    //Offset pixels based on new m_drags
-    if(m_dragX != 0 || m_dragY != 0)
-    {
-        for(QPoint& p : m_pixels)
-        {
-            p.setX(p.x() - m_dragX);
-            p.setY(p.y() - m_dragY);
-        }
-    }
-
-    //Create new clipboard image
-    const int width = dimensionsRect.right() - m_dragX;
-    const int height = dimensionsRect.bottom() - m_dragY;
-    QImage newClipboardImage = QImage(QSize(width, height), QImage::Format_ARGB32);
-    newClipboardImage.fill(Qt::transparent);
-
-    //Paint and combine new pixels and old clipboard onto new clipboard
-    QPainter painter(&newClipboardImage);
-    painter.drawImage(newPixelsImage.rect().translated(-m_dragX, -m_dragY), newPixelsImage, newPixelsImage.rect());
-    painter.drawImage(m_clipboardImage.rect().translated(oldDragX - m_dragX, oldDragY - m_dragY), m_clipboardImage, m_clipboardImage.rect());
-    painter.end();
-
-    //Set new clipboard
-    m_clipboardImage = newClipboardImage;
-    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
-
-    updateDimensionsRect();
-    update();
+    addPixelsPrivate(newPixelsImage, noPixelsBefore);
 }
 
-void PaintableClipboard::addPixels(QVector<QVector<bool>>& selectedPixels)
+void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels)
 {
+    QImage newPixelsImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
+    newPixelsImage.fill(Qt::transparent);
+
+    bool noPixelsBefore = m_pixels.size() == 0;
+    m_pixels = getPixelsOffset();
+
     for(int x = 0; x < selectedPixels.size(); x++)
     {
         for(int y = 0; y < selectedPixels[x].size(); y++)
@@ -2131,6 +2165,7 @@ void PaintableClipboard::addPixels(QVector<QVector<bool>>& selectedPixels)
             if(selectedPixels[x][y])
             {
                 m_pixels.push_back(QPoint(x,y));
+                newPixelsImage.setPixelColor(x, y, canvas.pixelColor(x,y));
             }
         }
     }
@@ -2138,8 +2173,7 @@ void PaintableClipboard::addPixels(QVector<QVector<bool>>& selectedPixels)
     //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end() ), m_pixels.end());
 
-    updateDimensionsRect();
-    update();
+    addPixelsPrivate(newPixelsImage, noPixelsBefore);
 }
 
 bool PaintableClipboard::isDragging()
@@ -2343,26 +2377,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
 void PaintableClipboard::updateDimensionsRect()
 {
-    m_dimensionsRect = QRect();
-    for(QPoint& p : m_pixels)
-    {
-        if(m_dimensionsRect.x() == 0 || m_dimensionsRect.x() > p.x())
-        {
-            m_dimensionsRect.setX(p.x());
-        }
-        if(m_dimensionsRect.y() == 0 || m_dimensionsRect.y() > p.y())
-        {
-            m_dimensionsRect.setY(p.y());
-        }
-        if(m_dimensionsRect.right() < p.x())
-        {
-            m_dimensionsRect.setRight(p.x());
-        }
-        if(m_dimensionsRect.bottom() < p.y())
-        {
-            m_dimensionsRect.setBottom(p.y());
-        }
-    }
+    m_dimensionsRect = getPixelsDimensions(m_pixels);
 }
 
 bool PaintableClipboard::completeOperation()
