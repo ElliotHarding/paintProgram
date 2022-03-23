@@ -210,7 +210,12 @@ void Canvas::onUpdateText()
 {
     m_canvasMutex.lock();
 
-    QImage textImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+    QFontMetrics fontMetrics(m_pParent->getTextFont());
+
+    const int textWidth = fontMetrics.width(m_textToDraw);
+    const int textHeight = fontMetrics.height();
+
+    QImage textImage = QImage(QSize(m_textDrawLocation.x() + textWidth, m_textDrawLocation.y() + textHeight), QImage::Format_ARGB32);
     textImage.fill(Qt::transparent);
     QPainter textPainter(&textImage);
     textPainter.setCompositionMode (QPainter::CompositionMode_Source);
@@ -2402,7 +2407,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.setPen(selectionOutlinePen);
 
     //2D vectorize selected pixels for quicker outline drawing
-    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels, m_pParentCanvas->width(), m_pParentCanvas->height());
+    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels, m_clipboardImage.width(), m_clipboardImage.height());
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     //Draw highlight outline
