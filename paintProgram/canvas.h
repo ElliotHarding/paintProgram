@@ -76,6 +76,7 @@ public:
 
     ///Image
     void setImage(QImage& image);
+    QImage& getImage();
     bool dumpImage(QPainter& painter);//Returns false if no image dumped
 
     ///Pixel info

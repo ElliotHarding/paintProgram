@@ -510,11 +510,10 @@ void Canvas::onCopyKeysPressed()
         QImage clipboardImage = QImage(QSize(m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()), QImage::Format_ARGB32);
         clipboardImage.fill(Qt::transparent);
 
-        const QVector<QPoint> selectedPixels = m_pClipboardPixels->getPixels();
-        for(const QPoint& p : selectedPixels)
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
         {
-            clipboardImage.setPixelColor(p.x(), p.y(), m_canvasLayers[m_selectedLayer].m_image.pixelColor(p.x(), p.y()));
-        }
+            clipboardImage.setPixelColor(x, y, m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y));
+        });
 
         QGuiApplication::clipboard()->setImage(clipboardImage);
     }
@@ -526,12 +525,12 @@ void Canvas::onCutKeysPressed()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
-    Clipboard clipBoard;
+    QImage clipboardImage;
 
     //What if already dragging something around?
     if(m_pClipboardPixels->clipboardActive())
     {
-        clipBoard = m_pClipboardPixels->getClipboard();
+        clipboardImage = m_pClipboardPixels->getImage();
 
         //Reset
         m_pClipboardPixels->reset();
@@ -541,17 +540,16 @@ void Canvas::onCutKeysPressed()
     else
     {
         //Copy cut pixels to clipboard
-        clipBoard.m_clipboardImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
-        clipBoard.m_clipboardImage.fill(Qt::transparent);
+        QImage clipboardImage = QImage(QSize(m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()), QImage::Format_ARGB32);
+        clipboardImage.fill(Qt::transparent);
 
         if(m_pClipboardPixels->containsPixels())
         {
             //Go through selected pixels cutting from canvas and copying to clipboard
             m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
             {
-                clipBoard.m_clipboardImage.setPixelColor(x, y, m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y));//Assumes there is a selected layer
+                clipboardImage.setPixelColor(x, y, m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y));//Assumes there is a selected layer
                 m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, Qt::transparent);//Assumes there is a selected layer
-                //clipBoard.m_pixels.push_back(QPoint(x,y));
             });
 
             //Reset
@@ -561,9 +559,7 @@ void Canvas::onCutKeysPressed()
         }
     }
 
-    //m_pParent->setCopyBuffer(clipBoard);
-
-    QGuiApplication::clipboard()->setImage(clipBoard.m_clipboardImage);
+    QGuiApplication::clipboard()->setImage(clipboardImage);
 
     canvasMutexLocker.unlock();
 
@@ -582,11 +578,8 @@ void Canvas::onPasteKeysPressed()
         update();
     }
 
-    Clipboard cb;
-    cb.m_clipboardImage = QGuiApplication::clipboard()->image();
-    m_pClipboardPixels->setClipboard(cb);
-
-    //m_pClipboardPixels->setClipboard(m_pParent->getCopyBuffer());
+    QImage clipboardImage = QGuiApplication::clipboard()->image();
+    m_pClipboardPixels->setImage(clipboardImage);
 
     m_canvasHistory.recordHistory(getSnapshot());
 
@@ -1929,6 +1922,11 @@ void PaintableClipboard::setImage(QImage& image)
     updateDimensionsRect();
 
     update();
+}
+
+QImage& PaintableClipboard::getImage()
+{
+    return m_clipboardImage;
 }
 
 //Returns false if no image dumped
