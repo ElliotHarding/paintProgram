@@ -105,6 +105,7 @@ private slots:
     void onGreenLimit(const int value);
     void onOutlineEffect(const int value);
     void onSketchEffect(const int value);
+    void onNormalBlur(const int value);
     void onConfirmEffects();
     void onCancelEffects();
 

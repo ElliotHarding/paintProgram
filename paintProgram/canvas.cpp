@@ -834,6 +834,46 @@ void Canvas::onSketchEffect(const int sensitivity)
     update();
 }
 
+void Canvas::onNormalBlur(const int value)
+{
+    //check if were doing the whole image or just some selected pixels
+    if(m_pClipboardPixels->clipboardActive())
+    {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+
+        });
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        //Loop through selected pixels
+        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
+        {
+
+        });
+    }
+    else
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
+        {
+
+        });
+    }
+
+    //Record history is done in onConfirmEffects()
+
+    update();
+}
+
 void Canvas::onOutlineEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
