@@ -21,7 +21,7 @@ public:
     bool spinBoxHasFocus();
 
 signals:
-    void updateFont(const QFont font);
+    void fontUpdated();
 
 private slots:
     void on_btn_bold_clicked();

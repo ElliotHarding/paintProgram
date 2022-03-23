@@ -190,8 +190,8 @@ public:
     void onParentMouseScroll(QWheelEvent* event);
 
     ///Text writing events
-    void onUpdateText(QFont font);
-    void onWriteText(QString letter, QFont font);
+    void onUpdateText();
+    void onWriteText(QString letter);
 
     ///Shortcut/keyboard events
     void onDeleteKeyPressed();
@@ -245,12 +245,14 @@ private:
     uint m_selectedLayer;
     QImage m_canvasBackgroundImage;    
     QMutex m_canvasMutex;
-    QString m_textToDraw = "";
-    QPoint m_textDrawLocation;
     QImage m_beforeEffectsImage;
     QImage getCanvasImageBeforeEffects();//Requires m_canvasMutex to be locked!
     Clipboard m_beforeEffectsClipboard;
     Clipboard getClipboardBeforeEffects();//Requires m_canvasMutex to be locked!
+
+    ///Drawing text
+    QString m_textToDraw = "";
+    QPoint m_textDrawLocation;
 
     ///Draw shape
     QPoint m_drawShapeOrigin = QPoint(0,0);

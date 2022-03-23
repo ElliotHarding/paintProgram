@@ -7,6 +7,8 @@ DLG_TextSettings::DLG_TextSettings(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+
+    m_font.setPointSize(ui->spinBox_fontSize->value());
 }
 
 DLG_TextSettings::~DLG_TextSettings()
@@ -47,7 +49,7 @@ void DLG_TextSettings::on_btn_bold_clicked()
     m_font.setBold(!m_font.bold());
     ui->btn_bold->setStyleSheet(m_font.bold() ? "font: bold;" : "font : normal;");
 
-    emit updateFont(m_font);
+    emit fontUpdated();
 }
 
 void DLG_TextSettings::on_btn_underlined_clicked()
@@ -59,7 +61,7 @@ void DLG_TextSettings::on_btn_underlined_clicked()
     underlineBtnFont.setUnderline(m_font.underline());
     ui->btn_underlined->setFont(underlineBtnFont);
 
-    emit updateFont(m_font);
+    emit fontUpdated();
 }
 
 void DLG_TextSettings::on_btn_italic_clicked()
@@ -67,11 +69,11 @@ void DLG_TextSettings::on_btn_italic_clicked()
     m_font.setItalic(!m_font.italic());
     ui->btn_italic->setStyleSheet(m_font.italic() ? "font: italic;" : "font : normal");
 
-    emit updateFont(m_font);
+    emit fontUpdated();
 }
 
 void DLG_TextSettings::on_spinBox_fontSize_valueChanged(int size)
 {
     m_font.setPointSize(size);
-    emit updateFont(m_font);
+    emit fontUpdated();
 }

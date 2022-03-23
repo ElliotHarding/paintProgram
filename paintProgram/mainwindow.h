@@ -70,7 +70,7 @@ private slots:
     void onCurrentToolUpdated(Tool tool);
 
     ///DLG_TextSettings communication
-    void onUpdateFont(const QFont font);
+    void onFontUpdated();
 
     ///Canvas save/load/change settings/add
     void onLoad();

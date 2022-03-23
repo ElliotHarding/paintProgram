@@ -206,40 +206,39 @@ int Canvas::height()
     return m_canvasHeight;
 }
 
-void Canvas::onUpdateText(QFont font)
+void Canvas::onUpdateText()
 {
-    onWriteText("", font);
+    m_canvasMutex.lock();
+
+    QImage textImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
+    textImage.fill(Qt::transparent);
+    QPainter textPainter(&textImage);
+    textPainter.setCompositionMode (QPainter::CompositionMode_Source);
+    textPainter.setPen(m_pParent->getSelectedColor());
+    textPainter.setFont(m_pParent->getTextFont());
+    textPainter.drawText(m_textDrawLocation, m_textToDraw);
+
+    m_pClipboardPixels->setImage(textImage);
+
+    m_canvasMutex.unlock();
 }
 
-void Canvas::onWriteText(QString letter, QFont font)
+void Canvas::onWriteText(QString letter)
 {
-    if(m_tool == TOOL_TEXT)
+    m_canvasMutex.lock();
+
+    if(letter == "\010")//backspace
     {
-        if(letter == "\010")//backspace
-        {
-            m_textToDraw.chop(1);
-        }
-        else
-        {
-            m_textToDraw += letter;
-        }
-
-        m_canvasMutex.lock();
-
-        QImage textImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
-        textImage.fill(Qt::transparent);
-        QPainter textPainter(&textImage);
-        textPainter.setCompositionMode (QPainter::CompositionMode_Source);
-        textPainter.setPen(m_pParent->getSelectedColor());
-        textPainter.setFont(font);
-        textPainter.drawText(m_textDrawLocation, m_textToDraw);
-
-        m_pClipboardPixels->setImage(textImage);
-
-        m_canvasMutex.unlock();
-
-        update();
+        m_textToDraw.chop(1);
     }
+    else
+    {
+        m_textToDraw += letter;
+    }
+
+    m_canvasMutex.unlock();
+
+    onUpdateText();
 }
 
 QString Canvas::getSavePath()
@@ -1560,7 +1559,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
         canvasMutexLocker.unlock();
 
-        onUpdateText(m_pParent->getTextFont());
+        onUpdateText();
 
         canvasMutexLocker.relock();
     }
