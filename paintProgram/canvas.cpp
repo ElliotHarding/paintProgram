@@ -1490,6 +1490,13 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
         update();
     }
 
+    //If pixels are selected, and were not using selection tools. Loose the selection
+    //  In the future may only wish todo operations like painting inside the selected pixels, so this is not permanant
+    else if(m_pClipboardPixels->containsPixels() && (m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR))
+    {
+        m_pClipboardPixels->reset();
+    }
+
     if(m_tool == TOOL_PAINT)
     {
         paintBrush(m_canvasLayers[m_selectedLayer].m_image, mouseLocation.x(), mouseLocation.y(), m_pParent->getSelectedColor(), m_pParent->getBrushSize(), m_pParent->getCurrentBrushShape());
