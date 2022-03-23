@@ -95,6 +95,18 @@ void DLG_EffectsSliders::on_spinBox_blueLimit_valueChanged(int value)
     emit onBlueLimit(value);
 }
 
+void DLG_EffectsSliders::on_spinBox_normalBlur_valueChanged(int value)
+{
+    ui->slider_normalBlur->setValue(value);
+    emit onNormalBlur(value);
+}
+
+void DLG_EffectsSliders::on_slider_normalBlur_valueChanged(int value)
+{
+    ui->spinBox_normalBlur->setValue(value);
+    emit onNormalBlur(value);
+}
+
 void DLG_EffectsSliders::on_btn_ok_clicked()
 {
     emit confirmEffects();
@@ -106,3 +118,5 @@ void DLG_EffectsSliders::on_btn_cancel_clicked()
     emit cancelEffects();
     hide();
 }
+
+

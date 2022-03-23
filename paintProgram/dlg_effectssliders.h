@@ -23,6 +23,7 @@ signals:
     void onRedLimit(const int value);
     void onGreenLimit(const int value);
     void onBlueLimit(const int value);
+    void onNormalBlur(const int value);
 
     void confirmEffects();
     void cancelEffects();
@@ -38,6 +39,8 @@ private slots:
     void on_spinBox_greenLimit_valueChanged(int arg1);
     void on_slider_blueLimit_valueChanged(int value);
     void on_spinBox_blueLimit_valueChanged(int arg1);
+    void on_slider_normalBlur_valueChanged(int value);
+    void on_spinBox_normalBlur_valueChanged(int value);
 
     void on_btn_ok_clicked();
 
