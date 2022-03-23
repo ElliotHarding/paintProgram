@@ -540,7 +540,7 @@ void Canvas::onCutKeysPressed()
     else
     {
         //Copy cut pixels to clipboard
-        QImage clipboardImage = QImage(QSize(m_canvasLayers[m_selectedLayer].m_image.width(),m_canvasLayers[m_selectedLayer].m_image.height()), QImage::Format_ARGB32);
+        clipboardImage = QImage(QSize(m_canvasLayers[m_selectedLayer].m_image.width(),m_canvasLayers[m_selectedLayer].m_image.height()), QImage::Format_ARGB32);
         clipboardImage.fill(Qt::transparent);
 
         if(m_pClipboardPixels->containsPixels())
