@@ -55,8 +55,6 @@ public:
 
     ///Access mainwindow properties
     bool isCtrlPressed();
-    void setCopyBuffer(Clipboard clipboard);
-    Clipboard getCopyBuffer();
 
 protected: //todo - can remove the key events because event filter handles them....
     bool eventFilter(QObject* watched, QEvent* event ) override;

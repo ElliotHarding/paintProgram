@@ -21,8 +21,6 @@ class PaintableClipboard;
 class Clipboard
 {
 public:
-    void generateClipboard(QImage& canvas, const QVector<QPoint>& selectedPixels);
-
     QVector<QPoint> m_pixels;
     QImage m_clipboardImage = QImage();
     int m_dragX = 0;

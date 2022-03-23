@@ -132,16 +132,6 @@ int MainWindow::getSpreadSensitivity()
     return m_dlg_sensitivity->getSensitivity();
 }
 
-void MainWindow::setCopyBuffer(Clipboard clipboard)
-{
-    m_copyBuffer = clipboard;
-}
-
-Clipboard MainWindow::getCopyBuffer()
-{
-    return m_copyBuffer;
-}
-
 QFont MainWindow::getTextFont()
 {
     return m_dlg_textSettings->getFont();

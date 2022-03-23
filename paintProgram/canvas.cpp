@@ -491,26 +491,35 @@ void Canvas::onDeleteKeyPressed()
         update();
     }
 }
-
+#include <QGuiApplication>
+#include <QClipboard>
+#include <QMimeData>
 void Canvas::onCopyKeysPressed()
 {
     m_canvasMutex.lock();
-    Clipboard clipboard;
 
-    //IF were just selecting. Not dragging
-    if(!m_pClipboardPixels->clipboardActive())
+    //IF were dragging
+    if(m_pClipboardPixels->clipboardActive())
     {
-        clipboard.generateClipboard(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels()); //Assumes there is a selected layer
-    }
-    else
-    {
-        clipboard.generateClipboard(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels());
+        QGuiApplication::clipboard()->setImage(m_pClipboardPixels->m_clipboardImage);
     }
 
-    m_pParent->setCopyBuffer(clipboard);
+    //If were selecting
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        QImage clipboardImage = QImage(QSize(m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()), QImage::Format_ARGB32);
+        clipboardImage.fill(Qt::transparent);
+
+        const QVector<QPoint> selectedPixels = m_pClipboardPixels->getPixels();
+        for(const QPoint& p : selectedPixels)
+        {
+            clipboardImage.setPixelColor(p.x(), p.y(), m_canvasLayers[m_selectedLayer].m_image.pixelColor(p.x(), p.y()));
+        }
+
+        QGuiApplication::clipboard()->setImage(clipboardImage);
+    }
+
     m_canvasMutex.unlock();
-
-    update();
 }
 
 void Canvas::onCutKeysPressed()
@@ -542,7 +551,7 @@ void Canvas::onCutKeysPressed()
             {
                 clipBoard.m_clipboardImage.setPixelColor(x, y, m_canvasLayers[m_selectedLayer].m_image.pixelColor(x, y));//Assumes there is a selected layer
                 m_canvasLayers[m_selectedLayer].m_image.setPixelColor(x, y, Qt::transparent);//Assumes there is a selected layer
-                clipBoard.m_pixels.push_back(QPoint(x,y));
+                //clipBoard.m_pixels.push_back(QPoint(x,y));
             });
 
             //Reset
@@ -552,7 +561,9 @@ void Canvas::onCutKeysPressed()
         }
     }
 
-    m_pParent->setCopyBuffer(clipBoard);
+    //m_pParent->setCopyBuffer(clipBoard);
+
+    QGuiApplication::clipboard()->setImage(clipBoard.m_clipboardImage);
 
     canvasMutexLocker.unlock();
 
@@ -571,7 +582,11 @@ void Canvas::onPasteKeysPressed()
         update();
     }
 
-    m_pClipboardPixels->setClipboard(m_pParent->getCopyBuffer());
+    Clipboard cb;
+    cb.m_clipboardImage = QGuiApplication::clipboard()->image();
+    m_pClipboardPixels->setClipboard(cb);
+
+    //m_pClipboardPixels->setClipboard(m_pParent->getCopyBuffer());
 
     m_canvasHistory.recordHistory(getSnapshot());
 
@@ -1770,24 +1785,6 @@ void Canvas::updateCenter()
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Clipboard
-///
-void Clipboard::generateClipboard(QImage &canvas, const QVector<QPoint>& selectedPixels)
-{
-    //Prep selected pixels for dragging
-    m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
-    m_clipboardImage.fill(Qt::transparent);
-
-    m_pixels.clear();
-
-    for(const QPoint& p: selectedPixels)
-    {
-        m_clipboardImage.setPixelColor(p.x(), p.y(), canvas.pixelColor(p.x(),p.y()));
-        m_pixels.push_back(QPoint(p.x(),p.y()));
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// PaintableClipboard
 ///
 PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
@@ -1871,7 +1868,15 @@ PaintableClipboard::~PaintableClipboard()
 
 void PaintableClipboard::generateClipboard(QImage &canvas)
 {
-    Clipboard::generateClipboard(canvas, getPixels());
+    //Prep selected pixels for dragging
+    m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
+    m_clipboardImage.fill(Qt::transparent);
+
+    for(const QPoint& p: m_pixels)
+    {
+        m_clipboardImage.setPixelColor(p.x(), p.y(), canvas.pixelColor(p.x(),p.y()));
+    }
+
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
     updateDimensionsRect();
     update();
