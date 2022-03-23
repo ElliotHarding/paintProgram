@@ -507,7 +507,7 @@ void Canvas::onCopyKeysPressed()
     //If were selecting
     else if(m_pClipboardPixels->containsPixels())
     {
-        QImage clipboardImage = QImage(QSize(m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()), QImage::Format_ARGB32);
+        QImage clipboardImage = QImage(QSize(m_canvasLayers[m_selectedLayer].m_image.width(), m_canvasLayers[m_selectedLayer].m_image.height()), QImage::Format_ARGB32);
         clipboardImage.fill(Qt::transparent);
 
         m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
@@ -540,7 +540,7 @@ void Canvas::onCutKeysPressed()
     else
     {
         //Copy cut pixels to clipboard
-        QImage clipboardImage = QImage(QSize(m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()), QImage::Format_ARGB32);
+        QImage clipboardImage = QImage(QSize(m_canvasLayers[m_selectedLayer].m_image.width(),m_canvasLayers[m_selectedLayer].m_image.height()), QImage::Format_ARGB32);
         clipboardImage.fill(Qt::transparent);
 
         if(m_pClipboardPixels->containsPixels())
