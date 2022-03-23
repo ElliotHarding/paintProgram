@@ -1469,9 +1469,16 @@ void floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, 
 
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    if(mouseEvent->button() == Qt::MiddleButton)
+    {
+        m_bMiddleMouseDown = true;
+        return;
+    }
+
     m_bMouseDown = true;
 
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
     //If not dragging, and clipboard shows something. Dump it.
@@ -1570,6 +1577,13 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_bMouseDown = false;
 
+    if(m_bMiddleMouseDown)
+    {
+         m_bMiddleMouseDown = false;
+         m_previousPanPos = m_c_nullPanPos;
+         return;
+    }
+
     if(m_tool == TOOL_SELECT)
     {
         m_pClipboardPixels->addPixels(m_canvasLayers[m_selectedLayer].m_image, m_selectionTool); //Assumes there is a selected layer
@@ -1618,10 +1632,29 @@ void Canvas::onParentMouseMove(QMouseEvent *event)
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
-    m_canvasMutex.lock();
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
     emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
+
+    //If middle mouse down, ignore current tool & do pan operation
+    if(m_bMiddleMouseDown)
+    {
+        if(m_previousPanPos == m_c_nullPanPos)
+        {
+            m_previousPanPos = event->pos();
+        }
+        else
+        {
+            m_panOffsetX += (event->pos().x() - m_previousPanPos.x())/m_zoomFactor;
+            m_panOffsetY += (event->pos().y() - m_previousPanPos.y())/m_zoomFactor;
+
+            m_previousPanPos = event->pos();
+
+            update();
+        }
+        return;
+    }
 
     if(m_bMouseDown)
     {
@@ -1753,7 +1786,6 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             m_pClipboardPixels->setImage(newShapeImage);
         }
     }
-    m_canvasMutex.unlock();
 }
 
 //Requires m_canvasMutex to be locked!

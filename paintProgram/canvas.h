@@ -238,6 +238,7 @@ private:
     void mouseMoveEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     bool m_bMouseDown = false;
+    bool m_bMiddleMouseDown = false;
 
     ///Drawing
     QList<CanvasLayer> m_canvasLayers;
