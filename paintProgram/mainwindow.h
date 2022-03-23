@@ -143,8 +143,6 @@ private:
 
     QSet<int> m_pressedKeys;
 
-    Clipboard m_copyBuffer;
-
     ///Loading
     void addNewCanvas(Canvas* c, QString name);
     bool m_bMakingNewCanvas = false;
