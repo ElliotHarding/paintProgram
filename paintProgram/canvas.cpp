@@ -1478,7 +1478,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     // Unless : selecting and holding ctrl
     // Unless : writing text
     if(m_tool != TOOL_DRAG && m_pClipboardPixels->clipboardActive() &&
-      (!m_pParent->isCtrlPressed() && (m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)) &&
+      !(m_pParent->isCtrlPressed() && (m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)) &&
        m_tool != TOOL_TEXT)
     {
         //Dump clipboard, if something actually dumped record image history
@@ -1492,7 +1492,10 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
     //If pixels are selected, and were not using selection tools. Loose the selection
     //  In the future may only wish todo operations like painting inside the selected pixels, so this is not permanant
-    else if(m_pClipboardPixels->containsPixels() && m_tool != TOOL_SELECT && m_tool != TOOL_SPREAD_ON_SIMILAR)
+    else if(m_pClipboardPixels->containsPixels() &&
+            m_tool != TOOL_SELECT &&
+            m_tool != TOOL_SPREAD_ON_SIMILAR &&
+            m_tool != TOOL_DRAG)
     {
         m_pClipboardPixels->reset();
     }
@@ -1556,17 +1559,6 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     }
     else if(m_tool == TOOL_SHAPE)
     {
-        //Dump dragged contents onto m_canvasImage
-        QPainter painter(&m_canvasLayers[m_selectedLayer].m_image);//assumes theres always a selected layer
-        m_pClipboardPixels->dumpImage(painter);
-        painter.end();
-
-        update();
-
-        m_canvasHistory.recordHistory(getSnapshot());
-
-        m_pClipboardPixels->reset();
-
         m_drawShapeOrigin = mouseLocation;
     }
 }
@@ -1601,6 +1593,13 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     else if(m_tool == TOOL_DRAG)
     {
         if(m_pClipboardPixels->checkFinishDragging())
+        {
+            m_canvasHistory.recordHistory(getSnapshot());
+        }
+    }
+    else if(m_tool == TOOL_SHAPE)
+    {
+        if(m_pClipboardPixels->clipboardActive())
         {
             m_canvasHistory.recordHistory(getSnapshot());
         }
