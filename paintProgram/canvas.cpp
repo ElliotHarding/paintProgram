@@ -1492,7 +1492,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
     //If pixels are selected, and were not using selection tools. Loose the selection
     //  In the future may only wish todo operations like painting inside the selected pixels, so this is not permanant
-    else if(m_pClipboardPixels->containsPixels() && (m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR))
+    else if(m_pClipboardPixels->containsPixels() && m_tool != TOOL_SELECT && m_tool != TOOL_SPREAD_ON_SIMILAR)
     {
         m_pClipboardPixels->reset();
     }
