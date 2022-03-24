@@ -11,6 +11,7 @@ CONFIG += resources_big
 
 SOURCES += \
     canvas.cpp \
+    dlg_blursettings.cpp \
     dlg_brushsettings.cpp \
     dlg_effectssliders.cpp \
     dlg_info.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
 HEADERS += \
     canvas.h \
     canvaslayer.h \
+    dlg_blursettings.h \
     dlg_brushsettings.h \
     dlg_effectssliders.h \
     dlg_info.h \
@@ -45,6 +47,7 @@ HEADERS += \
     wdg_layerlistitem.h
 
 FORMS += \
+    dlg_blursettings.ui \
     dlg_brushsettings.ui \
     dlg_effectssliders.ui \
     dlg_info.ui \
