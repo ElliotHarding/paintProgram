@@ -834,6 +834,74 @@ void Canvas::onSketchEffect(const int sensitivity)
     update();
 }
 
+QVector<QVector<bool>> listTo2dVector(const QVector<QPoint>& selectedPixels, const int& width, const int& height)
+{
+     QVector<QVector<bool>> selectedPixelsVector = QVector<QVector<bool>>(width, QVector<bool>(height, false));
+
+     for(const QPoint& p : selectedPixels)
+     {
+        selectedPixelsVector[p.x()][p.y()] = true;
+     }
+
+     return selectedPixelsVector;
+}
+
+QImage blurImage(QImage& originalImage, const QVector<QVector<bool>>& pixelsArray, const QVector<QPoint>& pixelsList, const int& blurValue)
+{
+    QImage bluredImage = originalImage;
+
+    //Data to be used in loop
+    QColor originalColor;
+    QColor neighbourColor;
+    int r;
+    int g;
+    int b;
+    int neighborPixels;
+    int startX;
+    int endX;
+    int startY;
+    int endY;
+
+    for(const QPoint& p : pixelsList)
+    {
+        //Get original color of pixel under operation
+        originalColor = originalImage.pixelColor(p.x(), p.y());
+        r = originalColor.red();
+        g = originalColor.green();
+        b = originalColor.blue();
+        neighborPixels = 1;
+
+        //Loop through a box around pixel under operation (blurValue width and height)
+        //Collect r,g,b colors of the pixels in box
+        startX = p.x() - blurValue >= 0 ? p.x() - blurValue : 0;
+        endX = p.x() + blurValue < originalImage.width() ? p.x() + blurValue : originalImage.width();
+        startY = p.y() - blurValue >= 0 ? p.y() - blurValue : 0;
+        endY = p.y() + blurValue < originalImage.height() ? p.y() + blurValue : originalImage.height();
+        for(int x = startX; x < endX; x++)
+        {
+            for(int y = startY; y < endY; y++)
+            {
+                if(pixelsArray[x][y])
+                {
+                    neighbourColor = originalImage.pixelColor(x, y);
+                    if(neighbourColor.alpha() != 0)
+                    {
+                        r += neighbourColor.red();
+                        g += neighbourColor.green();
+                        b += neighbourColor.blue();
+                        neighborPixels++;
+                    }
+                }
+            }
+        }
+
+        //Average combined r,g,b values and set new pixel under operation
+        bluredImage.setPixelColor(p.x(), p.y(), QColor(r/neighborPixels, g/neighborPixels, b/neighborPixels, originalColor.alpha()));
+    }
+
+    return bluredImage;
+}
+
 void Canvas::onNormalBlur(const int value)
 {
     //check if were doing the whole image or just some selected pixels
@@ -841,32 +909,25 @@ void Canvas::onNormalBlur(const int value)
     {
         m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
 
-        //Loop through selected pixels
-        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
-        {
-
-        });
+        m_pClipboardPixels->m_clipboardImage = blurImage(m_pClipboardPixels->m_clipboardImage,
+                                                         listTo2dVector(m_pClipboardPixels->getPixels(), m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()),
+                                                         m_pClipboardPixels->getPixels(),
+                                                         value);
     }
     else if(m_pClipboardPixels->containsPixels())
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        //Loop through selected pixels
-        m_pClipboardPixels->operateOnSelectedPixels([&](int x, int y)-> void
-        {
-
-        });
+        m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image,
+                                                         listTo2dVector(m_pClipboardPixels->getPixels(), m_canvasLayers[m_selectedLayer].m_image.width(), m_canvasLayers[m_selectedLayer].m_image.height()),
+                                                         m_pClipboardPixels->getPixels(),
+                                                         value);
     }
     else
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
-
-        operateOnCanvasPixels(m_canvasLayers[m_selectedLayer].m_image, [&](int x, int y)-> void
-        {
-
-        });
     }
 
     //Record history is done in onConfirmEffects()
@@ -1947,7 +2008,8 @@ void PaintableClipboard::generateClipboard(QImage &canvas)
     m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
     m_clipboardImage.fill(Qt::transparent);
 
-    for(const QPoint& p: m_pixels)
+    const QVector<QPoint> pixels = m_pixels;
+    for(const QPoint& p: pixels)
     {
         m_clipboardImage.setPixelColor(p.x(), p.y(), canvas.pixelColor(p.x(),p.y()));
     }
@@ -2410,18 +2472,6 @@ void PaintableClipboard::reset()
     update();
 }
 
-QVector<QVector<bool>> listTo2dVector(const QVector<QPoint>& selectedPixels, const int& width, const int& height)
-{
-     QVector<QVector<bool>> selectedPixelsVector = QVector<QVector<bool>>(width, QVector<bool>(height, false));
-
-     for(const QPoint& p : selectedPixels)
-     {
-        selectedPixelsVector[p.x()][p.y()] = true;
-     }
-
-     return selectedPixelsVector;
-}
-
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
     Q_UNUSED(paintEvent);
@@ -2447,7 +2497,9 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.setPen(selectionOutlinePen);
 
     //2D vectorize selected pixels for quicker outline drawing
-    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels, m_clipboardImage.width(), m_clipboardImage.height());
+    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels,
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() : m_pParentCanvas->getImageCopy().width(),
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() : m_pParentCanvas->getImageCopy().height());
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     //Draw highlight outline
