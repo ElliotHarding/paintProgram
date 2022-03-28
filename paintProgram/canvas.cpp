@@ -1003,6 +1003,8 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const bool& includ
 
 void Canvas::onNormalBlur(const int& difference, const int& averageArea, const bool& includeTransparent)
 {
+    //TODO : use difference
+
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
