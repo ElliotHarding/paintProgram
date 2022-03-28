@@ -869,6 +869,12 @@ QImage blurImage(QImage& originalImage,
     {
         //Get original color of pixel under operation
         originalColor = originalImage.pixelColor(p.x(), p.y());
+
+        if(originalColor.alpha() == 0)
+        {
+            continue;
+        }
+
         if(includeTransparent)
             a = originalColor.alpha();
         r = originalColor.red();
@@ -941,6 +947,12 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const bool& includ
         {
             //Get original color of pixel under operation
             originalColor = originalImage.pixelColor(x, y);
+
+            if(originalColor.alpha() == 0)
+            {
+                continue;
+            }
+
             if(includeTransparent)
                 a = originalColor.alpha();
             r = originalColor.red();
