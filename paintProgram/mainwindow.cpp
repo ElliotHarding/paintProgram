@@ -97,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionBlack_and_white, SIGNAL(triggered()), this, SLOT(onBlackAndWhite()));
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
+    connect(ui->actionBlur, SIGNAL(triggered()), this, SLOT(onShowBlurDialog()));
     connect(ui->actionSketch_Outline, SIGNAL(triggered()), this, SLOT(onSketchAndOutline()));
     connect(ui->action_showInfoDialog, SIGNAL(triggered()), this, SLOT(onShowInfoDialog()));
     connect(ui->action_showLayersDialog, SIGNAL(triggered()), this, SLOT(onShowLayersDialog()));
@@ -502,6 +503,11 @@ void MainWindow::onInvert()
 void MainWindow::onEffectsSliders()
 {
     m_dlg_effectsSliders->show();
+}
+
+void MainWindow::onShowBlurDialog()
+{
+    m_dlg_blurSettings->show();
 }
 
 void MainWindow::onSketchAndOutline()

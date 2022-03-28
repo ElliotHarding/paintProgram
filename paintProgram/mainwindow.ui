@@ -137,6 +137,7 @@
      <addaction name="actionBlack_and_white"/>
      <addaction name="actionInvert"/>
      <addaction name="actionSketch_Outline"/>
+     <addaction name="actionBlur"/>
      <addaction name="actionEffectsSliders"/>
     </widget>
     <addaction name="actionImageSettings"/>
@@ -256,6 +257,11 @@
   <action name="actionExport">
    <property name="text">
     <string>Export</string>
+   </property>
+  </action>
+  <action name="actionBlur">
+   <property name="text">
+    <string>Blur</string>
    </property>
   </action>
  </widget>
