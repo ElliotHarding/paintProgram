@@ -846,13 +846,16 @@ QVector<QVector<bool>> listTo2dVector(const QVector<QPoint>& selectedPixels, con
      return selectedPixelsVector;
 }
 
-QImage blurImage(QImage& originalImage, const QVector<QVector<bool>>& pixelsArray, const QVector<QPoint>& pixelsList, const int& blurValue)
+QImage blurImage(QImage& originalImage,
+                 const QVector<QVector<bool>>& pixelsArray, const QVector<QPoint>& pixelsList,
+                 const int& blurValue, const bool& includeTransparent)
 {
     QImage bluredImage = originalImage;
 
     //Data to be used in loop
     QColor originalColor;
     QColor neighbourColor;
+    int a;
     int r;
     int g;
     int b;
@@ -866,6 +869,8 @@ QImage blurImage(QImage& originalImage, const QVector<QVector<bool>>& pixelsArra
     {
         //Get original color of pixel under operation
         originalColor = originalImage.pixelColor(p.x(), p.y());
+        if(includeTransparent)
+            a = originalColor.alpha();
         r = originalColor.red();
         g = originalColor.green();
         b = originalColor.blue();
@@ -888,7 +893,18 @@ QImage blurImage(QImage& originalImage, const QVector<QVector<bool>>& pixelsArra
                     {
                         r += neighbourColor.red();
                         g += neighbourColor.green();
-                        b += neighbourColor.blue();
+                        b += neighbourColor.blue();                        
+                        if(includeTransparent)
+                            a += neighbourColor.alpha();
+
+                        neighborPixels++;
+                    }
+                    else if(includeTransparent)
+                    {
+                        r += originalColor.red();
+                        g += originalColor.green();
+                        b += originalColor.blue();
+                        a += neighbourColor.alpha();
                         neighborPixels++;
                     }
                 }
@@ -896,19 +912,20 @@ QImage blurImage(QImage& originalImage, const QVector<QVector<bool>>& pixelsArra
         }
 
         //Average combined r,g,b values and set new pixel under operation
-        bluredImage.setPixelColor(p.x(), p.y(), QColor(r/neighborPixels, g/neighborPixels, b/neighborPixels, originalColor.alpha()));
+        bluredImage.setPixelColor(p.x(), p.y(), QColor(r/neighborPixels, g/neighborPixels, b/neighborPixels, includeTransparent ? a/neighborPixels : originalColor.alpha()));
     }
 
     return bluredImage;
 }
 
-QImage blurImage(QImage& originalImage, const int& blurValue)
+QImage blurImage(QImage& originalImage, const int& blurValue, const bool& includeTransparent)
 {
     QImage bluredImage = originalImage;
 
     //Data to be used in loop
     QColor originalColor;
     QColor neighbourColor;
+    int a;
     int r;
     int g;
     int b;
@@ -924,6 +941,8 @@ QImage blurImage(QImage& originalImage, const int& blurValue)
         {
             //Get original color of pixel under operation
             originalColor = originalImage.pixelColor(x, y);
+            if(includeTransparent)
+                a = originalColor.alpha();
             r = originalColor.red();
             g = originalColor.green();
             b = originalColor.blue();
@@ -945,13 +964,25 @@ QImage blurImage(QImage& originalImage, const int& blurValue)
                         r += neighbourColor.red();
                         g += neighbourColor.green();
                         b += neighbourColor.blue();
+
+                        if(includeTransparent)
+                            a += neighbourColor.alpha();
+
+                        neighborPixels++;
+                    }
+                    else if(includeTransparent)
+                    {
+                        r += originalColor.red();
+                        g += originalColor.green();
+                        b += originalColor.blue();
+                        a += neighbourColor.alpha();
                         neighborPixels++;
                     }
                 }
             }
 
             //Average combined r,g,b values and set new pixel under operation
-            bluredImage.setPixelColor(x, y, QColor(r/neighborPixels, g/neighborPixels, b/neighborPixels, originalColor.alpha()));
+            bluredImage.setPixelColor(x, y, QColor(r/neighborPixels, g/neighborPixels, b/neighborPixels, includeTransparent ? a/neighborPixels : originalColor.alpha()));
         }
     }
 
@@ -968,7 +999,7 @@ void Canvas::onNormalBlur(const int& difference, const int& averageArea, const b
         m_pClipboardPixels->m_clipboardImage = blurImage(m_pClipboardPixels->m_clipboardImage,
                                                          listTo2dVector(m_pClipboardPixels->getPixels(), m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()),
                                                          m_pClipboardPixels->getPixels(),
-                                                         averageArea);
+                                                         averageArea, includeTransparent);
     }
     else if(m_pClipboardPixels->containsPixels())
     {
@@ -978,14 +1009,14 @@ void Canvas::onNormalBlur(const int& difference, const int& averageArea, const b
         m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image,
                                                          listTo2dVector(m_pClipboardPixels->getPixels(), m_canvasLayers[m_selectedLayer].m_image.width(), m_canvasLayers[m_selectedLayer].m_image.height()),
                                                          m_pClipboardPixels->getPixels(),
-                                                         averageArea);
+                                                         averageArea, includeTransparent);
     }
     else
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image, averageArea);
+        m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image, averageArea, includeTransparent);
     }
 
     //Record history is done in onConfirmEffects()
