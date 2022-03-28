@@ -212,7 +212,7 @@ void Canvas::onUpdateText()
 
     QFontMetrics fontMetrics(m_pParent->getTextFont());
 
-    const int textWidth = fontMetrics.width(m_textToDraw);
+    const int textWidth = fontMetrics.horizontalAdvance(m_textToDraw);
     const int textHeight = fontMetrics.height();
 
     QImage textImage = QImage(QSize(m_textDrawLocation.x() + textWidth, m_textDrawLocation.y() + textHeight), QImage::Format_ARGB32);
@@ -1004,6 +1004,7 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const bool& includ
 void Canvas::onNormalBlur(const int& difference, const int& averageArea, const bool& includeTransparent)
 {
     //TODO : use difference
+    Q_UNUSED(difference);
 
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
