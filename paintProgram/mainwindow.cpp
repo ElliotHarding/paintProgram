@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_effectsSliders = new DLG_EffectsSliders(this);
 
+    m_dlg_blurSettings = new DLG_BlurSettings(this);
+
     m_dlg_sketch = new DLG_Sketch(this);
 
     m_dlg_layers = new DLG_Layers(this);
@@ -62,9 +64,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_effectsSliders, SIGNAL(onRedLimit(const int)), this, SLOT(onRedLimit(const int)));
     connect(m_dlg_effectsSliders, SIGNAL(onGreenLimit(const int)), this, SLOT(onGreenLimit(const int)));
     connect(m_dlg_effectsSliders, SIGNAL(onBlueLimit(const int)), this, SLOT(onBlueLimit(const int)));
-    connect(m_dlg_effectsSliders, SIGNAL(onNormalBlur(const int)), this, SLOT(onNormalBlur(const int)));
     connect(m_dlg_effectsSliders, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_effectsSliders, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
+    connect(m_dlg_blurSettings, SIGNAL(onNormalBlur(const int, const int, const bool)), this, SLOT(onNormalBlur(const int, const int, const bool)));
+    connect(m_dlg_blurSettings, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
+    connect(m_dlg_blurSettings, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
     connect(m_dlg_sketch, SIGNAL(onOutlineEffect(const int)), this, SLOT(onOutlineEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
@@ -596,12 +600,12 @@ void MainWindow::onSketchEffect(const int value)
     }
 }
 
-void MainWindow::onNormalBlur(const int value)
+void MainWindow::onNormalBlur(const int difference, const int averageArea, const bool includeTransparent)
 {
     Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
     if(c)
     {
-        c->onNormalBlur(value);
+        c->onNormalBlur(difference, averageArea, includeTransparent);
     }
     else
     {

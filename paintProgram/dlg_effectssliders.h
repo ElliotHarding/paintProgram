@@ -39,11 +39,8 @@ private slots:
     void on_spinBox_greenLimit_valueChanged(int arg1);
     void on_slider_blueLimit_valueChanged(int value);
     void on_spinBox_blueLimit_valueChanged(int arg1);
-    void on_slider_normalBlur_valueChanged(int value);
-    void on_spinBox_normalBlur_valueChanged(int value);
 
     void on_btn_ok_clicked();
-
     void on_btn_cancel_clicked();
 
 private:

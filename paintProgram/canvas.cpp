@@ -958,7 +958,7 @@ QImage blurImage(QImage& originalImage, const int& blurValue)
     return bluredImage;
 }
 
-void Canvas::onNormalBlur(const int value)
+void Canvas::onNormalBlur(const int& difference, const int& averageArea, const bool& includeTransparent)
 {
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
@@ -968,7 +968,7 @@ void Canvas::onNormalBlur(const int value)
         m_pClipboardPixels->m_clipboardImage = blurImage(m_pClipboardPixels->m_clipboardImage,
                                                          listTo2dVector(m_pClipboardPixels->getPixels(), m_pClipboardPixels->m_clipboardImage.width(), m_pClipboardPixels->m_clipboardImage.height()),
                                                          m_pClipboardPixels->getPixels(),
-                                                         value);
+                                                         averageArea);
     }
     else if(m_pClipboardPixels->containsPixels())
     {
@@ -978,14 +978,14 @@ void Canvas::onNormalBlur(const int value)
         m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image,
                                                          listTo2dVector(m_pClipboardPixels->getPixels(), m_canvasLayers[m_selectedLayer].m_image.width(), m_canvasLayers[m_selectedLayer].m_image.height()),
                                                          m_pClipboardPixels->getPixels(),
-                                                         value);
+                                                         averageArea);
     }
     else
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image, value);
+        m_canvasLayers[m_selectedLayer].m_image = blurImage(m_canvasLayers[m_selectedLayer].m_image, averageArea);
     }
 
     //Record history is done in onConfirmEffects()

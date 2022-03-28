@@ -17,6 +17,7 @@
 #include "dlg_sketch.h"
 #include "dlg_layers.h"
 #include "dlg_message.h"
+#include "dlg_blursettings.h"
 
 #include "canvas.h"
 
@@ -93,7 +94,7 @@ private slots:
     void onShowToolSelectorDialog();
     void onShowToolSpecificDialogs();
 
-    ///Slots from effects dialog
+    ///Slots from effects dialogs
     void onBlackAndWhite();
     void onInvert();
     void onEffectsSliders();
@@ -105,7 +106,7 @@ private slots:
     void onGreenLimit(const int value);
     void onOutlineEffect(const int value);
     void onSketchEffect(const int value);
-    void onNormalBlur(const int value);
+    void onNormalBlur(const int difference, const int averageArea, const bool includeTransparent);
     void onConfirmEffects();
     void onCancelEffects();
 
@@ -136,6 +137,7 @@ private:
     DLG_Shapes* m_dlg_shapes = nullptr;
     DLG_Info* m_dlg_info = nullptr;
     DLG_EffectsSliders* m_dlg_effectsSliders = nullptr;
+    DLG_BlurSettings* m_dlg_blurSettings = nullptr;
     DLG_Sketch* m_dlg_sketch = nullptr;
     DLG_Layers* m_dlg_layers = nullptr;
     DLG_Message* m_dlg_message = nullptr;
