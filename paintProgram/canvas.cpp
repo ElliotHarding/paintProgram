@@ -1853,7 +1853,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }   
     else if(m_tool == TOOL_DRAG)
     {
-        if(m_pClipboardPixels->checkFinishDragging())
+        if(m_pClipboardPixels->checkFinishOperation(m_panOffsetX, m_panOffsetY))
         {
             m_canvasHistory.recordHistory(getSnapshot());
         }
@@ -2511,7 +2511,7 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     }
 }
 
-bool PaintableClipboard::checkFinishDragging()
+bool PaintableClipboard::checkFinishOperation(const int& panOffsetX, const int& panOffsetY)
 {
     if(m_operationMode == DragOperation)
     {
@@ -2539,7 +2539,7 @@ bool PaintableClipboard::checkFinishDragging()
 
     else if(m_operationMode == RotateOperation)
     {
-        completeResizeDrag();
+        completeRotateDrag(panOffsetX, panOffsetY);
         return true;
     }
 
@@ -2685,21 +2685,42 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, 
     m_rotateNubble.setDegrees(offsetMouseLocation.x() - m_previousDragPos.x());
 }
 
-void PaintableClipboard::completeRotateDrag()
+void PaintableClipboard::completeRotateDrag(const int& panOffsetX, const int& panOffsetY)
 {
     m_previousDragPos = Constants::NullDragPoint;
 
-    //Create new clipboard image
-    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
-    newClipboardImage.fill(Qt::transparent);
+    const int offsetX = panOffsetX + m_dragX;
+    const int offsetY = panOffsetY + m_dragY;
 
-    //Dump nubble changed (re-scaled) current clipboard image onto new one
-    QPainter clipPainter(&newClipboardImage);
-    clipPainter.drawImage(m_clipboardImage.rect(), m_clipboardImage);
-    clipPainter.end();
+    QTransform trans;
 
-    //Set new values & reset & redraw
-    m_clipboardImage = newClipboardImage;
+    if(m_operationMode == RotateOperation)
+    {
+        trans.translate(panOffsetX, panOffsetY);
+        trans.rotate(m_rotateNubble.getDegrees());
+        trans.translate(-panOffsetX, -panOffsetY);
+        trans.translate(-m_dragX, -m_dragY);
+    }
+
+    m_clipboardImage = m_clipboardImage.transformed(trans);
+    m_clipboardImageBeforeOperationTransparent = m_clipboardImageBeforeOperationTransparent.transformed(trans);
+
+    m_pixels.clear();
+    for(int x = 0; x < m_clipboardImage.width(); x++)
+    {
+        for(int y = 0; y < m_clipboardImage.height(); y++)
+        {
+            if(m_clipboardImage.pixelColor(x, y).alpha() > 0)
+            {
+                m_pixels.push_back(QPoint(x,y));
+            }
+            else if(m_clipboardImageBeforeOperationTransparent.pixelColor(x, y).alpha() > 0)
+            {
+                m_pixels.push_back(QPoint(x, y));
+            }
+        }
+    }
+
     updateDimensionsRect();
     update();
 
