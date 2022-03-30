@@ -2074,7 +2074,7 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
     connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_pOutlineDrawTimer->start(Constants::SelectedPixelsOutlineFlashFrequency);
 
-    m_resizeNubbles.insert(DragNubblePos::TopLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::TopLeft, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right() && mouseLocation.y() < dimensions.bottom())
         {
@@ -2082,14 +2082,14 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
              dimensions.setY(mouseLocation.y());
         }
     }));
-    m_resizeNubbles.insert(DragNubblePos::TopMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::TopMiddle, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.y() < dimensions.bottom())
         {
             dimensions.setY(mouseLocation.y());
         }
     }));
-    m_resizeNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::TopRight, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() > dimensions.left() && mouseLocation.y() < dimensions.bottom())
         {
@@ -2097,21 +2097,21 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
             dimensions.setY(mouseLocation.y());
         }
     }));
-    m_resizeNubbles.insert(DragNubblePos::LeftMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::LeftMiddle, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right())
         {
             dimensions.setX(mouseLocation.x());
         }
     }));
-    m_resizeNubbles.insert(DragNubblePos::RightMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::RightMiddle, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() > dimensions.left())
         {
             dimensions.setRight(mouseLocation.x());
         }
     }));
-    m_resizeNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::BottomLeft, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right() && mouseLocation.y() > dimensions.top())
         {
@@ -2120,14 +2120,14 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
         }
 
     }));
-    m_resizeNubbles.insert(DragNubblePos::BottomMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::BottomMiddle, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.y() > dimensions.top())
         {
             dimensions.setBottom(mouseLocation.y());
         }
     }));
-    m_resizeNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::BottomRight, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() > dimensions.left() && mouseLocation.y() > dimensions.top())
         {
@@ -2928,11 +2928,6 @@ ResizeNubble::ResizeNubble(std::function<void (QRect &, const QPointF &)> operat
 void ResizeNubble::doDragging(const QPointF &mouseLocation, QRect &rect)
 {
     m_operation(rect, mouseLocation);
-}
-
-bool ResizeNubble::isDragging()
-{
-    return m_bIsDragging;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
