@@ -2476,7 +2476,7 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
 
     else if(m_operationMode == RotateOperation)
     {
-
+        doRotateDrag(globalMouseLocation, zoom, panOffsetX, panOffsetY);
     }
 
     else
@@ -2485,6 +2485,11 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
         if(checkResizeDrag(canvasImage, globalMouseLocation, zoom, panOffsetX, panOffsetY))
         {
             qDebug() << "PaintableClipboard:: - Starting resize operation";
+        }
+
+        else if(checkRotateDrag(canvasImage, globalMouseLocation, zoom, panOffsetX, panOffsetY))
+        {
+            qDebug() << "PaintableClipboard:: - Starting rotate operation";
         }
 
         //Try do normal drag operation
@@ -2633,7 +2638,8 @@ bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocat
                 generateClipboard(canvasImage);
             }
 
-            prepNubblesDrag();
+            prepResizeOrRotateDrag();
+            m_operationMode = ResizeOperation;
             return true;
         }
     }
@@ -2774,7 +2780,7 @@ void PaintableClipboard::doResizeDragScale()
     update();
 }
 
-void PaintableClipboard::prepNubblesDrag()
+void PaintableClipboard::prepResizeOrRotateDrag()
 {
     m_clipboardImageBeforeOperation = m_clipboardImage;
     m_dimensionsRectBeforeOperation = m_dimensionsRect;
@@ -2788,8 +2794,6 @@ void PaintableClipboard::prepNubblesDrag()
             m_clipboardImageBeforeOperationTransparent.setPixelColor(p.x(), p.y(), Qt::black);
         }
     }
-
-    m_operationMode = ResizeOperation;
 }
 
 void PaintableClipboard::completeNubbleDrag()
@@ -2809,6 +2813,28 @@ void PaintableClipboard::completeNubbleDrag()
     update();
 
     m_operationMode = NoOperation;
+}
+
+bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+{
+    if(false)
+    {
+        if(!clipboardActive())
+        {
+            generateClipboard(canvasImage);
+        }
+
+        prepResizeOrRotateDrag();
+        m_operationMode = ResizeOperation;
+        return true;
+    }
+
+    return false;
+}
+
+void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+{
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

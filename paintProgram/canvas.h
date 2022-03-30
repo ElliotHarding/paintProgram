@@ -132,8 +132,14 @@ private:
     void doResizeDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     bool checkResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     void doResizeDragScale();
-    void prepNubblesDrag();
     void completeNubbleDrag();
+
+    ///Rotate dragging
+    bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void doRotateDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+
+    ///Resize & rotate dragging
+    void prepResizeOrRotateDrag();
 
     ///Nubble dimensions rect
     QRect m_dimensionsRect = QRect();
