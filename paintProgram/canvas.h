@@ -71,6 +71,7 @@ class ResizeNubble : public DragNubble
 {
 public:
     ResizeNubble(std::function<void(QRect&, const QPointF&)> operation);
+    ResizeNubble();//todo fix and remove this
 
     void doDragging(const QPointF &mouseLocation, QRect& rect);
 
@@ -167,11 +168,13 @@ private:
     void doResizeDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     bool checkResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     void doResizeDragScale();
-    void completeNubbleDrag();
+    void completeResizeDrag();
 
     ///Rotate dragging
+    RotateNubble m_rotateNubble;
     bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     void doRotateDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void completeRotateDrag();
 
     ///Resize & rotate dragging
     void prepResizeOrRotateDrag();

@@ -42,6 +42,7 @@ const float ZoomPanFactor = 0.1;
 //Dragging
 const int DragNubbleSize = 8;
 const QPoint NullDragPoint = QPoint(0,0);
+const int RotateNubbleOffset = 10;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -2526,18 +2527,19 @@ bool PaintableClipboard::checkFinishDragging()
             if(m_resizeNubbles[nubblePos].isDragging())
             {
                 m_resizeNubbles[nubblePos].setDragging(false);
-                completeNubbleDrag();
+                completeResizeDrag();
                 return true;
             }
         }
 
-        completeNubbleDrag();
+        completeResizeDrag();
         qDebug() << "PaintableClipboard::checkFinishDragging - Something went wrong";
         return true;
     }
 
     else if(m_operationMode == RotateOperation)
     {
+        completeResizeDrag();
         return true;
     }
 
@@ -2647,6 +2649,68 @@ bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocat
     return false;
 }
 
+bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+{
+    const int offsetX = panOffsetX + m_dragX;
+    const int offsetY = panOffsetY + m_dragY;
+    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+
+    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
+
+    if(m_rotateNubble.isStartDragging(offsetMouseLocation, QPoint(m_dimensionsRect.topRight().x() + Constants::RotateNubbleOffset, m_dimensionsRect.topRight().y() - Constants::RotateNubbleOffset), zoom))
+    {
+        m_previousDragPos = QPoint(offsetMouseLocation.x(), offsetMouseLocation.y());
+
+        if(!clipboardActive())
+        {
+            generateClipboard(canvasImage);
+        }
+
+        prepResizeOrRotateDrag();
+        m_operationMode = RotateOperation;
+        return true;
+    }
+
+    return false;
+}
+
+void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+{
+    const int offsetX = panOffsetX + m_dragX;
+    const int offsetY = panOffsetY + m_dragY;
+    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+
+    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
+
+    m_rotateNubble.setDegrees(offsetMouseLocation.x() - m_previousDragPos.x());
+
+    QTransform tr;
+    tr.translate(-center.x(), -center.y());
+    tr.rotate(m_rotateNubble.getDegrees());
+    m_clipboardImage = m_clipboardImageBeforeOperation.transformed(tr);
+}
+
+void PaintableClipboard::completeRotateDrag()
+{
+    m_previousDragPos = Constants::NullDragPoint;
+
+    //Create new clipboard image
+    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
+    newClipboardImage.fill(Qt::transparent);
+
+    //Dump nubble changed (re-scaled) current clipboard image onto new one
+    QPainter clipPainter(&newClipboardImage);
+    clipPainter.drawImage(m_clipboardImage.rect(), m_clipboardImage);
+    clipPainter.end();
+
+    //Set new values & reset & redraw
+    m_clipboardImage = newClipboardImage;
+    updateDimensionsRect();
+    update();
+
+    m_operationMode = NoOperation;
+}
+
 void PaintableClipboard::reset()
 {
     m_clipboardImage = QImage();
@@ -2730,7 +2794,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         }
     }
 
-    //Draw nubbles to scale dimension of clipboard
+    //Draw nubbles that scale/rotate dimension of clipboard
     if(m_pixels.size() > 0)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
@@ -2740,6 +2804,8 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         {
             m_resizeNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
         }
+
+        m_rotateNubble.draw(painter, zoom, QPoint(translatedDimensions.topRight().x() + Constants::RotateNubbleOffset, translatedDimensions.topRight().y() - Constants::RotateNubbleOffset));
     }
 }
 
@@ -2796,7 +2862,7 @@ void PaintableClipboard::prepResizeOrRotateDrag()
     }
 }
 
-void PaintableClipboard::completeNubbleDrag()
+void PaintableClipboard::completeResizeDrag()
 {
     //Create new clipboard image
     QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
@@ -2813,28 +2879,6 @@ void PaintableClipboard::completeNubbleDrag()
     update();
 
     m_operationMode = NoOperation;
-}
-
-bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
-{
-    if(false)
-    {
-        if(!clipboardActive())
-        {
-            generateClipboard(canvasImage);
-        }
-
-        prepResizeOrRotateDrag();
-        m_operationMode = ResizeOperation;
-        return true;
-    }
-
-    return false;
-}
-
-void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
-{
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2925,6 +2969,10 @@ ResizeNubble::ResizeNubble(std::function<void (QRect &, const QPointF &)> operat
     nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
 }
 
+ResizeNubble::ResizeNubble() : DragNubble() //todo - remove this
+{
+}
+
 void ResizeNubble::doDragging(const QPointF &mouseLocation, QRect &rect)
 {
     m_operation(rect, mouseLocation);
@@ -2933,7 +2981,7 @@ void ResizeNubble::doDragging(const QPointF &mouseLocation, QRect &rect)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// RotateNubble
 ///
-RotateNubble::RotateNubble()
+RotateNubble::RotateNubble() : DragNubble()
 {
     m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
     m_image.fill(Qt::black);
