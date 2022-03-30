@@ -2739,10 +2739,11 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     const float zoom = m_pParentCanvas->getZoom();
-    painter.translate(center);
-    painter.scale(zoom, zoom);
-    painter.translate(-center);
+    trans.translate(center.x(), center.y());
+    trans.scale(zoom, zoom);
+    trans.translate(-center.x(), -center.y());
 
+    painter.setTransform(trans);
 
 
     //Draw clipboard
