@@ -2683,11 +2683,6 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, 
     QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
 
     m_rotateNubble.setDegrees(offsetMouseLocation.x() - m_previousDragPos.x());
-
-    QTransform tr;
-    tr.translate(-center.x(), -center.y());
-    tr.rotate(m_rotateNubble.getDegrees());
-    m_clipboardImage = m_clipboardImageBeforeOperation.transformed(tr);
 }
 
 void PaintableClipboard::completeRotateDrag()
@@ -2729,15 +2724,26 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
     QPainter painter(this);
 
+    QPoint offset = m_pParentCanvas->getPanOffset();
+    const int offsetX = offset.x() + m_dragX;
+    const int offsetY = offset.y() + m_dragY;
+
+    QTransform trans;
+
+    if(m_operationMode == RotateOperation)
+    {
+        trans.translate(offsetX, offsetY);
+        trans.rotate(m_rotateNubble.getDegrees());
+        trans.translate(-offsetX, -offsetY);
+    }
+
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     const float zoom = m_pParentCanvas->getZoom();
     painter.translate(center);
     painter.scale(zoom, zoom);
     painter.translate(-center);
 
-    QPoint offset = m_pParentCanvas->getPanOffset();
-    const int offsetX = offset.x() + m_dragX;
-    const int offsetY = offset.y() + m_dragY;
+
 
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
