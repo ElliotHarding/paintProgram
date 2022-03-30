@@ -2276,6 +2276,12 @@ QVector<QPoint> PaintableClipboard::getPixelsOffset()
     return pixels;
 }
 
+void PaintableClipboard::completeNormalDrag()
+{
+    m_previousDragPos = Constants::NullDragPoint;
+    m_operationMode = NoOperation;
+}
+
 void PaintableClipboard::operateOnSelectedPixels(std::function<void (int, int)> func)
 {
     for(QPoint& p : m_pixels)
@@ -2458,9 +2464,31 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
 
 void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
 {
-    if(!isNormalDragging())
+    if(m_operationMode == DragOperation)
     {
-        if(!doNubblesDrag(canvasImage, globalMouseLocation, zoom, panOffsetX, panOffsetY))
+        doNormalDragging(mouseLocation);
+    }
+
+    else if(m_operationMode == ResizeOperation)
+    {
+        doResizeDrag(globalMouseLocation, zoom, panOffsetX, panOffsetY);
+    }
+
+    else if(m_operationMode == RotateOperation)
+    {
+
+    }
+
+    else
+    {
+        //Try do resize operation
+        if(checkResizeDrag(canvasImage, globalMouseLocation, zoom, panOffsetX, panOffsetY))
+        {
+            qDebug() << "PaintableClipboard:: - Starting resize operation";
+        }
+
+        //Try do normal drag operation
+        else
         {
             //check if mouse is over selection area
             if(isHighlighted(mouseLocation.x(), mouseLocation.y()))
@@ -2475,42 +2503,46 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
             }
         }
     }
-    else
-    {
-        doNormalDragging(mouseLocation);
-    }
 }
 
 bool PaintableClipboard::checkFinishDragging()
 {
-    if(isNormalDragging())
+    if(m_operationMode == DragOperation)
     {
         completeNormalDrag();
         return true;
     }
 
-    const QList nubbleKeys = m_dragNubbles.keys();
-    for(const auto& nubblePos : nubbleKeys)
+    else if(m_operationMode == ResizeOperation)
     {
-        if(m_dragNubbles[nubblePos].isDragging())
+        const QList nubbleKeys = m_dragNubbles.keys();
+        for(const auto& nubblePos : nubbleKeys)
         {
-            m_dragNubbles[nubblePos].setDragging(false);
-            completeNubbleDrag();
-            return true;
+            if(m_dragNubbles[nubblePos].isDragging())
+            {
+                m_dragNubbles[nubblePos].setDragging(false);
+                completeNubbleDrag();
+                return true;
+            }
         }
+
+        completeNubbleDrag();
+        qDebug() << "PaintableClipboard::checkFinishDragging - Something went wrong";
+        return true;
+    }
+
+    else if(m_operationMode == RotateOperation)
+    {
+        return true;
     }
 
     return false;
 }
 
-bool PaintableClipboard::isNormalDragging()
-{
-    return (m_previousDragPos != Constants::NullDragPoint);
-}
-
 void PaintableClipboard::startNormalDragging(QPoint mouseLocation)
 {
     m_previousDragPos = mouseLocation;
+    m_operationMode = DragOperation;
 }
 
 void PaintableClipboard::doNormalDragging(QPoint mouseLocation)
@@ -2521,11 +2553,6 @@ void PaintableClipboard::doNormalDragging(QPoint mouseLocation)
     m_previousDragPos = mouseLocation;
 
     update();
-}
-
-void PaintableClipboard::completeNormalDrag()
-{
-    m_previousDragPos = Constants::NullDragPoint;
 }
 
 void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDimensions)
@@ -2563,7 +2590,7 @@ QPointF getLocation(QRectF rect, DragNubblePos nubblePos)
     return rect.topLeft();
 }
 
-bool PaintableClipboard::doNubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY)
+void PaintableClipboard::doResizeDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY)
 {
     const int offsetX = panOffsetX + m_dragX;
     const int offsetY = panOffsetY + m_dragY;
@@ -2571,19 +2598,32 @@ bool PaintableClipboard::doNubblesDrag(QImage& canvasImage, QPointF mouseLocatio
 
     QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
 
-    //If one of the nubbles is already dragging, continue dragging
     const QList nubbleKeys = m_dragNubbles.keys();
+
+    //If one of the nubbles is already dragging, continue dragging
     for(const auto& nubblePos : nubbleKeys)
     {
         if(m_dragNubbles[nubblePos].isDragging())
         {
             m_dragNubbles[nubblePos].doDragging(offsetMouseLocation, m_dimensionsRect);
-            doNubbleDragScale();
-            return true;
+            doResizeDragScale();
+            return;
         }
     }
 
+    qDebug() << "PaintableClipboard::doResizeDrag - Something went wrong";
+}
+
+bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+{
+    const int offsetX = panOffsetX + m_dragX;
+    const int offsetY = panOffsetY + m_dragY;
+    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+
+    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
+
     //Check if a nubble is being selected
+    const QList nubbleKeys = m_dragNubbles.keys();
     for(const auto& nubblePos : nubbleKeys)
     {
         if(m_dragNubbles[nubblePos].isStartDragging(offsetMouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
@@ -2702,16 +2742,16 @@ void PaintableClipboard::updateDimensionsRect()
     m_dimensionsRect = getPixelsDimensions(m_pixels);
 }
 
-void PaintableClipboard::doNubbleDragScale()
+void PaintableClipboard::doResizeDragScale()
 {
-    m_clipboardImage = m_clipboardImageBeforeNubbleDrag;
+    m_clipboardImage = m_clipboardImageBeforeOperation;
 
     //Scale
-    scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
+    scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
     //Scale selected transparent pixels (cheat by converting to black)
-    QImage m_clipboardImageTransparent = m_clipboardImageBeforeNubbleDragTransparent;
-    scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeNubbleDrag, m_dimensionsRect);
+    QImage m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+    scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
     //Set new pixels based off scaled image
     m_pixels.clear();
@@ -2736,18 +2776,20 @@ void PaintableClipboard::doNubbleDragScale()
 
 void PaintableClipboard::prepNubblesDrag()
 {
-    m_clipboardImageBeforeNubbleDrag = m_clipboardImage;
-    m_dimensionsRectBeforeNubbleDrag = m_dimensionsRect;
+    m_clipboardImageBeforeOperation = m_clipboardImage;
+    m_dimensionsRectBeforeOperation = m_dimensionsRect;
 
-    m_clipboardImageBeforeNubbleDragTransparent = QImage(QSize(m_clipboardImageBeforeNubbleDrag.width(), m_clipboardImageBeforeNubbleDrag.height()), QImage::Format_ARGB32);
-    m_clipboardImageBeforeNubbleDragTransparent.fill(Qt::transparent);
+    m_clipboardImageBeforeOperationTransparent = QImage(QSize(m_clipboardImageBeforeOperation.width(), m_clipboardImageBeforeOperation.height()), QImage::Format_ARGB32);
+    m_clipboardImageBeforeOperationTransparent.fill(Qt::transparent);
     for(QPoint& p : m_pixels)
     {
-        if(m_clipboardImageBeforeNubbleDrag.pixelColor(p.x(), p.y()).alpha() == 0)
+        if(m_clipboardImageBeforeOperation.pixelColor(p.x(), p.y()).alpha() == 0)
         {
-            m_clipboardImageBeforeNubbleDragTransparent.setPixelColor(p.x(), p.y(), Qt::black);
+            m_clipboardImageBeforeOperationTransparent.setPixelColor(p.x(), p.y(), Qt::black);
         }
     }
+
+    m_operationMode = ResizeOperation;
 }
 
 void PaintableClipboard::completeNubbleDrag()
@@ -2765,6 +2807,8 @@ void PaintableClipboard::completeNubbleDrag()
     m_clipboardImage = newClipboardImage;
     updateDimensionsRect();
     update();
+
+    m_operationMode = NoOperation;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

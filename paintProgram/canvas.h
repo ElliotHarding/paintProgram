@@ -109,20 +109,29 @@ private:
     bool isHighlighted(const int& x, const int& y);
     QVector<QPoint> getPixelsOffset();
 
+    enum OperationMode
+    {
+        NoOperation,
+        DragOperation,
+        ResizeOperation,
+        RotateOperation
+    };
+    OperationMode m_operationMode = NoOperation;
+
     ///Normal Dragging
     QPoint m_previousDragPos;
     void completeNormalDrag();
-    bool isNormalDragging();
     void startNormalDragging(QPoint mouseLocation);
     void doNormalDragging(QPoint mouseLocation);
 
-    ///Nubble dragging
+    ///Resize nubble dragging
     QMap<DragNubblePos, DragNubble> m_dragNubbles;
-    QImage m_clipboardImageBeforeNubbleDrag = QImage();
-    QImage m_clipboardImageBeforeNubbleDragTransparent = QImage();
-    QRect m_dimensionsRectBeforeNubbleDrag = QRect();
-    bool doNubblesDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
-    void doNubbleDragScale();
+    QImage m_clipboardImageBeforeOperation = QImage();
+    QImage m_clipboardImageBeforeOperationTransparent = QImage();
+    QRect m_dimensionsRectBeforeOperation = QRect();
+    void doResizeDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    bool checkResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void doResizeDragScale();
     void prepNubblesDrag();
     void completeNubbleDrag();
 
