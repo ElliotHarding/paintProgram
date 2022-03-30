@@ -17,6 +17,9 @@ class Canvas;
 class MainWindow;
 class PaintableClipboard;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// PaintableClipboard
+///
 ///Clipboard (Image + Pixel info) used for copying/cutting/pasting
 class Clipboard
 {
@@ -39,28 +42,60 @@ enum DragNubblePos
     BottomRight
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// DragNubble
+///
 class DragNubble
 {
 public:
-    DragNubble(std::function<void(QRect&, const QPointF&)> operation);
-    DragNubble(){}
+    DragNubble();
+    ~DragNubble(){}
 
     ///Dragging
-    bool isDragging();
     void setDragging(const bool dragging);
     bool isStartDragging(const QPointF &mouseLocation, QPointF location, const float& zoom);
-    void doDragging(const QPointF &mouseLocation, QRect& rect);
+    bool isDragging();
 
     void draw(QPainter &painter, const float& zoom, const QPointF location);
 
-private:
-    std::function<void (QRect&, const QPointF&)> m_operation;
-
+protected:
     bool m_bIsDragging = false;
 
-    inline static QImage m_image = QImage();
+    QImage m_image;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ResizeNubble
+///
+class ResizeNubble : public DragNubble
+{
+public:
+    ResizeNubble(std::function<void(QRect&, const QPointF&)> operation);
+
+    void doDragging(const QPointF &mouseLocation, QRect& rect);
+
+private:
+    std::function<void (QRect&, const QPointF&)> m_operation;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// RotateNubble
+///
+class RotateNubble : public DragNubble
+{
+public:
+    RotateNubble();
+
+    int getDegrees();
+    void setDegrees(int degrees);
+
+private:
+    int m_degrees = 0;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// PaintableClipboard
+///
 ///A clipboard that also paints. Used for dragging, selecting cutting, pasting
 class PaintableClipboard : public Clipboard, public QWidget
 {
@@ -148,6 +183,9 @@ private:
     Canvas* m_pParentCanvas;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// CanvasHistoryItem
+///
 class CanvasHistoryItem
 {
 public:
@@ -155,6 +193,9 @@ public:
     Clipboard m_clipboard;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// CanvasHistory
+///
 ///Holds the history of actions on the canvas ~ may store only changes between
 ///  saves later (instead of entire canvas and clipboard each time)
 class CanvasHistory
@@ -169,6 +210,9 @@ private:
     uint m_historyIndex = 0;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Canvas
+///
 ///Tab widget in charge of displaying & interacting with the image edited by paint program
 class Canvas : public QTabWidget
 {

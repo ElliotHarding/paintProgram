@@ -2875,17 +2875,8 @@ bool CanvasHistory::undoHistory(CanvasHistoryItem& canvasSnapShot)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// DragNubble
 ///
-DragNubble::DragNubble(std::function<void(QRect&, const QPointF&)> operation) :
-    m_operation(operation)
+DragNubble::DragNubble()
 {
-    //Static m_image shared across all instances of DragNubble
-    if(m_image.isNull())
-    {
-        m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
-        m_image.fill(Qt::black);
-        QPainter nubbleImagePainter(&m_image);
-        nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
-    }
 }
 
 bool DragNubble::isDragging()
@@ -2912,11 +2903,6 @@ bool DragNubble::isStartDragging(const QPointF& mouseLocation, QPointF location,
     return false;
 }
 
-void DragNubble::doDragging(const QPointF &mouseLocation, QRect& rect)
-{
-    m_operation(rect, mouseLocation);
-}
-
 void DragNubble::draw(QPainter &painter, const float& zoom, const QPointF location)
 {
     const float nubbleSize = Constants::DragNubbleSize / zoom;
@@ -2925,4 +2911,47 @@ void DragNubble::draw(QPainter &painter, const float& zoom, const QPointF locati
     painter.drawImage(QRectF(location.x() - halfNubbleSize, location.y() - halfNubbleSize, nubbleSize, nubbleSize),
                       m_image,
                       m_image.rect());
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ResizeNubble
+///
+ResizeNubble::ResizeNubble(std::function<void (QRect &, const QPointF &)> operation) : DragNubble(),
+    m_operation(operation)
+{
+    m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
+    m_image.fill(Qt::black);
+    QPainter nubbleImagePainter(&m_image);
+    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
+}
+
+void ResizeNubble::doDragging(const QPointF &mouseLocation, QRect &rect)
+{
+    m_operation(rect, mouseLocation);
+}
+
+bool ResizeNubble::isDragging()
+{
+    return m_bIsDragging;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// RotateNubble
+///
+RotateNubble::RotateNubble()
+{
+    m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
+    m_image.fill(Qt::black);
+    QPainter nubbleImagePainter(&m_image);
+    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
+}
+
+int RotateNubble::getDegrees()
+{
+    return m_degrees;
+}
+
+void RotateNubble::setDegrees(int degrees)
+{
+    m_degrees = degrees;
 }
