@@ -2074,7 +2074,7 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
     connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_pOutlineDrawTimer->start(Constants::SelectedPixelsOutlineFlashFrequency);
 
-    m_dragNubbles.insert(DragNubblePos::TopLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::TopLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right() && mouseLocation.y() < dimensions.bottom())
         {
@@ -2082,14 +2082,14 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
              dimensions.setY(mouseLocation.y());
         }
     }));
-    m_dragNubbles.insert(DragNubblePos::TopMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::TopMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.y() < dimensions.bottom())
         {
             dimensions.setY(mouseLocation.y());
         }
     }));
-    m_dragNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::TopRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() > dimensions.left() && mouseLocation.y() < dimensions.bottom())
         {
@@ -2097,21 +2097,21 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
             dimensions.setY(mouseLocation.y());
         }
     }));
-    m_dragNubbles.insert(DragNubblePos::LeftMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::LeftMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right())
         {
             dimensions.setX(mouseLocation.x());
         }
     }));
-    m_dragNubbles.insert(DragNubblePos::RightMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::RightMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() > dimensions.left())
         {
             dimensions.setRight(mouseLocation.x());
         }
     }));
-    m_dragNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::BottomLeft, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() < dimensions.right() && mouseLocation.y() > dimensions.top())
         {
@@ -2120,14 +2120,14 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
         }
 
     }));
-    m_dragNubbles.insert(DragNubblePos::BottomMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::BottomMiddle, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.y() > dimensions.top())
         {
             dimensions.setBottom(mouseLocation.y());
         }
     }));
-    m_dragNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
+    m_resizeNubbles.insert(DragNubblePos::BottomRight, DragNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
     {
         if(mouseLocation.x() > dimensions.left() && mouseLocation.y() > dimensions.top())
         {
@@ -2520,12 +2520,12 @@ bool PaintableClipboard::checkFinishDragging()
 
     else if(m_operationMode == ResizeOperation)
     {
-        const QList nubbleKeys = m_dragNubbles.keys();
+        const QList nubbleKeys = m_resizeNubbles.keys();
         for(const auto& nubblePos : nubbleKeys)
         {
-            if(m_dragNubbles[nubblePos].isDragging())
+            if(m_resizeNubbles[nubblePos].isDragging())
             {
-                m_dragNubbles[nubblePos].setDragging(false);
+                m_resizeNubbles[nubblePos].setDragging(false);
                 completeNubbleDrag();
                 return true;
             }
@@ -2603,14 +2603,14 @@ void PaintableClipboard::doResizeDrag(QPointF mouseLocation, const float& zoom, 
 
     QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
 
-    const QList nubbleKeys = m_dragNubbles.keys();
+    const QList nubbleKeys = m_resizeNubbles.keys();
 
     //If one of the nubbles is already dragging, continue dragging
     for(const auto& nubblePos : nubbleKeys)
     {
-        if(m_dragNubbles[nubblePos].isDragging())
+        if(m_resizeNubbles[nubblePos].isDragging())
         {
-            m_dragNubbles[nubblePos].doDragging(offsetMouseLocation, m_dimensionsRect);
+            m_resizeNubbles[nubblePos].doDragging(offsetMouseLocation, m_dimensionsRect);
             doResizeDragScale();
             return;
         }
@@ -2628,10 +2628,10 @@ bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocat
     QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
 
     //Check if a nubble is being selected
-    const QList nubbleKeys = m_dragNubbles.keys();
+    const QList nubbleKeys = m_resizeNubbles.keys();
     for(const auto& nubblePos : nubbleKeys)
     {
-        if(m_dragNubbles[nubblePos].isStartDragging(offsetMouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
+        if(m_resizeNubbles[nubblePos].isStartDragging(offsetMouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
         {
             if(!clipboardActive())
             {
@@ -2735,10 +2735,10 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
 
-        const QList nubbleKeys = m_dragNubbles.keys();
+        const QList nubbleKeys = m_resizeNubbles.keys();
         for(const auto& nubblePos : nubbleKeys)
         {
-            m_dragNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
+            m_resizeNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
         }
     }
 }

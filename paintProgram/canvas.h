@@ -125,7 +125,7 @@ private:
     void doNormalDragging(QPoint mouseLocation);
 
     ///Resize nubble dragging
-    QMap<DragNubblePos, DragNubble> m_dragNubbles;
+    QMap<DragNubblePos, DragNubble> m_resizeNubbles;
     QImage m_clipboardImageBeforeOperation = QImage();
     QImage m_clipboardImageBeforeOperationTransparent = QImage();
     QRect m_dimensionsRectBeforeOperation = QRect();
