@@ -1853,7 +1853,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     }   
     else if(m_tool == TOOL_DRAG)
     {
-        if(m_pClipboardPixels->checkFinishOperation(m_panOffsetX, m_panOffsetY))
+        if(m_pClipboardPixels->checkFinishOperation())
         {
             m_canvasHistory.recordHistory(getSnapshot());
         }
@@ -2511,7 +2511,7 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     }
 }
 
-bool PaintableClipboard::checkFinishOperation(const int& panOffsetX, const int& panOffsetY)
+bool PaintableClipboard::checkFinishOperation()
 {
     if(m_operationMode == DragOperation)
     {
@@ -2539,7 +2539,7 @@ bool PaintableClipboard::checkFinishOperation(const int& panOffsetX, const int& 
 
     else if(m_operationMode == RotateOperation)
     {
-        completeRotateDrag(panOffsetX, panOffsetY);
+        completeRotateDrag();
         return true;
     }
 
@@ -2718,7 +2718,7 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, 
     update();
 }
 
-void PaintableClipboard::completeRotateDrag(const int& panOffsetX, const int& panOffsetY)
+void PaintableClipboard::completeRotateDrag()
 {
     m_previousDragPos = Constants::NullDragPoint;
     m_operationMode = NoOperation;

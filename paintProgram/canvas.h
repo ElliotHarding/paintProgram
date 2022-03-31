@@ -122,7 +122,7 @@ public:
 
     ///Dragging
     void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
-    bool checkFinishOperation(const int& panOffsetX, const int& panOffsetY);
+    bool checkFinishOperation();
 
     ///Reset/clear
     void reset();
@@ -168,7 +168,7 @@ private:
     RotateNubble m_rotateNubble;
     bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     void doRotateDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
-    void completeRotateDrag(const int& panOffsetX, const int& panOffsetY);
+    void completeRotateDrag();
 
     ///Resize & rotate dragging
     void prepResizeOrRotateDrag();
