@@ -2468,27 +2468,34 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     if(m_operationMode == DragOperation)
     {
         doNormalDragging(mouseLocation);
+        return;
     }
 
-    else if(m_operationMode == ResizeOperation)
+    //Get global mouse pos with drag offset
+    const int offsetX = panOffsetX + m_dragX;
+    const int offsetY = panOffsetY + m_dragY;
+    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(globalMouseLocation, center, zoom, offsetX, offsetY);
+
+    if(m_operationMode == ResizeOperation)
     {
-        doResizeDrag(globalMouseLocation, zoom, panOffsetX, panOffsetY);
+        doResizeDrag(offsetMouseLocation);
     }
 
     else if(m_operationMode == RotateOperation)
     {
-        doRotateDrag(globalMouseLocation, zoom, panOffsetX, panOffsetY);
+        doRotateDrag(offsetMouseLocation);
     }
 
     else
     {
         //Try do resize operation
-        if(checkResizeDrag(canvasImage, globalMouseLocation, zoom, panOffsetX, panOffsetY))
+        if(checkResizeDrag(canvasImage, offsetMouseLocation, zoom))
         {
             qDebug() << "PaintableClipboard:: - Starting resize operation";
         }
 
-        else if(checkRotateDrag(canvasImage, globalMouseLocation, zoom, panOffsetX, panOffsetY))
+        else if(checkRotateDrag(canvasImage, offsetMouseLocation, zoom))
         {
             qDebug() << "PaintableClipboard:: - Starting rotate operation";
         }
@@ -2597,14 +2604,8 @@ QPointF getLocation(QRectF rect, DragNubblePos nubblePos)
     return rect.topLeft();
 }
 
-void PaintableClipboard::doResizeDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY)
+void PaintableClipboard::doResizeDrag(QPointF mouseLocation)
 {
-    const int offsetX = panOffsetX + m_dragX;
-    const int offsetY = panOffsetY + m_dragY;
-    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-
-    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
-
     const QList nubbleKeys = m_resizeNubbles.keys();
 
     //If one of the nubbles is already dragging, continue dragging
@@ -2612,7 +2613,7 @@ void PaintableClipboard::doResizeDrag(QPointF mouseLocation, const float& zoom, 
     {
         if(m_resizeNubbles[nubblePos].isDragging())
         {
-            m_resizeNubbles[nubblePos].doDragging(offsetMouseLocation, m_dimensionsRect);
+            m_resizeNubbles[nubblePos].doDragging(mouseLocation, m_dimensionsRect);
             doResizeDragScale();
             return;
         }
@@ -2621,19 +2622,13 @@ void PaintableClipboard::doResizeDrag(QPointF mouseLocation, const float& zoom, 
     qDebug() << "PaintableClipboard::doResizeDrag - Something went wrong";
 }
 
-bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom)
 {
-    const int offsetX = panOffsetX + m_dragX;
-    const int offsetY = panOffsetY + m_dragY;
-    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-
-    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
-
     //Check if a nubble is being selected
     const QList nubbleKeys = m_resizeNubbles.keys();
     for(const auto& nubblePos : nubbleKeys)
     {
-        if(m_resizeNubbles[nubblePos].isStartDragging(offsetMouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
+        if(m_resizeNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
         {
             if(!clipboardActive())
             {
@@ -2649,17 +2644,62 @@ bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocat
     return false;
 }
 
-bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+void PaintableClipboard::doResizeDragScale()
 {
-    const int offsetX = panOffsetX + m_dragX;
-    const int offsetY = panOffsetY + m_dragY;
-    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
+    m_clipboardImage = m_clipboardImageBeforeOperation;
 
-    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
+    //Scale
+    scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
-    if(m_rotateNubble.isStartDragging(offsetMouseLocation, QPoint(m_dimensionsRect.topRight().x() + Constants::RotateNubbleOffset, m_dimensionsRect.topRight().y() - Constants::RotateNubbleOffset), zoom))
+    //Scale selected transparent pixels (cheat by converting to black)
+    QImage m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+    scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
+
+    //Set new pixels based off scaled image
+    m_pixels.clear();
+    for(int x = 0; x < m_clipboardImage.width(); x++)
     {
-        m_previousDragPos = QPoint(offsetMouseLocation.x(), offsetMouseLocation.y());
+        for(int y = 0; y < m_clipboardImage.height(); y++)
+        {
+            if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
+            {
+                m_pixels.push_back(QPoint(x,y));
+            }
+            else if(m_clipboardImageTransparent.pixelColor(x,y).alpha() > 0)
+            {
+                m_pixels.push_back(QPoint(x,y));
+            }
+        }
+    }
+
+    updateDimensionsRect();
+    update();
+}
+
+void PaintableClipboard::completeResizeDrag()
+{
+    //Create new clipboard image
+    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
+    newClipboardImage.fill(Qt::transparent);
+
+    //Dump nubble changed (re-scaled) current clipboard image onto new one
+    QPainter clipPainter(&newClipboardImage);
+    clipPainter.drawImage(m_clipboardImage.rect(), m_clipboardImage);
+    clipPainter.end();
+
+    //Set new values & reset & redraw
+    m_clipboardImage = newClipboardImage;
+    updateDimensionsRect();
+    update();
+
+    m_operationMode = NoOperation;
+}
+
+bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation, const float& zoom)
+{
+    if(m_rotateNubble.isStartDragging(mouseLocation, QPoint(m_dimensionsRect.topRight().x() + Constants::RotateNubbleOffset, m_dimensionsRect.topRight().y() - Constants::RotateNubbleOffset), zoom))
+    {
+        m_previousDragPos = QPoint(mouseLocation.x(), mouseLocation.y());
 
         if(!clipboardActive())
         {
@@ -2674,17 +2714,11 @@ bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocat
     return false;
 }
 
-void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
 {
-    const int offsetX = panOffsetX + m_dragX;
-    const int offsetY = panOffsetY + m_dragY;
-    QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-
-    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
-
     QTransform trans;
     trans.translate(m_dimensionsRect.center().x(), m_dimensionsRect.center().y());
-    trans.rotate(offsetMouseLocation.x() - m_previousDragPos.x());
+    trans.rotate(mouseLocation.x() - m_previousDragPos.x());
     trans.translate(-m_dimensionsRect.center().x(), -m_dimensionsRect.center().y());
 
     m_clipboardImage.fill(Qt::transparent);
@@ -2725,6 +2759,22 @@ void PaintableClipboard::completeRotateDrag()
 
     updateDimensionsRect();
     update();    
+}
+
+void PaintableClipboard::prepResizeOrRotateDrag()
+{
+    m_clipboardImageBeforeOperation = m_clipboardImage;
+    m_dimensionsRectBeforeOperation = m_dimensionsRect;
+
+    m_clipboardImageBeforeOperationTransparent = QImage(QSize(m_clipboardImageBeforeOperation.width(), m_clipboardImageBeforeOperation.height()), QImage::Format_ARGB32);
+    m_clipboardImageBeforeOperationTransparent.fill(Qt::transparent);
+    for(QPoint& p : m_pixels)
+    {
+        if(m_clipboardImageBeforeOperation.pixelColor(p.x(), p.y()).alpha() == 0)
+        {
+            m_clipboardImageBeforeOperationTransparent.setPixelColor(p.x(), p.y(), Qt::black);
+        }
+    }
 }
 
 void PaintableClipboard::reset()
@@ -2828,73 +2878,6 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 void PaintableClipboard::updateDimensionsRect()
 {
     m_dimensionsRect = getPixelsDimensions(m_pixels);
-}
-
-void PaintableClipboard::doResizeDragScale()
-{
-    m_clipboardImage = m_clipboardImageBeforeOperation;
-
-    //Scale
-    scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
-
-    //Scale selected transparent pixels (cheat by converting to black)
-    QImage m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
-    scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
-
-    //Set new pixels based off scaled image
-    m_pixels.clear();
-    for(int x = 0; x < m_clipboardImage.width(); x++)
-    {
-        for(int y = 0; y < m_clipboardImage.height(); y++)
-        {
-            if(m_clipboardImage.pixelColor(x,y).alpha() > 0)
-            {
-                m_pixels.push_back(QPoint(x,y));
-            }
-            else if(m_clipboardImageTransparent.pixelColor(x,y).alpha() > 0)
-            {
-                m_pixels.push_back(QPoint(x,y));
-            }
-        }
-    }
-
-    updateDimensionsRect();
-    update();
-}
-
-void PaintableClipboard::prepResizeOrRotateDrag()
-{
-    m_clipboardImageBeforeOperation = m_clipboardImage;
-    m_dimensionsRectBeforeOperation = m_dimensionsRect;
-
-    m_clipboardImageBeforeOperationTransparent = QImage(QSize(m_clipboardImageBeforeOperation.width(), m_clipboardImageBeforeOperation.height()), QImage::Format_ARGB32);
-    m_clipboardImageBeforeOperationTransparent.fill(Qt::transparent);
-    for(QPoint& p : m_pixels)
-    {
-        if(m_clipboardImageBeforeOperation.pixelColor(p.x(), p.y()).alpha() == 0)
-        {
-            m_clipboardImageBeforeOperationTransparent.setPixelColor(p.x(), p.y(), Qt::black);
-        }
-    }
-}
-
-void PaintableClipboard::completeResizeDrag()
-{
-    //Create new clipboard image
-    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
-    newClipboardImage.fill(Qt::transparent);
-
-    //Dump nubble changed (re-scaled) current clipboard image onto new one
-    QPainter clipPainter(&newClipboardImage);
-    clipPainter.drawImage(m_clipboardImage.rect(), m_clipboardImage);
-    clipPainter.end();
-
-    //Set new values & reset & redraw
-    m_clipboardImage = newClipboardImage;
-    updateDimensionsRect();
-    update();
-
-    m_operationMode = NoOperation;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

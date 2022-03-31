@@ -159,15 +159,15 @@ private:
     QImage m_clipboardImageBeforeOperation = QImage();
     QImage m_clipboardImageBeforeOperationTransparent = QImage();
     QRect m_dimensionsRectBeforeOperation = QRect();
-    void doResizeDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
-    bool checkResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void doResizeDrag(QPointF mouseLocation);
+    bool checkResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
     void doResizeDragScale();
     void completeResizeDrag();
 
     ///Rotate dragging
     RotateNubble m_rotateNubble;
-    bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
-    void doRotateDrag(QPointF mouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
+    void doRotateDrag(QPointF mouseLocation);
     void completeRotateDrag();
 
     ///Resize & rotate dragging
