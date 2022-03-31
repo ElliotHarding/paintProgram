@@ -2682,7 +2682,26 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation, const float &zoom, 
 
     QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseLocation, center, zoom, offsetX, offsetY);
 
-    m_rotateNubble.setDegrees(offsetMouseLocation.x() - m_previousDragPos.x());
+    //m_rotateNubble.setDegrees(offsetMouseLocation.x() - m_previousDragPos.x());
+
+    m_clipboardImage.fill(Qt::transparent);
+    QPainter painter(&m_clipboardImage);
+
+    QTransform trans;
+    trans.translate(m_dimensionsRect.center().x(), m_dimensionsRect.center().y());
+    trans.rotate(offsetMouseLocation.x() - m_previousDragPos.x());
+    trans.translate(-m_dimensionsRect.center().x(), -m_dimensionsRect.center().y());
+    painter.setTransform(trans);
+    painter.drawImage(m_clipboardImageBeforeOperation.rect(), m_clipboardImageBeforeOperation);
+    painter.end();
+
+    //QTransform trans;
+    //trans.translate(m_clipboardImage.width(), m_clipboardImage.height());
+    //trans.rotate(offsetMouseLocation.x() - m_previousDragPos.x());
+    //trans.translate(-m_clipboardImage.width(), -m_clipboardImage.height());
+    //m_clipboardImage = m_clipboardImageBeforeOperation.transformed(trans);
+    //m_clipboardImage = m_clipboardImageBeforeOperationTransparent.transformed(trans);
+
 }
 
 void PaintableClipboard::completeRotateDrag(const int& panOffsetX, const int& panOffsetY)
@@ -2692,18 +2711,18 @@ void PaintableClipboard::completeRotateDrag(const int& panOffsetX, const int& pa
     const int offsetX = panOffsetX + m_dragX;
     const int offsetY = panOffsetY + m_dragY;
 
-    QTransform trans;
+    //QTransform trans;
 
-    if(m_operationMode == RotateOperation)
-    {
-        trans.translate(panOffsetX, panOffsetY);
-        trans.rotate(m_rotateNubble.getDegrees());
-        trans.translate(-panOffsetX, -panOffsetY);
-        trans.translate(-m_dragX, -m_dragY);
-    }
+    //if(m_operationMode == RotateOperation)
+    //{
+        //trans.translate(panOffsetX, panOffsetY);
+        //trans.rotate(m_rotateNubble.getDegrees());
+        //trans.translate(-panOffsetX, -panOffsetY);
+        //trans.translate(-m_dragX, -m_dragY);
+    //}
 
-    m_clipboardImage = m_clipboardImage.transformed(trans);
-    m_clipboardImageBeforeOperationTransparent = m_clipboardImageBeforeOperationTransparent.transformed(trans);
+    //m_clipboardImage = m_clipboardImage.transformed(trans);
+    //m_clipboardImageBeforeOperationTransparent = m_clipboardImageBeforeOperationTransparent.transformed(trans);
 
     m_pixels.clear();
     for(int x = 0; x < m_clipboardImage.width(); x++)
@@ -2714,10 +2733,10 @@ void PaintableClipboard::completeRotateDrag(const int& panOffsetX, const int& pa
             {
                 m_pixels.push_back(QPoint(x,y));
             }
-            else if(m_clipboardImageBeforeOperationTransparent.pixelColor(x, y).alpha() > 0)
-            {
-                m_pixels.push_back(QPoint(x, y));
-            }
+            //else if(m_clipboardImageBeforeOperationTransparent.pixelColor(x, y).alpha() > 0)
+            //{
+                //m_pixels.push_back(QPoint(x, y));
+            //}
         }
     }
 
@@ -2749,26 +2768,15 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     const int offsetX = offset.x() + m_dragX;
     const int offsetY = offset.y() + m_dragY;
 
-    QTransform trans;
-
-    if(m_operationMode == RotateOperation)
-    {
-        trans.translate(offsetX, offsetY);
-        trans.rotate(m_rotateNubble.getDegrees());
-        trans.translate(-offsetX, -offsetY);
-    }
-
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
     const float zoom = m_pParentCanvas->getZoom();
-    trans.translate(center.x(), center.y());
-    trans.scale(zoom, zoom);
-    trans.translate(-center.x(), -center.y());
-
-    painter.setTransform(trans);
-
+    painter.translate(center.x(), center.y());
+    painter.scale(zoom, zoom);
+    painter.translate(-center.x(), -center.y());
 
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
+    painter.drawRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height());
 
     //Outline
     m_bOutlineColorToggle = !m_bOutlineColorToggle;
