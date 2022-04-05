@@ -2650,23 +2650,12 @@ void PaintableClipboard::doResizeDragScale()
     const int yOffset = m_dimensionsRect.y();
     const int xOffset = m_dimensionsRect.x();
 
-
-
     //Check if newley scaled image will fit inside existing image
     QImage m_clipboardImageTransparent;
     if(xOffset > -1 && yOffset > -1 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
     {
         m_clipboardImage = m_clipboardImageBeforeOperation;
         m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
-
-        /*
-        m_clipboardImage.fill(Qt::transparent);
-        QPainter clipboardPainter(&m_clipboardImage);
-        clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
-
-        m_clipboardImageTransparent.fill(Qt::transparent);
-        QPainter tClipboardPainter(&m_clipboardImageTransparent);
-        tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);*/
 
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
@@ -2728,9 +2717,11 @@ void PaintableClipboard::doResizeDragScale()
         //Set background image to new size
         m_backgroundImage = genTransparentPixelsBackground(newWidth, newHeight);
 
+        //Scale
         QPainter clipboardPainter(&m_clipboardImage);
         clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
 
+        //Scale transparent
         QPainter tClipboardPainter(&m_clipboardImageTransparent);
         tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);
     }
