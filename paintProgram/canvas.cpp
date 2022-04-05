@@ -2294,15 +2294,18 @@ void PaintableClipboard::operateOnSelectedPixels(std::function<void (int, int)> 
 QRect getPixelsDimensions(QVector<QPoint>& pixels)
 {
     QRect returnRect = QRect();
+    QList<bool> alreadySet = {false, false};
     for(QPoint& p : pixels)
     {
-        if(returnRect.x() == 0 || returnRect.x() > p.x())
+        if(!alreadySet[0] || returnRect.x() > p.x())
         {
             returnRect.setX(p.x());
+            alreadySet[0] = true;
         }
-        if(returnRect.y() == 0 || returnRect.y() > p.y())
+        if(!alreadySet[1] || returnRect.y() > p.y())
         {
             returnRect.setY(p.y());
+            alreadySet[1] = true;
         }
         if(returnRect.right() < p.x())
         {
@@ -2792,7 +2795,7 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
     trans.rotate(mouseLocation.x() - m_previousDragPos.x());
     trans.translate(-m_dimensionsRect.center().x(), -m_dimensionsRect.center().y());
 
-    QRect dimensionsAfterRotation = trans.mapRect(m_dimensionsRect);
+    QRectF dimensionsAfterRotation = trans.mapRect(QRectF(m_dimensionsRect));
 
     //const int xOffset = dimensionsAfterRotation.left();
     const int yOffset = dimensionsAfterRotation.top();
