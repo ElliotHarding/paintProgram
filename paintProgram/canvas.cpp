@@ -2813,7 +2813,7 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
     clipboardRotatePainter.drawImage(m_clipboardImageBeforeOperation.rect().translated(0, (yOffset < 0 ? -yOffset : 0)), m_clipboardImageBeforeOperation);
     clipboardRotatePainter.end();
 
-    QImage clipboardImageTransparent = QImage(QSize(m_clipboardImageBeforeOperationTransparent.width(), m_clipboardImageBeforeOperationTransparent.height() + (yOffset < 0 ? -yOffset : 0)), QImage::Format_ARGB32);
+    QImage clipboardImageTransparent = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height() + (yOffset < 0 ? -yOffset : 0)), QImage::Format_ARGB32);
     clipboardImageTransparent.fill(Qt::transparent);
     QPainter transparentClipboardRotatePainter(&clipboardImageTransparent);
     transparentClipboardRotatePainter.setTransform(trans);
@@ -2831,10 +2831,6 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
             }
             else if(clipboardImageTransparent.pixelColor(x, y).alpha() > 0)
             {
-                if(y > 199)
-                {
-                    qDebug() << "Something went wrong";
-                }
                 m_pixels.push_back(QPoint(x, y));
             }
         }
