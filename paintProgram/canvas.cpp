@@ -2752,20 +2752,6 @@ void PaintableClipboard::doResizeDragScale()
 
 void PaintableClipboard::completeResizeDrag()
 {
-    //Create new clipboard image
-    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width(), m_clipboardImage.height()), QImage::Format_ARGB32);
-    newClipboardImage.fill(Qt::transparent);
-
-    //Dump nubble changed (re-scaled) current clipboard image onto new one
-    QPainter clipPainter(&newClipboardImage);
-    clipPainter.drawImage(m_clipboardImage.rect(), m_clipboardImage);
-    clipPainter.end();
-
-    //Set new values & reset & redraw
-    m_clipboardImage = newClipboardImage;
-    updateDimensionsRect();
-    update();
-
     m_operationMode = NoOperation;
 }
 
