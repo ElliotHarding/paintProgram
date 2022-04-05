@@ -2144,7 +2144,7 @@ PaintableClipboard::~PaintableClipboard()
         delete m_pOutlineDrawTimer;
 }
 
-void PaintableClipboard::generateClipboard(QImage &canvas)
+void PaintableClipboard::generateClipboardSteal(QImage &canvas)
 {
     //Prep selected pixels for dragging
     m_clipboardImage = QImage(QSize(canvas.width(), canvas.height()), QImage::Format_ARGB32);
@@ -2154,6 +2154,7 @@ void PaintableClipboard::generateClipboard(QImage &canvas)
     for(const QPoint& p: pixels)
     {
         m_clipboardImage.setPixelColor(p.x(), p.y(), canvas.pixelColor(p.x(),p.y()));
+        canvas.setPixelColor(p.x(), p.y(), Qt::transparent);
     }
 
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
@@ -2512,7 +2513,7 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
                 //If no clipboard exists to drag, generate one based on selected pixels
                 if(!clipboardActive())
                 {
-                    generateClipboard(canvasImage);
+                    generateClipboardSteal(canvasImage);
                 }
 
                 startNormalDragging(mouseLocation);
@@ -2635,7 +2636,7 @@ bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocat
         {
             if(!clipboardActive())
             {
-                generateClipboard(canvasImage);
+                generateClipboardSteal(canvasImage);
             }
 
             prepResizeOrRotateDrag();
@@ -2763,7 +2764,7 @@ bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocat
 
         if(!clipboardActive())
         {
-            generateClipboard(canvasImage);
+            generateClipboardSteal(canvasImage);
         }
 
         prepResizeOrRotateDrag();

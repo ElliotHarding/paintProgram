@@ -99,7 +99,7 @@ public:
     ~PaintableClipboard();
 
     ///Clipboard (image + pixels)
-    void generateClipboard(QImage& canvas);
+    void generateClipboardSteal(QImage& canvas);
     void setClipboard(Clipboard clipboard);
     Clipboard getClipboard();
     bool clipboardActive();
