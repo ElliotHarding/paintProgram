@@ -2654,10 +2654,19 @@ void PaintableClipboard::doResizeDragScale()
 
     //Check if newley scaled image will fit inside existing image
     QImage m_clipboardImageTransparent;
-    if(xOffset == 0 && yOffset == 0 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
+    if(xOffset > -1 && yOffset > -1 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
     {
         m_clipboardImage = m_clipboardImageBeforeOperation;
         m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+
+        /*
+        m_clipboardImage.fill(Qt::transparent);
+        QPainter clipboardPainter(&m_clipboardImage);
+        clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
+
+        m_clipboardImageTransparent.fill(Qt::transparent);
+        QPainter tClipboardPainter(&m_clipboardImageTransparent);
+        tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);*/
 
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
