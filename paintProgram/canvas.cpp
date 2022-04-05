@@ -2650,50 +2650,75 @@ void PaintableClipboard::doResizeDragScale()
     const int yOffset = m_dimensionsRect.y();
     const int xOffset = m_dimensionsRect.x();
 
+
+
+    //Check if newley scaled image will fit inside existing image
     QImage m_clipboardImageTransparent;
     if(xOffset == 0 && yOffset == 0 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
     {
         m_clipboardImage = m_clipboardImageBeforeOperation;
         m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
     }
+
+    //Means a new image size is required to fit the resize operation
     else
     {
+        int newWidth;
+        int newHeight;
+
+        //If in the negative x
         if(xOffset < 0)
         {
+            //Move everything into the positive
             m_dimensionsRect.setRight(m_dimensionsRect.right() - xOffset);
             m_dimensionsRect.setLeft(0);
-
             m_dragX += xOffset;
+
+            //new width equal to largest (m_dimensionsRect or previous image)
+            newWidth = m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width();
         }
 
+        //if outside bounds of positive x
+        else
+        {
+            newWidth = m_dimensionsRect.right() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.right() : m_clipboardImageBeforeOperation.width();
+        }
+
+        //If in the negative y
         if(yOffset < 0)
         {
+            //Move everything into the positive
             m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
             m_dimensionsRect.setTop(0);
-
             m_dragY += yOffset;
+
+            //new height equal to largest (m_dimensionsRect or previous image)
+            newHeight = m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height();
         }
 
-        const int newWidth = m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() ?
-                    m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width() :
-                    m_dimensionsRect.right();
+        //if outside bounds of positive y
+        else
+        {
+            newHeight = m_dimensionsRect.bottom() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.bottom() : m_clipboardImageBeforeOperation.height();
+        }
 
-        const int newHeight = m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height() ?
-                    m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height() :
-                    m_dimensionsRect.bottom();
-
+        //Make new sized clipboard image
         m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
         m_clipboardImage.fill(Qt::transparent);
 
+        //Make new sized transparent version of clipboard image
         m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
         m_clipboardImageTransparent.fill(Qt::transparent);
 
-        m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+        //Set background image to new size
+        m_backgroundImage = genTransparentPixelsBackground(newWidth, newHeight);
 
+        //Paint old image onto new sized clipboard
         QPainter painter(&m_clipboardImage);
         painter.drawImage(m_clipboardImageBeforeOperation.rect(), m_clipboardImageBeforeOperation);
         painter.end();
 
+        //Paint old image onto new sized clipboard (transparent)
         QPainter transparentPainter(&m_clipboardImageTransparent);
         transparentPainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect(), m_clipboardImageBeforeOperationTransparent);
         transparentPainter.end();
