@@ -2679,7 +2679,7 @@ void PaintableClipboard::doResizeDragScale()
         m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
         m_clipboardImage.fill(Qt::transparent);
 
-        QImage m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+        m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
         m_clipboardImageTransparent.fill(Qt::transparent);
 
         m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
