@@ -2648,10 +2648,8 @@ void PaintableClipboard::doResizeDragScale()
 {
     //m_dimensionsRect has changed. If its out of range. Make it not so.
     const int yOffset = m_dimensionsRect.y();
-    if(m_dimensionsRect.y() < 0)
+    if(yOffset < 0)
     {
-
-
         m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
         m_dimensionsRect.setTop(0);
 
@@ -2659,37 +2657,41 @@ void PaintableClipboard::doResizeDragScale()
     }
 
     const int xOffset = m_dimensionsRect.x();
-    if(m_dimensionsRect.x() < 0)
+    if(xOffset < 0)
     {
-
-
         m_dimensionsRect.setRight(m_dimensionsRect.right() - xOffset);
         m_dimensionsRect.setLeft(0);
 
         m_dragX += xOffset;
     }
 
-    const int newWidth = m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width();
-    const int newHeight = m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height();
+    QImage m_clipboardImageTransparent;
+    if(xOffset == 0 && yOffset == 0)
+    {
+        m_clipboardImage = m_clipboardImageBeforeOperation;
+        m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+    }
+    else
+    {
+        const int newWidth = m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width();
+        const int newHeight = m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height();
 
-    m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
-    m_clipboardImage.fill(Qt::transparent);
+        m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+        m_clipboardImage.fill(Qt::transparent);
 
-    QImage m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
-    m_clipboardImageTransparent.fill(Qt::transparent);
+        QImage m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+        m_clipboardImageTransparent.fill(Qt::transparent);
 
-    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+        m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
 
-    QPainter painter(&m_clipboardImage);
-    painter.drawImage(m_clipboardImageBeforeOperation.rect()/*.translated(xOffset < 0 ? xOffset : 0, yOffset < 0 ? yOffset : 0)*/, m_clipboardImageBeforeOperation);
-    painter.end();
+        QPainter painter(&m_clipboardImage);
+        painter.drawImage(m_clipboardImageBeforeOperation.rect(), m_clipboardImageBeforeOperation);
+        painter.end();
 
-    QPainter transparentPainter(&m_clipboardImageTransparent);
-    transparentPainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect()/*.translated(xOffset < 0 ? xOffset : 0, yOffset < 0 ? yOffset : 0)*/, m_clipboardImageBeforeOperationTransparent);
-    transparentPainter.end();
-
-    //m_clipboardImage = m_clipboardImageBeforeOperation;
-    //QImage m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+        QPainter transparentPainter(&m_clipboardImageTransparent);
+        transparentPainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect(), m_clipboardImageBeforeOperationTransparent);
+        transparentPainter.end();
+    }
 
     //Scale
     scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
