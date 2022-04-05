@@ -2658,6 +2658,12 @@ void PaintableClipboard::doResizeDragScale()
     {
         m_clipboardImage = m_clipboardImageBeforeOperation;
         m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+
+        //Scale
+        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
+
+        //Scale selected transparent pixels (cheat by converting to black)
+        scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
     }
 
     //Means a new image size is required to fit the resize operation
@@ -2713,22 +2719,12 @@ void PaintableClipboard::doResizeDragScale()
         //Set background image to new size
         m_backgroundImage = genTransparentPixelsBackground(newWidth, newHeight);
 
-        //Paint old image onto new sized clipboard
-        QPainter painter(&m_clipboardImage);
-        painter.drawImage(m_clipboardImageBeforeOperation.rect(), m_clipboardImageBeforeOperation);
-        painter.end();
+        QPainter clipboardPainter(&m_clipboardImage);
+        clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
 
-        //Paint old image onto new sized clipboard (transparent)
-        QPainter transparentPainter(&m_clipboardImageTransparent);
-        transparentPainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect(), m_clipboardImageBeforeOperationTransparent);
-        transparentPainter.end();
+        QPainter tClipboardPainter(&m_clipboardImageTransparent);
+        tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);
     }
-
-    //Scale
-    scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
-
-    //Scale selected transparent pixels (cheat by converting to black)    
-    scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
     //Set new pixels based off scaled image
     m_pixels.clear();
