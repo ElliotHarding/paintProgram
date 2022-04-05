@@ -2651,17 +2651,17 @@ void PaintableClipboard::doResizeDragScale()
     const int xOffset = m_dimensionsRect.x();
 
     //Check if newley scaled image will fit inside existing image
-    QImage m_clipboardImageTransparent;
+    QImage clipboardImageTransparent;
     if(xOffset > -1 && yOffset > -1 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
     {
         m_clipboardImage = m_clipboardImageBeforeOperation;
-        m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+        clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
 
         //Scale
         scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
         //Scale selected transparent pixels (cheat by converting to black)
-        scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
+        scaleImageOntoSelf(clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
     }
 
     //Means a new image size is required to fit the resize operation
@@ -2711,8 +2711,8 @@ void PaintableClipboard::doResizeDragScale()
         m_clipboardImage.fill(Qt::transparent);
 
         //Make new sized transparent version of clipboard image
-        m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
-        m_clipboardImageTransparent.fill(Qt::transparent);
+        clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+        clipboardImageTransparent.fill(Qt::transparent);
 
         //Set background image to new size
         m_backgroundImage = genTransparentPixelsBackground(newWidth, newHeight);
@@ -2722,7 +2722,7 @@ void PaintableClipboard::doResizeDragScale()
         clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
 
         //Scale transparent
-        QPainter tClipboardPainter(&m_clipboardImageTransparent);
+        QPainter tClipboardPainter(&clipboardImageTransparent);
         tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);
     }
 
@@ -2736,7 +2736,7 @@ void PaintableClipboard::doResizeDragScale()
             {
                 m_pixels.push_back(QPoint(x,y));
             }
-            else if(m_clipboardImageTransparent.pixelColor(x,y).alpha() > 0)
+            else if(clipboardImageTransparent.pixelColor(x,y).alpha() > 0)
             {
                 m_pixels.push_back(QPoint(x,y));
             }
@@ -2792,17 +2792,32 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
     trans.rotate(mouseLocation.x() - m_previousDragPos.x());
     trans.translate(-m_dimensionsRect.center().x(), -m_dimensionsRect.center().y());
 
+    QRect dimensionsAfterRotation = trans.mapRect(m_dimensionsRect);
+
+    //const int xOffset = dimensionsAfterRotation.left();
+    const int yOffset = dimensionsAfterRotation.top();
+    if(/*xOffset < 0 ||*/ yOffset < 0)
+    {
+        //m_dragX += xOffset;
+        m_dragY += yOffset;
+        m_dimensionsRect.setTop(m_dimensionsRect.top() - yOffset);
+        m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
+
+        m_clipboardImage = QImage(QSize(m_clipboardImageBeforeOperation.width(), m_clipboardImageBeforeOperation.height() - yOffset), QImage::Format_ARGB32);
+        m_backgroundImage = genTransparentPixelsBackground(m_clipboardImageBeforeOperation.width(), m_clipboardImageBeforeOperation.height() - yOffset);
+    }
+
     m_clipboardImage.fill(Qt::transparent);
     QPainter clipboardRotatePainter(&m_clipboardImage);
     clipboardRotatePainter.setTransform(trans);
-    clipboardRotatePainter.drawImage(m_clipboardImageBeforeOperation.rect(), m_clipboardImageBeforeOperation);
+    clipboardRotatePainter.drawImage(m_clipboardImageBeforeOperation.rect().translated(0, (yOffset < 0 ? -yOffset : 0)), m_clipboardImageBeforeOperation);
     clipboardRotatePainter.end();
 
-    QImage m_clipboardImageTransparent = QImage(QSize(m_clipboardImageBeforeOperationTransparent.width(), m_clipboardImageBeforeOperationTransparent.height()), QImage::Format_ARGB32);
-    m_clipboardImageTransparent.fill(Qt::transparent);
-    QPainter transparentClipboardRotatePainter(&m_clipboardImageTransparent);
+    QImage clipboardImageTransparent = QImage(QSize(m_clipboardImageBeforeOperationTransparent.width(), m_clipboardImageBeforeOperationTransparent.height() + (yOffset < 0 ? -yOffset : 0)), QImage::Format_ARGB32);
+    clipboardImageTransparent.fill(Qt::transparent);
+    QPainter transparentClipboardRotatePainter(&clipboardImageTransparent);
     transparentClipboardRotatePainter.setTransform(trans);
-    transparentClipboardRotatePainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect(), m_clipboardImageBeforeOperationTransparent);
+    transparentClipboardRotatePainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect().translated(0, (yOffset < 0 ? -yOffset : 0)), m_clipboardImageBeforeOperationTransparent);
     transparentClipboardRotatePainter.end();
 
     m_pixels.clear();
@@ -2814,8 +2829,12 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
             {
                 m_pixels.push_back(QPoint(x,y));
             }
-            else if(m_clipboardImageTransparent.pixelColor(x, y).alpha() > 0)
+            else if(clipboardImageTransparent.pixelColor(x, y).alpha() > 0)
             {
+                if(y > 199)
+                {
+                    qDebug() << "Something went wrong";
+                }
                 m_pixels.push_back(QPoint(x, y));
             }
         }
