@@ -2648,33 +2648,39 @@ void PaintableClipboard::doResizeDragScale()
 {
     //m_dimensionsRect has changed. If its out of range. Make it not so.
     const int yOffset = m_dimensionsRect.y();
-    if(yOffset < 0)
-    {
-        m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
-        m_dimensionsRect.setTop(0);
-
-        m_dragY += yOffset;
-    }
-
     const int xOffset = m_dimensionsRect.x();
-    if(xOffset < 0)
-    {
-        m_dimensionsRect.setRight(m_dimensionsRect.right() - xOffset);
-        m_dimensionsRect.setLeft(0);
-
-        m_dragX += xOffset;
-    }
 
     QImage m_clipboardImageTransparent;
-    if(xOffset == 0 && yOffset == 0)
+    if(xOffset == 0 && yOffset == 0 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
     {
         m_clipboardImage = m_clipboardImageBeforeOperation;
         m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
     }
     else
     {
-        const int newWidth = m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width();
-        const int newHeight = m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height();
+        if(xOffset < 0)
+        {
+            m_dimensionsRect.setRight(m_dimensionsRect.right() - xOffset);
+            m_dimensionsRect.setLeft(0);
+
+            m_dragX += xOffset;
+        }
+
+        if(yOffset < 0)
+        {
+            m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
+            m_dimensionsRect.setTop(0);
+
+            m_dragY += yOffset;
+        }
+
+        const int newWidth = m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() ?
+                    m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width() :
+                    m_dimensionsRect.right();
+
+        const int newHeight = m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height() ?
+                    m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height() :
+                    m_dimensionsRect.bottom();
 
         m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
         m_clipboardImage.fill(Qt::transparent);
