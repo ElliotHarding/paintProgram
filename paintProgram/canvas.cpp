@@ -2343,8 +2343,8 @@ void PaintableClipboard::addImageToActiveClipboard(QImage& newPixelsImage)
     }
 
     //Create new clipboard image
-    const int newClipboardWidth = dimensionsRect.right() - m_dragX;
-    const int newClipboardHeight = dimensionsRect.bottom() - m_dragY;
+    const int newClipboardWidth = dimensionsRect.right() - m_dragX + 1;
+    const int newClipboardHeight = dimensionsRect.bottom() - m_dragY + 1;
     QImage newClipboardImage = QImage(QSize(newClipboardWidth, newClipboardHeight), QImage::Format_ARGB32);
     newClipboardImage.fill(Qt::transparent);
 
@@ -2923,8 +2923,8 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
     //2D vectorize selected pixels for quicker outline drawing
     QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels,
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() + 1 : m_pParentCanvas->getImageCopy().width(),
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() + 1 : m_pParentCanvas->getImageCopy().height());
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() : m_pParentCanvas->getImageCopy().width(),
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() : m_pParentCanvas->getImageCopy().height());
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     //Draw highlight outline
