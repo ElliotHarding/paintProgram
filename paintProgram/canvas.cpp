@@ -2811,6 +2811,16 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
         m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
     }
 
+    const int xOverRange = ceil(dimensionsAfterRotation.right() > m_clipboardImageBeforeOperation.width() ? dimensionsAfterRotation.right() - m_clipboardImageBeforeOperation.width() : 0);
+    if(xOverRange > 0)
+    {
+        m_clipboardImage = QImage(QSize(m_clipboardImageBeforeOperation.width() + xOverRange, m_clipboardImageBeforeOperation.height()), QImage::Format_ARGB32);
+        m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+    }
+
+    const int yOverRange = ceil(dimensionsAfterRotation.bottom() > m_clipboardImageBeforeOperation.height() ? dimensionsAfterRotation.bottom() - m_clipboardImageBeforeOperation.height() : 0);
+
+
     m_clipboardImage.fill(Qt::transparent);
     QPainter clipboardRotatePainter(&m_clipboardImage);
     clipboardRotatePainter.setTransform(trans);
