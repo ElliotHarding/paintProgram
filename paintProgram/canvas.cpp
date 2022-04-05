@@ -2407,6 +2407,9 @@ void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea
         {
             m_pixels.push_back(QPoint(x,y));
             newPixelsImage.setPixelColor(x, y, canvas.pixelColor(x,y));
+
+            //Rip from canvas
+            canvas.setPixelColor(x, y, Qt::transparent);
         }
     }
 
@@ -2457,6 +2460,9 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
             {
                 m_pixels.push_back(QPoint(x,y));
                 newPixelsImage.setPixelColor(x, y, canvas.pixelColor(x,y));
+
+                //Rip from canvas
+                canvas.setPixelColor(x, y, Qt::transparent);
             }
         }
     }
