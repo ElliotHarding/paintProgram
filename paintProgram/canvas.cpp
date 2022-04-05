@@ -2675,21 +2675,26 @@ void PaintableClipboard::doResizeDragScale()
     m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
     m_clipboardImage.fill(Qt::transparent);
 
+    QImage m_clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+    m_clipboardImageTransparent.fill(Qt::transparent);
+
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
 
     QPainter painter(&m_clipboardImage);
-    painter.drawImage(m_clipboardImageBeforeOperation.rect().translated(xOffset < 0 ? xOffset : 0, yOffset < 0 ? yOffset : 0), m_clipboardImageBeforeOperation);
+    painter.drawImage(m_clipboardImageBeforeOperation.rect()/*.translated(xOffset < 0 ? xOffset : 0, yOffset < 0 ? yOffset : 0)*/, m_clipboardImageBeforeOperation);
     painter.end();
 
-    //m_clipboardImage = m_clipboardImageBeforeOperation;
+    QPainter transparentPainter(&m_clipboardImageTransparent);
+    transparentPainter.drawImage(m_clipboardImageBeforeOperationTransparent.rect()/*.translated(xOffset < 0 ? xOffset : 0, yOffset < 0 ? yOffset : 0)*/, m_clipboardImageBeforeOperationTransparent);
+    transparentPainter.end();
 
-    //Todo do also transparent
+    //m_clipboardImage = m_clipboardImageBeforeOperation;
+    //QImage m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
 
     //Scale
     scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
-    //Scale selected transparent pixels (cheat by converting to black)
-    QImage m_clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+    //Scale selected transparent pixels (cheat by converting to black)    
     scaleImageOntoSelf(m_clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
 
     //Set new pixels based off scaled image
