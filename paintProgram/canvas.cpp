@@ -2702,13 +2702,6 @@ bool PaintableClipboard::checkStartResizeDrag(QImage &canvasImage, QPointF mouse
     return false;
 }
 
-void scaleImageOntoImage(QImage& hostImage, QImage& sourceImage, QRect& oldDimensions, QRect& newDimensions)
-{
-    hostImage.fill(Qt::transparent);
-    QPainter clipboardPainter(&hostImage);
-    clipboardPainter.drawImage(newDimensions, sourceImage, oldDimensions);
-}
-
 void PaintableClipboard::doResizeDragScale()
 {
     //m_dimensionsRect has changed. If its out of range. Make it not so.
