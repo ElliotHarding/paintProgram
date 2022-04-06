@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QPair>
 #include <stack>
 #include <cmath>
 #include <math.h>
@@ -2175,6 +2176,7 @@ void PaintableClipboard::setClipboard(Clipboard clipboard)
     m_pixels = clipboard.m_pixels;
     m_dragX = clipboard.m_dragX;
     m_dragY = clipboard.m_dragY;
+    updatePixelBorders();
     updateDimensionsRect();
     update();
 }
@@ -2210,9 +2212,8 @@ void PaintableClipboard::setImage(QImage& image)
             }
         }
     }
-
+    updatePixelBorders();
     updateDimensionsRect();
-
     update();
 }
 
@@ -2281,6 +2282,45 @@ QVector<QPoint> PaintableClipboard::getPixelsOffset()
         p.setY(p.y() + m_dragY);
     }
     return pixels;
+}
+
+void PaintableClipboard::updatePixelBorders()
+{
+    //2D vectorize selected pixels for quicker outline drawing
+    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels,
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() + 1 : m_pParentCanvas->getImageCopy().width() + 1,
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() + 1 : m_pParentCanvas->getImageCopy().height() + 1);
+
+    m_pixelBorders.clear();
+    for(QPoint& p : m_pixels)
+    {
+        const int x = p.x();
+        const int y = p.y();
+
+        //border right
+        if(!selectedPixelsVector[x+1][y])
+        {
+            m_pixelBorders.push_back(QPair<QPoint, QPoint>(QPoint(x + 1, y ), QPoint(x + 1, y + 1)));
+        }
+
+        //border left
+        if(x == 0 || !selectedPixelsVector[x-1][y])
+        {
+            m_pixelBorders.push_back(QPair<QPoint, QPoint>(QPoint(x, y), QPoint(x, y + 1)));
+        }
+
+        //border bottom
+        if(!selectedPixelsVector[x][y+1])
+        {
+            m_pixelBorders.push_back(QPair<QPoint, QPoint>(QPoint(x, y + 1.0), QPoint(x + 1.0, y + 1.0)));
+        }
+
+        //border top
+        if(y == 0 || !selectedPixelsVector[x][y-1])
+        {
+            m_pixelBorders.push_back(QPair<QPoint, QPoint>(QPoint(x, y), QPoint(x + 1.0, y)));
+        }
+    }
 }
 
 bool PaintableClipboard::checkStartNormalDragging(QImage &canvas, QPoint mouseLocation)
@@ -2375,6 +2415,7 @@ void PaintableClipboard::addImageToActiveClipboard(QImage& newPixelsImage)
     m_clipboardImage = newClipboardImage;
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
 
+    updatePixelBorders();
     updateDimensionsRect();
     update();
 }
@@ -2405,6 +2446,7 @@ void PaintableClipboard::addPixels(QImage& canvas, QRubberBand* newSelectionArea
         //Remove duplicates
         m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
 
+        updatePixelBorders();
         updateDimensionsRect();
         update();
 
@@ -2455,6 +2497,7 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
         //Remove duplicates
         m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
 
+        updatePixelBorders();
         updateDimensionsRect();
         update();
 
@@ -2762,7 +2805,7 @@ void PaintableClipboard::doResizeDragScale()
             }
         }
     }
-
+    updatePixelBorders();
     updateDimensionsRect();
     update();
 }
@@ -2857,6 +2900,7 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
             }
         }
     }
+    updatePixelBorders();
     update();
 }
 
@@ -2884,6 +2928,7 @@ void PaintableClipboard::reset()
     m_dragY = 0;
     m_pixels.clear();
     m_dimensionsRect = QRect();
+    updatePixelBorders();
     update();
 }
 
@@ -2912,17 +2957,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
-    //Outline
-    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
-    painter.setPen(selectionOutlinePen);
-
-    //2D vectorize selected pixels for quicker outline drawing
-    QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels,
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() + 1 : m_pParentCanvas->getImageCopy().width() + 1,
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() + 1 : m_pParentCanvas->getImageCopy().height() + 1);
-
-    //Draw transparent selected pixels ~ todo - So inneficient! look for something else
-    //Draw highlight outline
+    //Draw transparent selected pixels & highlight overlay for selected pixels
     for(QPoint& p : m_pixels)
     {
         const int x = p.x();
@@ -2934,33 +2969,17 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
             {
                 painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), m_backgroundImage.pixelColor(x, y));
             }
-        }        
+        }
 
         painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColor);
+    }
 
-        //border right
-        if(!selectedPixelsVector[x+1][y])
-        {
-            painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
-        }
-
-        //border left
-        if(x == 0 || !selectedPixelsVector[x-1][y])
-        {
-            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
-        }
-
-        //border bottom
-        if(!selectedPixelsVector[x][y+1])
-        {
-            painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
-        }
-
-        //border top
-        if(y == 0 || !selectedPixelsVector[x][y-1])
-        {
-            painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
-        }
+    //Draw highlight outline
+    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
+    painter.setPen(selectionOutlinePen);
+    for(QPair<QPoint, QPoint>& line : m_pixelBorders)
+    {
+        painter.drawLine(line.first + QPoint(offsetX, offsetY), line.second + QPoint(offsetX, offsetY));
     }
 
     //Draw nubbles that scale/rotate dimension of clipboard

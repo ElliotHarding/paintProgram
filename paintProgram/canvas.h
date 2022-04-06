@@ -124,6 +124,10 @@ private:
     bool isHighlighted(const int& x, const int& y);
     QVector<QPoint> getPixelsOffset();
 
+    ///Pixels borders
+    QList<QPair<QPoint, QPoint>> m_pixelBorders;
+    void updatePixelBorders();
+
     enum OperationMode
     {
         NoOperation,
