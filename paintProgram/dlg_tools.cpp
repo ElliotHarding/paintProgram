@@ -8,7 +8,7 @@ DLG_Tools::DLG_Tools(QWidget *parent) :
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     setFixedWidth(64);
-    setFixedHeight(195);
+    setFixedHeight(229);
 
     m_currentTool = TOOL_PAINT;
     ui->btn_paintTool->setFlat(false);

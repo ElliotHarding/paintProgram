@@ -1727,10 +1727,10 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(mouseEvent->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
 
-    //If not dragging, and clipboard shows something. Dump it.
+    //If not dragging or rotating, and clipboard shows something. Dump it.
     // Unless : selecting and holding ctrl
     // Unless : writing text
-    if(m_tool != TOOL_DRAG && m_pClipboardPixels->clipboardActive() &&
+    if(m_tool != TOOL_DRAG && m_tool != TOOL_ROTATE && m_pClipboardPixels->clipboardActive() &&
       !(m_pParent->isCtrlPressed() && (m_tool == TOOL_SELECT || m_tool == TOOL_SPREAD_ON_SIMILAR)) &&
        m_tool != TOOL_TEXT)
     {
@@ -1748,7 +1748,8 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     else if(m_pClipboardPixels->containsPixels() &&
             m_tool != TOOL_SELECT &&
             m_tool != TOOL_SPREAD_ON_SIMILAR &&
-            m_tool != TOOL_DRAG)
+            m_tool != TOOL_DRAG &&
+            m_tool != TOOL_ROTATE)
     {
         m_pClipboardPixels->reset();
     }
@@ -1850,7 +1851,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
     {
         m_canvasHistory.recordHistory(getSnapshot());
     }   
-    else if(m_tool == TOOL_DRAG)
+    else if(m_tool == TOOL_DRAG || m_tool == TOOL_ROTATE)
     {
         if(m_pClipboardPixels->checkFinishOperation())
         {
