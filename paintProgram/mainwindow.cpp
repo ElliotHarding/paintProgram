@@ -347,6 +347,10 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
         m_dlg_layers->move(geometry().right() - m_dlg_layers->width(), geometry().bottom() - m_dlg_layers->height() - titleBarHeight);
 
         m_dlg_blurSettings->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_blurSettings->geometry().width()/2, geometry().top());
+
+        m_dlg_effectsSliders->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_effectsSliders->geometry().width()/2, geometry().top());
+
+        m_dlg_sketch->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_sketch->geometry().width()/2, geometry().top());
     }
 }
 
