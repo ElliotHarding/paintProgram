@@ -103,9 +103,6 @@ public:
     void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     bool checkFinishOperation();
 
-    ///Rotating
-    bool updateOfferRotate(QPoint mouseLocation);
-
     ///Reset/clear
     void reset();
 
@@ -150,7 +147,6 @@ private:
     void completeResizeDrag();
 
     ///Rotate dragging
-    bool m_bOfferingRotate = false;
     bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation);
     void doRotateDrag(QPointF mouseLocation);
     void completeRotateDrag();

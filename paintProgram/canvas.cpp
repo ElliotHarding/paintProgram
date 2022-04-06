@@ -42,10 +42,6 @@ const float ZoomPanFactor = 0.1;
 //Dragging
 const int DragNubbleSize = 8;
 const QPoint NullDragPoint = QPoint(0,0);
-
-//Rotating
-const int OfferRotateBoundaryMargin = 20;
-const int OfferRotateBoundaryPadding = 2;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -1877,20 +1873,6 @@ void Canvas::onParentMouseMove(QMouseEvent *event)
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
     emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
 
-    if(m_tool == TOOL_DRAG)
-    {
-        if(m_pClipboardPixels->updateOfferRotate(mouseLocation))
-        {
-            QCursor c(Qt::CursorShape::DragMoveCursor);
-            setCursor(c);
-        }
-        else
-        {
-            QCursor c(Qt::CursorShape::ArrowCursor);
-            setCursor(c);
-        }
-    }
-
     m_canvasMutex.unlock();
 }
 
@@ -2580,25 +2562,6 @@ bool PaintableClipboard::checkFinishOperation()
     return false;
 }
 
-bool PaintableClipboard::updateOfferRotate(QPoint mouseLocation)
-{
-    if(m_pixels.size() > 0)
-    {
-        if(mouseLocation.y() > m_dimensionsRect.top() - Constants::OfferRotateBoundaryMargin + m_dragY && mouseLocation.y() < m_dimensionsRect.bottom() + Constants::OfferRotateBoundaryMargin + m_dragY &&
-           mouseLocation.x() > m_dimensionsRect.left() - Constants::OfferRotateBoundaryMargin + m_dragX && mouseLocation.x() < m_dimensionsRect.right() + Constants::OfferRotateBoundaryMargin + m_dragX
-                &&
-           (mouseLocation.y() < m_dimensionsRect.top() - Constants::OfferRotateBoundaryPadding + m_dragY || mouseLocation.y() > m_dimensionsRect.bottom() + Constants::OfferRotateBoundaryPadding + m_dragY ||
-            mouseLocation.x() < m_dimensionsRect.left() - Constants::OfferRotateBoundaryPadding + m_dragX || mouseLocation.x() > m_dimensionsRect.right() + Constants::OfferRotateBoundaryPadding + m_dragX))
-        {
-            m_bOfferingRotate = true;
-            return m_bOfferingRotate;
-        }
-    }
-
-    m_bOfferingRotate = false;
-    return m_bOfferingRotate;
-}
-
 void PaintableClipboard::startNormalDragging(QPoint mouseLocation)
 {
     m_previousDragPos = mouseLocation;
@@ -2800,21 +2763,16 @@ void PaintableClipboard::completeResizeDrag()
 
 bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation)
 {
-    if(m_bOfferingRotate)
+    m_previousDragPos = QPoint(mouseLocation.x(), mouseLocation.y());
+
+    if(!clipboardActive())
     {
-        m_previousDragPos = QPoint(mouseLocation.x(), mouseLocation.y());
-
-        if(!clipboardActive())
-        {
-            generateClipboardSteal(canvasImage);
-        }
-
-        prepResizeOrRotateDrag();
-        m_operationMode = RotateOperation;
-        return true;
+        generateClipboardSteal(canvasImage);
     }
 
-    return false;
+    prepResizeOrRotateDrag();
+    m_operationMode = RotateOperation;
+    return true;
 }
 
 void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
