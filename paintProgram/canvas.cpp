@@ -2918,46 +2918,46 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
     //2D vectorize selected pixels for quicker outline drawing
     QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels,
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() : m_pParentCanvas->getImageCopy().width(),
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() : m_pParentCanvas->getImageCopy().height());
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() + 1 : m_pParentCanvas->getImageCopy().width() + 1,
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() + 1 : m_pParentCanvas->getImageCopy().height() + 1);
 
     //Draw transparent selected pixels ~ todo - So inneficient! look for something else
     //Draw highlight outline
     for(QPoint& p : m_pixels)
     {
-        if(m_clipboardImage != QImage())
-        {
-            if(m_clipboardImage.pixelColor(p.x(), p.y()).alpha() == 0)
-            {
-                painter.fillRect(QRect(p.x() + offsetX, p.y() + offsetY, 1, 1), m_backgroundImage.pixelColor(p.x(), p.y()));
-            }
-        }
-
         const int x = p.x();
         const int y = p.y();
+
+        if(m_clipboardImage != QImage())
+        {
+            if(m_clipboardImage.pixelColor(x, y).alpha() == 0)
+            {
+                painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), m_backgroundImage.pixelColor(x, y));
+            }
+        }        
 
         painter.fillRect(QRect(x + offsetX, y + offsetY, 1, 1), Constants::SelectionAreaColor);
 
         //border right
-        if(x == selectedPixelsVector.size()-1 || (x + 1 < selectedPixelsVector.size() && !selectedPixelsVector[x+1][y]))
+        if(!selectedPixelsVector[x+1][y])
         {
             painter.drawLine(QPoint(x + offsetX + 1, y + offsetY), QPoint(x + offsetX + 1, y + offsetY + 1));
         }
 
         //border left
-        if(x == 0 || (x > 0 && !selectedPixelsVector[x-1][y]))
+        if(x == 0 || !selectedPixelsVector[x-1][y])
         {
             painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX, y + offsetY + 1));
         }
 
         //border bottom
-        if(y == selectedPixelsVector[x].size()-1 || (y + 1 < selectedPixelsVector.size() && !selectedPixelsVector[x][y+1]))
+        if(!selectedPixelsVector[x][y+1])
         {
             painter.drawLine(QPoint(x + offsetX, y + offsetY + 1.0), QPoint(x + offsetX + 1.0, y + offsetY + 1.0));
         }
 
         //border top
-        if(y == 0 || (y > 0 && !selectedPixelsVector[x][y-1]))
+        if(y == 0 || !selectedPixelsVector[x][y-1])
         {
             painter.drawLine(QPoint(x + offsetX, y + offsetY), QPoint(x + offsetX + 1.0, y + offsetY));
         }
