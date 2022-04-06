@@ -14,8 +14,6 @@
 
 #include "mainwindow.h"
 
-//Bugs : saving clipboard before effects and saving clipboard for snapshot does not take into account the drag offsets of the clipboard.
-
 namespace Constants
 {
 
