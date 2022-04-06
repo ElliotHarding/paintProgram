@@ -29,6 +29,12 @@ void DLG_EffectsSliders::resetValues()
     ui->slider_blueLimit->setValue(255);
 }
 
+void DLG_EffectsSliders::closeEvent(QCloseEvent *e)
+{
+    emit cancelEffects();
+    QDialog::closeEvent(e);
+}
+
 void DLG_EffectsSliders::show()
 {
     resetValues();

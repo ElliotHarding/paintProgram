@@ -38,6 +38,8 @@ private:
     Ui::DLG_Sketch *ui;
 
     void reset();
+
+    void closeEvent(QCloseEvent *e) override;
 };
 
 #endif // DLG_SKETCH_H

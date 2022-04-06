@@ -47,6 +47,8 @@ private:
     Ui::DLG_EffectsSliders *ui;
 
     void resetValues();
+
+    void closeEvent(QCloseEvent* e) override;
 };
 
 #endif // DLG_EFFECTSSLIDERS_H

@@ -53,6 +53,12 @@ void DLG_Sketch::reset()
     ui->spinBox_outline->setValue(0);
 }
 
+void DLG_Sketch::closeEvent(QCloseEvent *e)
+{
+    emit cancelEffects();
+    QDialog::closeEvent(e);
+}
+
 void DLG_Sketch::on_btn_ok_clicked()
 {
     emit confirmEffects();
