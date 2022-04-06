@@ -43,49 +43,28 @@ enum DragNubblePos
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// DragNubble
+/// ResizeNubble
 ///
-class DragNubble
+class ResizeNubble
 {
 public:
-    DragNubble();
-    ~DragNubble(){}
+    ResizeNubble(std::function<void(QRect&, const QPointF&)> operation);
+    ResizeNubble(){}
 
     ///Dragging
     void setDragging(const bool dragging);
     bool isStartDragging(const QPointF &mouseLocation, QPointF location, const float& zoom);
     bool isDragging();
+    void doDragging(const QPointF &mouseLocation, QRect& rect);
 
     void draw(QPainter &painter, const float& zoom, const QPointF location);
 
-protected:
-    bool m_bIsDragging = false;
-
-    QImage m_image;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ResizeNubble
-///
-class ResizeNubble : public DragNubble
-{
-public:
-    ResizeNubble(std::function<void(QRect&, const QPointF&)> operation);
-    ResizeNubble();//todo fix and remove this
-
-    void doDragging(const QPointF &mouseLocation, QRect& rect);
-
 private:
     std::function<void (QRect&, const QPointF&)> m_operation;
-};
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// RotateNubble
-///
-class RotateNubble : public DragNubble
-{
-public:
-    RotateNubble();
+    bool m_bIsDragging = false;
+
+    inline static QImage m_image = QImage();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +102,9 @@ public:
     ///Dragging
     void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
     bool checkFinishOperation();
+
+    ///Rotating
+    bool updateOfferRotate(QPoint mouseLocation);
 
     ///Reset/clear
     void reset();
@@ -168,8 +150,8 @@ private:
     void completeResizeDrag();
 
     ///Rotate dragging
-    RotateNubble m_rotateNubble;
-    bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
+    bool m_bOfferingRotate = false;
+    bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation);
     void doRotateDrag(QPointF mouseLocation);
     void completeRotateDrag();
 

@@ -42,7 +42,10 @@ const float ZoomPanFactor = 0.1;
 //Dragging
 const int DragNubbleSize = 8;
 const QPoint NullDragPoint = QPoint(0,0);
-const int RotateNubbleOffset = 10;
+
+//Rotating
+const int OfferRotateBoundaryMargin = 20;
+const int OfferRotateBoundaryPadding = 2;
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -1874,6 +1877,20 @@ void Canvas::onParentMouseMove(QMouseEvent *event)
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
     emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
 
+    if(m_tool == TOOL_DRAG)
+    {
+        if(m_pClipboardPixels->updateOfferRotate(mouseLocation))
+        {
+            QCursor c(Qt::CursorShape::DragMoveCursor);
+            setCursor(c);
+        }
+        else
+        {
+            QCursor c(Qt::CursorShape::ArrowCursor);
+            setCursor(c);
+        }
+    }
+
     m_canvasMutex.unlock();
 }
 
@@ -2505,7 +2522,7 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
             qDebug() << "PaintableClipboard:: - Starting resize operation";
         }
 
-        else if(checkRotateDrag(canvasImage, offsetMouseLocation, zoom))
+        else if(checkRotateDrag(canvasImage, offsetMouseLocation))
         {
             qDebug() << "PaintableClipboard:: - Starting rotate operation";
         }
@@ -2561,6 +2578,25 @@ bool PaintableClipboard::checkFinishOperation()
     }
 
     return false;
+}
+
+bool PaintableClipboard::updateOfferRotate(QPoint mouseLocation)
+{
+    if(m_pixels.size() > 0)
+    {
+        if(mouseLocation.y() > m_dimensionsRect.top() - Constants::OfferRotateBoundaryMargin + m_dragY && mouseLocation.y() < m_dimensionsRect.bottom() + Constants::OfferRotateBoundaryMargin + m_dragY &&
+           mouseLocation.x() > m_dimensionsRect.left() - Constants::OfferRotateBoundaryMargin + m_dragX && mouseLocation.x() < m_dimensionsRect.right() + Constants::OfferRotateBoundaryMargin + m_dragX
+                &&
+           (mouseLocation.y() < m_dimensionsRect.top() - Constants::OfferRotateBoundaryPadding + m_dragY || mouseLocation.y() > m_dimensionsRect.bottom() + Constants::OfferRotateBoundaryPadding + m_dragY ||
+            mouseLocation.x() < m_dimensionsRect.left() - Constants::OfferRotateBoundaryPadding + m_dragX || mouseLocation.x() > m_dimensionsRect.right() + Constants::OfferRotateBoundaryPadding + m_dragX))
+        {
+            m_bOfferingRotate = true;
+            return m_bOfferingRotate;
+        }
+    }
+
+    m_bOfferingRotate = false;
+    return m_bOfferingRotate;
 }
 
 void PaintableClipboard::startNormalDragging(QPoint mouseLocation)
@@ -2762,9 +2798,9 @@ void PaintableClipboard::completeResizeDrag()
     m_operationMode = NoOperation;
 }
 
-bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation, const float& zoom)
+bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation)
 {
-    if(m_rotateNubble.isStartDragging(mouseLocation, QPoint(m_dimensionsRect.topRight().x() + Constants::RotateNubbleOffset, m_dimensionsRect.topRight().y() - Constants::RotateNubbleOffset), zoom))
+    if(m_bOfferingRotate)
     {
         m_previousDragPos = QPoint(mouseLocation.x(), mouseLocation.y());
 
@@ -2969,7 +3005,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     }
 
     //Draw nubbles that scale/rotate dimension of clipboard
-    if(m_pixels.size() > 0)
+    if(m_pixels.size() > 0 && m_operationMode != RotateOperation)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
 
@@ -2978,8 +3014,6 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         {
             m_resizeNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
         }
-
-        m_rotateNubble.draw(painter, zoom, QPoint(translatedDimensions.topRight().x() + Constants::RotateNubbleOffset, translatedDimensions.topRight().y() - Constants::RotateNubbleOffset));
     }
 }
 
@@ -3024,23 +3058,32 @@ bool CanvasHistory::undoHistory(CanvasHistoryItem& canvasSnapShot)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// DragNubble
+/// ResizeNubble
 ///
-DragNubble::DragNubble()
+ResizeNubble::ResizeNubble(std::function<void (QRect &, const QPointF &)> operation) :
+    m_operation(operation)
 {
+    //Static m_image shared across all instances of DragNubble
+    if(m_image.isNull())
+    {
+        m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
+        m_image.fill(Qt::black);
+        QPainter nubbleImagePainter(&m_image);
+        nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
+    }
 }
 
-bool DragNubble::isDragging()
+bool ResizeNubble::isDragging()
 {
     return m_bIsDragging;
 }
 
-void DragNubble::setDragging(bool dragging)
+void ResizeNubble::setDragging(bool dragging)
 {
     m_bIsDragging = dragging;
 }
 
-bool DragNubble::isStartDragging(const QPointF& mouseLocation, QPointF location, const float& zoom)
+bool ResizeNubble::isStartDragging(const QPointF& mouseLocation, QPointF location, const float& zoom)
 {
     const float nubbleSize = Constants::DragNubbleSize/zoom;
     const float halfNubbleSize = nubbleSize/2;
@@ -3054,7 +3097,12 @@ bool DragNubble::isStartDragging(const QPointF& mouseLocation, QPointF location,
     return false;
 }
 
-void DragNubble::draw(QPainter &painter, const float& zoom, const QPointF location)
+void ResizeNubble::doDragging(const QPointF &mouseLocation, QRect &rect)
+{
+    m_operation(rect, mouseLocation);
+}
+
+void ResizeNubble::draw(QPainter &painter, const float& zoom, const QPointF location)
 {
     const float nubbleSize = Constants::DragNubbleSize / zoom;
     const float halfNubbleSize = nubbleSize/2;
@@ -3062,36 +3110,4 @@ void DragNubble::draw(QPainter &painter, const float& zoom, const QPointF locati
     painter.drawImage(QRectF(location.x() - halfNubbleSize, location.y() - halfNubbleSize, nubbleSize, nubbleSize),
                       m_image,
                       m_image.rect());
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// ResizeNubble
-///
-ResizeNubble::ResizeNubble(std::function<void (QRect &, const QPointF &)> operation) : DragNubble(),
-    m_operation(operation)
-{
-    m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
-    m_image.fill(Qt::black);
-    QPainter nubbleImagePainter(&m_image);
-    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
-}
-
-ResizeNubble::ResizeNubble() : DragNubble() //todo - remove this
-{
-}
-
-void ResizeNubble::doDragging(const QPointF &mouseLocation, QRect &rect)
-{
-    m_operation(rect, mouseLocation);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// RotateNubble
-///
-RotateNubble::RotateNubble() : DragNubble()
-{
-    m_image = QImage(QSize(Constants::DragNubbleSize, Constants::DragNubbleSize), QImage::Format_ARGB32);
-    m_image.fill(Qt::black);
-    QPainter nubbleImagePainter(&m_image);
-    nubbleImagePainter.fillRect(QRect(1, 1, Constants::DragNubbleSize - 2, Constants::DragNubbleSize - 2), Qt::white);
 }
