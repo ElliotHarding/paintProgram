@@ -130,8 +130,7 @@ private:
 
     ///Normal Dragging
     QPoint m_previousDragPos;
-    void completeNormalDrag();
-    bool checkNormalDragging(QImage& canvas, QPoint mouseLocation);
+    bool checkStartNormalDragging(QImage& canvas, QPoint mouseLocation);
     void doNormalDragging(QPoint mouseLocation);
 
     ///Resize & rotate dragging (shared stuff)
@@ -143,14 +142,12 @@ private:
     QMap<DragNubblePos, ResizeNubble> m_resizeNubbles;
     QRect m_dimensionsRectBeforeOperation = QRect();
     void doResizeDrag(QPointF mouseLocation);
-    bool checkResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
+    bool checkStartResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
     void doResizeDragScale();
-    void completeResizeDrag();
 
     ///Rotate dragging
-    bool checkRotateDrag(QImage& canvasImage, QPointF mouseLocation);
+    bool checkStartRotateDrag(QImage& canvasImage, QPointF mouseLocation);
     void doRotateDrag(QPointF mouseLocation);
-    void completeRotateDrag();
 
     ///Nubble dimensions rect
     QRect m_dimensionsRect = QRect();

@@ -41,7 +41,6 @@ const float ZoomPanFactor = 0.1;
 
 //Dragging
 const int DragNubbleSize = 8;
-const QPoint NullDragPoint = QPoint(0,0);
 }
 
 QImage genTransparentPixelsBackground(const int width, const int height)
@@ -2076,7 +2075,6 @@ void Canvas::updateCenter()
 /// PaintableClipboard
 ///
 PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
-    m_previousDragPos(Constants::NullDragPoint),
     m_pParentCanvas(parent)
 {
     setGeometry(0, 0, parent->width(), parent->height());
@@ -2177,7 +2175,6 @@ void PaintableClipboard::setClipboard(Clipboard clipboard)
     m_clipboardImage = clipboard.m_clipboardImage;
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
     m_pixels = clipboard.m_pixels;
-    m_previousDragPos = Constants::NullDragPoint;
     m_dragX = clipboard.m_dragX;
     m_dragY = clipboard.m_dragY;
     updateDimensionsRect();
@@ -2288,13 +2285,7 @@ QVector<QPoint> PaintableClipboard::getPixelsOffset()
     return pixels;
 }
 
-void PaintableClipboard::completeNormalDrag()
-{
-    m_previousDragPos = Constants::NullDragPoint;
-    m_operationMode = NoOperation;
-}
-
-bool PaintableClipboard::checkNormalDragging(QImage &canvas, QPoint mouseLocation)
+bool PaintableClipboard::checkStartNormalDragging(QImage &canvas, QPoint mouseLocation)
 {
     //check if mouse is over selection area
     if(isHighlighted(mouseLocation.x(), mouseLocation.y()))
@@ -2528,14 +2519,14 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     }
 
     //Try do resize operation
-    if(checkResizeDrag(canvasImage, offsetMouseLocation, zoom))
+    if(checkStartResizeDrag(canvasImage, offsetMouseLocation, zoom))
     {
         qDebug() << "PaintableClipboard:: - Starting resize operation";
         return;
     }
 
     //Try do normal drag operation
-    if(checkNormalDragging(canvasImage, mouseLocation))
+    if(checkStartNormalDragging(canvasImage, mouseLocation))
     {
         qDebug() << "PaintableClipboard:: - Starting drag operation";
         return;
@@ -2548,7 +2539,7 @@ void PaintableClipboard::checkRotating(QImage &canvasImage, QPoint mouseLocation
     {
         doRotateDrag(mouseLocation);
     }
-    else if(checkRotateDrag(canvasImage, mouseLocation))
+    else if(checkStartRotateDrag(canvasImage, mouseLocation))
     {
         qDebug() << "PaintableClipboard:: - Starting rotate operation";
     }
@@ -2558,7 +2549,7 @@ bool PaintableClipboard::checkFinishOperation()
 {
     if(m_operationMode == DragOperation)
     {
-        completeNormalDrag();
+        m_operationMode = NoOperation;
         return true;
     }
 
@@ -2570,19 +2561,20 @@ bool PaintableClipboard::checkFinishOperation()
             if(m_resizeNubbles[nubblePos].isDragging())
             {
                 m_resizeNubbles[nubblePos].setDragging(false);
-                completeResizeDrag();
+                m_operationMode = NoOperation;
                 return true;
             }
         }
 
-        completeResizeDrag();
+        m_operationMode = NoOperation;
         qDebug() << "PaintableClipboard::checkFinishDragging - Something went wrong";
         return true;
     }
 
     else if(m_operationMode == RotateOperation)
     {
-        completeRotateDrag();
+        m_operationMode = NoOperation;
+        updateDimensionsRect();
         return true;
     }
 
@@ -2652,7 +2644,7 @@ void PaintableClipboard::doResizeDrag(QPointF mouseLocation)
     qDebug() << "PaintableClipboard::doResizeDrag - Something went wrong";
 }
 
-bool PaintableClipboard::checkResizeDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom)
+bool PaintableClipboard::checkStartResizeDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom)
 {
     //Check if a nubble is being selected
     const QList nubbleKeys = m_resizeNubbles.keys();
@@ -2777,12 +2769,7 @@ void PaintableClipboard::doResizeDragScale()
     update();
 }
 
-void PaintableClipboard::completeResizeDrag()
-{
-    m_operationMode = NoOperation;
-}
-
-bool PaintableClipboard::checkRotateDrag(QImage &canvasImage, QPointF mouseLocation)
+bool PaintableClipboard::checkStartRotateDrag(QImage &canvasImage, QPointF mouseLocation)
 {
     m_previousDragPos = QPoint(mouseLocation.x(), mouseLocation.y());
 
@@ -2875,15 +2862,6 @@ void PaintableClipboard::doRotateDrag(QPointF mouseLocation)
     update();
 }
 
-void PaintableClipboard::completeRotateDrag()
-{
-    m_previousDragPos = Constants::NullDragPoint;
-    m_operationMode = NoOperation;
-
-    updateDimensionsRect();
-    update();    
-}
-
 void PaintableClipboard::prepResizeOrRotateDrag()
 {
     m_clipboardImageBeforeOperation = m_clipboardImage;
@@ -2904,7 +2882,6 @@ void PaintableClipboard::reset()
 {
     m_clipboardImage = QImage();
     m_backgroundImage = QImage();
-    m_previousDragPos = Constants::NullDragPoint;
     m_dragX = 0;
     m_dragY = 0;
     m_pixels.clear();
