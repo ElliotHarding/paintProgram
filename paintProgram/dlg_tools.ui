@@ -323,7 +323,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/Resources/icon-text.png</normaloff>:/Resources/icon-text.png</iconset>
+     <normaloff>:/Resources/icon-redo.png</normaloff>:/Resources/icon-redo.png</iconset>
    </property>
    <property name="iconSize">
     <size>
