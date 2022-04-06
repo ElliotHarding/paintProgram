@@ -3001,7 +3001,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
         painter.drawLine(line.first + offset, line.second + offset);
     }
 
-    //Draw nubbles that scale/rotate dimension of clipboard
+    //Draw nubbles that scale dimension of clipboard
     if(m_pixels.size() > 0 && m_pParentCanvas->currentTool() == TOOL_DRAG)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated(offsetX, offsetY);
