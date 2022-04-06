@@ -2080,7 +2080,7 @@ PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
     setGeometry(0, 0, parent->width(), parent->height());
 
     m_pOutlineDrawTimer = new QTimer(this);
-    connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(update()));
+    connect(m_pOutlineDrawTimer, SIGNAL(timeout()), this, SLOT(onSwitchOutlineColor()));
     m_pOutlineDrawTimer->start(Constants::SelectedPixelsOutlineFlashFrequency);
 
     m_resizeNubbles.insert(DragNubblePos::TopLeft, ResizeNubble([&](QRect& dimensions, const QPointF& mouseLocation)-> void
@@ -2889,6 +2889,12 @@ void PaintableClipboard::reset()
     update();
 }
 
+void PaintableClipboard::onSwitchOutlineColor()
+{
+    m_bOutlineColorToggle = !m_bOutlineColorToggle;
+    update();
+}
+
 void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 {
     Q_UNUSED(paintEvent);
@@ -2909,7 +2915,6 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
 
     //Outline
-    m_bOutlineColorToggle = !m_bOutlineColorToggle;
     QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
     painter.setPen(selectionOutlinePen);
 

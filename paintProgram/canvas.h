@@ -71,8 +71,10 @@ private:
 /// PaintableClipboard
 ///
 ///A clipboard that also paints. Used for dragging, selecting cutting, pasting
-class PaintableClipboard : public Clipboard, public QWidget
+class PaintableClipboard : public QWidget, public Clipboard
 {
+    Q_OBJECT
+
 public:
     PaintableClipboard(Canvas* parent);
     ~PaintableClipboard();
@@ -106,6 +108,9 @@ public:
 
     ///Reset/clear
     void reset();
+
+private slots:
+    void onSwitchOutlineColor();
 
 private:
     ///Drawing
