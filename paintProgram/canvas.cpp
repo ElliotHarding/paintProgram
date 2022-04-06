@@ -3,10 +3,12 @@
 #include <QDebug>
 #include <QSet>
 #include <QFileInfo>
-#include <stack>
 #include <QPainterPath>
 #include <QBuffer>
 #include <QFileInfo>
+#include <QGuiApplication>
+#include <QClipboard>
+#include <stack>
 #include <cmath>
 #include <math.h>
 
@@ -494,9 +496,7 @@ void Canvas::onDeleteKeyPressed()
         update();
     }
 }
-#include <QGuiApplication>
-#include <QClipboard>
-#include <QMimeData>
+
 void Canvas::onCopyKeysPressed()
 {
     m_canvasMutex.lock();
