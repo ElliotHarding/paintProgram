@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Sketch and Outline</string>
   </property>
   <widget class="QSlider" name="slider_outline">
    <property name="geometry">
