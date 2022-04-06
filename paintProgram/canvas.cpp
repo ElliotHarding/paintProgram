@@ -2636,15 +2636,6 @@ void PaintableClipboard::doNormalDragging(QPoint mouseLocation)
     update();
 }
 
-void scaleImageOntoSelf(QImage& imageToScale, QRect oldDimensions, QRect newDimensions)
-{
-    QImage oldImage = imageToScale;
-
-    imageToScale.fill(Qt::transparent);
-    QPainter clipboardPainter(&imageToScale);
-    clipboardPainter.drawImage(newDimensions, oldImage, oldDimensions);
-}
-
 QPointF getLocation(QRectF rect, DragNubblePos nubblePos)
 {
     switch (nubblePos)
@@ -2711,87 +2702,76 @@ bool PaintableClipboard::checkStartResizeDrag(QImage &canvasImage, QPointF mouse
     return false;
 }
 
+void scaleImageOntoImage(QImage& hostImage, QImage& sourceImage, QRect& oldDimensions, QRect& newDimensions)
+{
+    hostImage.fill(Qt::transparent);
+    QPainter clipboardPainter(&hostImage);
+    clipboardPainter.drawImage(newDimensions, sourceImage, oldDimensions);
+}
+
 void PaintableClipboard::doResizeDragScale()
 {
     //m_dimensionsRect has changed. If its out of range. Make it not so.
     const int yOffset = m_dimensionsRect.y();
     const int xOffset = m_dimensionsRect.x();
 
-    //Check if newley scaled image will fit inside existing image
-    QImage clipboardImageTransparent;
-    if(xOffset > -1 && yOffset > -1 && m_dimensionsRect.right() <= m_clipboardImageBeforeOperation.width() && m_dimensionsRect.bottom() <= m_clipboardImageBeforeOperation.height())
+    int newWidth;
+    int newHeight;
+
+    //If in the negative x
+    if(xOffset < 0)
     {
-        m_clipboardImage = m_clipboardImageBeforeOperation;
-        clipboardImageTransparent = m_clipboardImageBeforeOperationTransparent;
+        //Move everything into the positive
+        m_dimensionsRect.setRight(m_dimensionsRect.right() - xOffset);
+        m_dimensionsRect.setLeft(0);
+        m_dragX += xOffset;
 
-        //Scale
-        scaleImageOntoSelf(m_clipboardImage, m_dimensionsRectBeforeOperation, m_dimensionsRect);
-
-        //Scale selected transparent pixels (cheat by converting to black)
-        scaleImageOntoSelf(clipboardImageTransparent, m_dimensionsRectBeforeOperation, m_dimensionsRect);
+        //new width equal to largest (m_dimensionsRect or previous image)
+        newWidth = m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width();
     }
 
-    //Means a new image size is required to fit the resize operation
+    //if outside bounds of positive x
     else
     {
-        int newWidth;
-        int newHeight;
-
-        //If in the negative x
-        if(xOffset < 0)
-        {
-            //Move everything into the positive
-            m_dimensionsRect.setRight(m_dimensionsRect.right() - xOffset);
-            m_dimensionsRect.setLeft(0);
-            m_dragX += xOffset;
-
-            //new width equal to largest (m_dimensionsRect or previous image)
-            newWidth = m_dimensionsRect.width() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.width() : m_clipboardImageBeforeOperation.width();
-        }
-
-        //if outside bounds of positive x
-        else
-        {
-            newWidth = m_dimensionsRect.right() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.right() : m_clipboardImageBeforeOperation.width();
-        }
-
-        //If in the negative y
-        if(yOffset < 0)
-        {
-            //Move everything into the positive
-            m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
-            m_dimensionsRect.setTop(0);
-            m_dragY += yOffset;
-
-            //new height equal to largest (m_dimensionsRect or previous image)
-            newHeight = m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height();
-        }
-
-        //if outside bounds of positive y
-        else
-        {
-            newHeight = m_dimensionsRect.bottom() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.bottom() : m_clipboardImageBeforeOperation.height();
-        }
-
-        //Make new sized clipboard image
-        m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
-        m_clipboardImage.fill(Qt::transparent);
-
-        //Make new sized transparent version of clipboard image
-        clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
-        clipboardImageTransparent.fill(Qt::transparent);
-
-        //Set background image to new size
-        m_backgroundImage = genTransparentPixelsBackground(newWidth, newHeight);
-
-        //Scale
-        QPainter clipboardPainter(&m_clipboardImage);
-        clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
-
-        //Scale transparent
-        QPainter tClipboardPainter(&clipboardImageTransparent);
-        tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);
+        newWidth = m_dimensionsRect.right() > m_clipboardImageBeforeOperation.width() ? m_dimensionsRect.right() : m_clipboardImageBeforeOperation.width();
     }
+
+    //If in the negative y
+    if(yOffset < 0)
+    {
+        //Move everything into the positive
+        m_dimensionsRect.setBottom(m_dimensionsRect.bottom() - yOffset);
+        m_dimensionsRect.setTop(0);
+        m_dragY += yOffset;
+
+        //new height equal to largest (m_dimensionsRect or previous image)
+        newHeight = m_dimensionsRect.height() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.height() : m_clipboardImageBeforeOperation.height();
+    }
+
+    //if outside bounds of positive y
+    else
+    {
+        newHeight = m_dimensionsRect.bottom() > m_clipboardImageBeforeOperation.height() ? m_dimensionsRect.bottom() : m_clipboardImageBeforeOperation.height();
+    }
+
+    //Make new sized clipboard image
+    m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+    m_clipboardImage.fill(Qt::transparent);
+
+    //Make new sized transparent version of clipboard image
+    QImage clipboardImageTransparent = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+    clipboardImageTransparent.fill(Qt::transparent);
+
+    //Set background image to new size
+    m_backgroundImage = genTransparentPixelsBackground(newWidth, newHeight);
+
+    //Scale
+    QPainter clipboardPainter(&m_clipboardImage);
+    clipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperation, m_dimensionsRectBeforeOperation);
+
+    //Scale transparent
+    QPainter tClipboardPainter(&clipboardImageTransparent);
+    tClipboardPainter.drawImage(m_dimensionsRect, m_clipboardImageBeforeOperationTransparent, m_dimensionsRectBeforeOperation);
 
     //Set new pixels based off scaled image
     m_pixels.clear();
