@@ -101,6 +101,7 @@ public:
 
     ///Dragging
     void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void checkRotating(QImage& canvasImage, QPoint mouseLocation);
     bool checkFinishOperation();
 
     ///Reset/clear
@@ -130,7 +131,7 @@ private:
     ///Normal Dragging
     QPoint m_previousDragPos;
     void completeNormalDrag();
-    void startNormalDragging(QPoint mouseLocation);
+    bool checkNormalDragging(QImage& canvas, QPoint mouseLocation);
     void doNormalDragging(QPoint mouseLocation);
 
     ///Resize & rotate dragging (shared stuff)

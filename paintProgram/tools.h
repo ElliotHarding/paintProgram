@@ -9,6 +9,7 @@ enum Tool
     TOOL_ERASER,
     TOOL_PAN,
     TOOL_DRAG,
+    TOOL_ROTATE,
     TOOL_BUCKET,
     TOOL_COLOR_PICKER,
     TOOL_TEXT,

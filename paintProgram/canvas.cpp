@@ -1942,6 +1942,10 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         {
             m_pClipboardPixels->checkDragging(m_canvasLayers[m_selectedLayer].m_image, mouseLocation, event->localPos(), m_zoomFactor, m_panOffsetX, m_panOffsetY);
         }
+        else if(m_tool == TOOL_ROTATE)
+        {
+            m_pClipboardPixels->checkRotating(m_canvasLayers[m_selectedLayer].m_image, mouseLocation);
+        }
         else if(m_tool == TOOL_SHAPE)
         {
             m_pClipboardPixels->reset();
@@ -2283,6 +2287,24 @@ void PaintableClipboard::completeNormalDrag()
     m_operationMode = NoOperation;
 }
 
+bool PaintableClipboard::checkNormalDragging(QImage &canvas, QPoint mouseLocation)
+{
+    //check if mouse is over selection area
+    if(isHighlighted(mouseLocation.x(), mouseLocation.y()))
+    {
+        //If no clipboard exists to drag, generate one based on selected pixels
+        if(!clipboardActive())
+        {
+            generateClipboardSteal(canvas);
+        }
+
+        m_previousDragPos = mouseLocation;
+        m_operationMode = DragOperation;
+        return true;
+    }
+    return false;
+}
+
 void PaintableClipboard::operateOnSelectedPixels(std::function<void (int, int)> func)
 {
     for(QPoint& p : m_pixels)
@@ -2489,41 +2511,39 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     if(m_operationMode == ResizeOperation)
     {
         doResizeDrag(offsetMouseLocation);
+        return;
     }
 
-    else if(m_operationMode == RotateOperation)
+    if(m_operationMode == RotateOperation)
     {
-        doRotateDrag(offsetMouseLocation);
+        qDebug() << "PaintableClipboard::checkDragging - Shouldnt be roating";
+        return;
     }
 
-    else
+    //Try do resize operation
+    if(checkResizeDrag(canvasImage, offsetMouseLocation, zoom))
     {
-        //Try do resize operation
-        if(checkResizeDrag(canvasImage, offsetMouseLocation, zoom))
-        {
-            qDebug() << "PaintableClipboard:: - Starting resize operation";
-        }
+        qDebug() << "PaintableClipboard:: - Starting resize operation";
+        return;
+    }
 
-        else if(checkRotateDrag(canvasImage, offsetMouseLocation))
-        {
-            qDebug() << "PaintableClipboard:: - Starting rotate operation";
-        }
+    //Try do normal drag operation
+    if(checkNormalDragging(canvasImage, mouseLocation))
+    {
+        qDebug() << "PaintableClipboard:: - Starting drag operation";
+        return;
+    }
+}
 
-        //Try do normal drag operation
-        else
-        {
-            //check if mouse is over selection area
-            if(isHighlighted(mouseLocation.x(), mouseLocation.y()))
-            {
-                //If no clipboard exists to drag, generate one based on selected pixels
-                if(!clipboardActive())
-                {
-                    generateClipboardSteal(canvasImage);
-                }
-
-                startNormalDragging(mouseLocation);
-            }
-        }
+void PaintableClipboard::checkRotating(QImage &canvasImage, QPoint mouseLocation)
+{
+    if(m_operationMode == RotateOperation)
+    {
+        doRotateDrag(mouseLocation);
+    }
+    else if(checkRotateDrag(canvasImage, mouseLocation))
+    {
+        qDebug() << "PaintableClipboard:: - Starting rotate operation";
     }
 }
 
@@ -2560,12 +2580,6 @@ bool PaintableClipboard::checkFinishOperation()
     }
 
     return false;
-}
-
-void PaintableClipboard::startNormalDragging(QPoint mouseLocation)
-{
-    m_previousDragPos = mouseLocation;
-    m_operationMode = DragOperation;
 }
 
 void PaintableClipboard::doNormalDragging(QPoint mouseLocation)
