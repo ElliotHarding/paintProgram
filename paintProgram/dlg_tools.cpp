@@ -10,7 +10,7 @@ DLG_Tools::DLG_Tools(QWidget *parent) :
     setFixedWidth(64);
     setFixedHeight(195);
 
-    m_currentTool == TOOL_PAINT;
+    m_currentTool = TOOL_PAINT;
     ui->btn_paintTool->setFlat(false);
 }
 
@@ -33,6 +33,7 @@ void DLG_Tools::setCurrentTool(const Tool tool)
     ui->btn_selectTool->setFlat(tool!=TOOL_SELECT);
     ui->btn_shapeTool->setFlat(tool!=TOOL_SHAPE);
     ui->btn_textTool->setFlat(tool!=TOOL_TEXT);
+    ui->btn_rotateTool->setFlat(tool!=TOOL_ROTATE);
 
     emit currentToolUpdated(tool);
 }
@@ -85,4 +86,9 @@ void DLG_Tools::on_btn_textTool_clicked()
 void DLG_Tools::on_btn_shapeTool_clicked()
 {
     setCurrentTool(TOOL_SHAPE);
+}
+
+void DLG_Tools::on_btn_rotateTool_clicked()
+{
+    setCurrentTool(TOOL_ROTATE);
 }
