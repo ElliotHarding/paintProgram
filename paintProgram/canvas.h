@@ -102,7 +102,7 @@ public:
     void addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels);
 
     ///Dragging
-    void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float& zoom, const int& panOffsetX, const int& panOffsetY);
+    void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation);
     void checkRotating(QImage& canvasImage, QPoint mouseLocation);
     bool checkFinishOperation();
 
@@ -111,6 +111,8 @@ public:
 
     ///Parent stuff
     void updateParentCanvasSize(const int& width, const int& height);
+    void updateParentZoom(const float& zoom);
+    void updateParentPanOffset(const int& panOffsetX, const int& panOffsetY);
 
 private slots:
     void onSwitchOutlineColor();
@@ -154,7 +156,7 @@ private:
     QMap<DragNubblePos, ResizeNubble> m_resizeNubbles;
     QRect m_dimensionsRectBeforeOperation = QRect();
     void doResizeDrag(QPointF mouseLocation);
-    bool checkStartResizeDrag(QImage& canvasImage, QPointF mouseLocation, const float& zoom);
+    bool checkStartResizeDrag(QImage& canvasImage, QPointF mouseLocation);
     void doResizeDragScale();
 
     ///Rotate dragging
@@ -270,8 +272,6 @@ public:
     void resizeEvent(QResizeEvent* event) override;
 
     ///Stuff called by childen
-    float getZoom();
-    QPoint getPanOffset();
     Tool currentTool();
 
 signals:

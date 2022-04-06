@@ -191,6 +191,9 @@ void Canvas::onAddedToTab()
     m_panOffsetX = m_center.x() - (m_canvasWidth / 2);
     m_panOffsetY = m_center.y() - (m_canvasHeight / 2);
 
+    m_pClipboardPixels->updateParentZoom(m_zoomFactor);
+    m_pClipboardPixels->updateParentPanOffset(m_panOffsetX, m_panOffsetY);
+
     m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
 }
 
@@ -1463,18 +1466,6 @@ QImage Canvas::getImageCopy()
     return m_canvasLayers[m_selectedLayer].m_image;
 }
 
-float Canvas::getZoom()
-{
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    return m_zoomFactor;
-}
-
-QPoint Canvas::getPanOffset()
-{
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-    return QPoint(m_panOffsetX, m_panOffsetY);
-}
-
 Tool Canvas::currentTool()
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
@@ -1498,10 +1489,11 @@ void Canvas::resizeEvent(QResizeEvent *event)
 
     updateCenter();
 
-    m_pClipboardPixels->setGeometry(geometry());
-
     m_panOffsetX = m_center.x() - (m_canvasWidth / 2);
     m_panOffsetY = m_center.y() - (m_canvasHeight / 2);
+
+    m_pClipboardPixels->setGeometry(geometry());
+    m_pClipboardPixels->updateParentPanOffset(m_panOffsetX, m_panOffsetY);
 
     if(m_textDrawLocation.x() > (int)m_canvasWidth || m_textDrawLocation.y() > (int)m_canvasHeight)
         m_textDrawLocation = QPoint(m_canvasWidth / 2, m_canvasHeight / 2);
@@ -1572,6 +1564,9 @@ void Canvas::wheelEvent(QWheelEvent* event)
         if(m_zoomFactor > 0.1)
             m_zoomFactor /= (Constants::ZoomIncrement);
     }
+
+    m_pClipboardPixels->updateParentPanOffset(m_panOffsetX, m_panOffsetY);
+    m_pClipboardPixels->updateParentZoom(m_zoomFactor);
 
     //Call to redraw
     update();
@@ -1902,6 +1897,8 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
             m_panOffsetX += (event->pos().x() - m_previousPanPos.x())/m_zoomFactor;
             m_panOffsetY += (event->pos().y() - m_previousPanPos.y())/m_zoomFactor;
 
+            m_pClipboardPixels->updateParentPanOffset(m_panOffsetX, m_panOffsetY);
+
             m_previousPanPos = event->pos();
 
             update();
@@ -1940,6 +1937,8 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
                 m_panOffsetX += (event->pos().x() - m_previousPanPos.x())/m_zoomFactor;
                 m_panOffsetY += (event->pos().y() - m_previousPanPos.y())/m_zoomFactor;
 
+                m_pClipboardPixels->updateParentPanOffset(m_panOffsetX, m_panOffsetY);
+
                 m_previousPanPos = event->pos();
 
                 update();
@@ -1947,7 +1946,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
         }
         else if(m_tool == TOOL_DRAG)
         {
-            m_pClipboardPixels->checkDragging(m_canvasLayers[m_selectedLayer].m_image, mouseLocation, event->localPos(), m_zoomFactor, m_panOffsetX, m_panOffsetY);
+            m_pClipboardPixels->checkDragging(m_canvasLayers[m_selectedLayer].m_image, mouseLocation, event->localPos());
         }
         else if(m_tool == TOOL_ROTATE)
         {
@@ -2537,7 +2536,7 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
     addImageToActiveClipboard(newPixelsImage);
 }
 
-void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation, QPointF globalMouseLocation, const float &zoom, const int &panOffsetX, const int &panOffsetY)
+void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation, QPointF globalMouseLocation)
 {
     if(m_operationMode == DragOperation)
     {
@@ -2546,10 +2545,10 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     }
 
     //Get global mouse pos with drag offset
-    const int offsetX = panOffsetX + m_dragX;
-    const int offsetY = panOffsetY + m_dragY;
+    const int offsetX = m_parentPanOffsetX + m_dragX;
+    const int offsetY = m_parentPanOffsetY + m_dragY;
     QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(globalMouseLocation, center, zoom, offsetX, offsetY);
+    QPointF offsetMouseLocation = getPositionRelativeCenterdAndZoomedCanvas(globalMouseLocation, center, m_parentZoom, offsetX, offsetY);
 
     if(m_operationMode == ResizeOperation)
     {
@@ -2564,7 +2563,7 @@ void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation
     }
 
     //Try do resize operation
-    if(checkStartResizeDrag(canvasImage, offsetMouseLocation, zoom))
+    if(checkStartResizeDrag(canvasImage, offsetMouseLocation))
     {
         qDebug() << "PaintableClipboard:: - Starting resize operation";
         return;
@@ -2689,13 +2688,13 @@ void PaintableClipboard::doResizeDrag(QPointF mouseLocation)
     qDebug() << "PaintableClipboard::doResizeDrag - Something went wrong";
 }
 
-bool PaintableClipboard::checkStartResizeDrag(QImage &canvasImage, QPointF mouseLocation, const float &zoom)
+bool PaintableClipboard::checkStartResizeDrag(QImage &canvasImage, QPointF mouseLocation)
 {
     //Check if a nubble is being selected
     const QList nubbleKeys = m_resizeNubbles.keys();
     for(const auto& nubblePos : nubbleKeys)
     {
-        if(m_resizeNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), zoom))
+        if(m_resizeNubbles[nubblePos].isStartDragging(mouseLocation, getLocation(m_dimensionsRect, nubblePos), m_parentZoom))
         {
             if(!clipboardActive())
             {
@@ -2942,6 +2941,17 @@ void PaintableClipboard::updateParentCanvasSize(const int &width, const int &hei
     m_parentCanvasHeight = height;
 }
 
+void PaintableClipboard::updateParentZoom(const float &zoom)
+{
+    m_parentZoom = zoom;
+}
+
+void PaintableClipboard::updateParentPanOffset(const int &panOffsetX, const int &panOffsetY)
+{
+    m_parentPanOffsetX = panOffsetX;
+    m_parentPanOffsetY = panOffsetY;
+}
+
 void PaintableClipboard::onSwitchOutlineColor()
 {
     m_bOutlineColorToggle = !m_bOutlineColorToggle;
@@ -2954,15 +2964,13 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
 
     QPainter painter(this);
 
-    QPoint offset = m_pParentCanvas->getPanOffset();
-    const int offsetX = offset.x() + m_dragX;
-    const int offsetY = offset.y() + m_dragY;
-
     const QPoint center = QPoint(geometry().width() / 2, geometry().height() / 2);
-    const float zoom = m_pParentCanvas->getZoom();
     painter.translate(center.x(), center.y());
-    painter.scale(zoom, zoom);
+    painter.scale(m_parentZoom, m_parentZoom);
     painter.translate(-center.x(), -center.y());
+
+    const int offsetX = m_parentPanOffsetX + m_dragX;
+    const int offsetY = m_parentPanOffsetY + m_dragY;
 
     //Draw clipboard
     painter.drawImage(QRect(offsetX, offsetY, m_clipboardImage.width(), m_clipboardImage.height()), m_clipboardImage);
@@ -2985,22 +2993,23 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     }
 
     //Draw highlight outline
-    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_pParentCanvas->getZoom());
+    QPen selectionOutlinePen = QPen(m_bOutlineColorToggle ? Qt::black : Qt::white, 1/m_parentZoom);
     painter.setPen(selectionOutlinePen);
+    const QPoint offset(offsetX, offsetY);
     for(QPair<QPoint, QPoint>& line : m_pixelBorders)
     {
-        painter.drawLine(line.first + QPoint(offsetX, offsetY), line.second + QPoint(offsetX, offsetY));
+        painter.drawLine(line.first + offset, line.second + offset);
     }
 
     //Draw nubbles that scale/rotate dimension of clipboard
     if(m_pixels.size() > 0 && m_pParentCanvas->currentTool() == TOOL_DRAG)
     {
-        QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
+        QRectF translatedDimensions = m_dimensionsRect.translated(offsetX, offsetY);
 
         const QList nubbleKeys = m_resizeNubbles.keys();
         for(const auto& nubblePos : nubbleKeys)
         {
-            m_resizeNubbles[nubblePos].draw(painter, zoom, getLocation(translatedDimensions, nubblePos));
+            m_resizeNubbles[nubblePos].draw(painter, m_parentZoom, getLocation(translatedDimensions, nubblePos));
         }
     }
 }
