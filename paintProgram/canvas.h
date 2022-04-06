@@ -76,7 +76,7 @@ class PaintableClipboard : public QWidget, public Clipboard
     Q_OBJECT
 
 public:
-    PaintableClipboard(Canvas* parent);
+    PaintableClipboard(Canvas* parent, const int& canvasWidth, const int& canvasHeight);
     ~PaintableClipboard();
 
     ///Clipboard (image + pixels)
@@ -108,6 +108,9 @@ public:
 
     ///Reset/clear
     void reset();
+
+    ///Parent stuff
+    void updateParentCanvasSize(const int& width, const int& height);
 
 private slots:
     void onSwitchOutlineColor();
@@ -162,7 +165,14 @@ private:
     QRect m_dimensionsRect = QRect();
     void updateDimensionsRect();
 
+    ///Parent stuff
     Canvas* m_pParentCanvas;
+    int m_parentCanvasWidth = 0;
+    int m_parentCanvasHeight = 0;
+    int m_parentPanOffsetX = 0;
+    int m_parentPanOffsetY = 0;
+    float m_parentZoom = 0;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

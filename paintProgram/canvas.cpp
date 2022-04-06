@@ -162,7 +162,7 @@ void Canvas::init(uint width, uint height)
     m_selectionTool = new QRubberBand(QRubberBand::Rectangle, this);
     m_selectionTool->setGeometry(QRect(m_selectionToolOrigin, QSize()));
 
-    m_pClipboardPixels = new PaintableClipboard(this);
+    m_pClipboardPixels = new PaintableClipboard(this, m_canvasWidth, m_canvasHeight);
     m_pClipboardPixels->raise();
 
     m_canvasHistory.recordHistory(getSnapshot());
@@ -429,6 +429,8 @@ void Canvas::onUpdateSettings(int width, int height, QString name)
 
     m_canvasWidth = width;
     m_canvasHeight = height;
+
+    m_pClipboardPixels->updateParentCanvasSize(m_canvasWidth, m_canvasHeight);
 
     for(CanvasLayer& canvasLayer : m_canvasLayers)
     {
@@ -2073,8 +2075,10 @@ void Canvas::updateCenter()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// PaintableClipboard
 ///
-PaintableClipboard::PaintableClipboard(Canvas* parent) : QWidget(parent),
-    m_pParentCanvas(parent)
+PaintableClipboard::PaintableClipboard(Canvas* parent, const int& canvasWidth, const int& canvasHeight) : QWidget(parent),
+    m_pParentCanvas(parent),
+    m_parentCanvasWidth(canvasWidth),
+    m_parentCanvasHeight(canvasHeight)
 {
     setGeometry(0, 0, parent->width(), parent->height());
 
@@ -2288,8 +2292,8 @@ void PaintableClipboard::updatePixelBorders()
 {
     //2D vectorize selected pixels for quicker outline drawing
     QVector<QVector<bool>> selectedPixelsVector = listTo2dVector(m_pixels,
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() + 1 : m_pParentCanvas->getImageCopy().width() + 1,
-                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() + 1 : m_pParentCanvas->getImageCopy().height() + 1);
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.width() + 1 : m_parentCanvasWidth + 1,
+                                                                 m_clipboardImage != QImage() ? m_clipboardImage.height() + 1 : m_parentCanvasHeight + 1);
 
     m_pixelBorders.clear();
     for(QPoint& p : m_pixels)
@@ -2930,6 +2934,12 @@ void PaintableClipboard::reset()
     m_dimensionsRect = QRect();
     updatePixelBorders();
     update();
+}
+
+void PaintableClipboard::updateParentCanvasSize(const int &width, const int &height)
+{
+    m_parentCanvasWidth = width;
+    m_parentCanvasHeight = height;
 }
 
 void PaintableClipboard::onSwitchOutlineColor()
