@@ -21,6 +21,18 @@ void DLG_BlurSettings::show()
     QDialog::show();
 }
 
+void DLG_BlurSettings::hide()
+{
+    emit cancelEffects();
+    QDialog::hide();
+}
+
+void DLG_BlurSettings::closeEvent(QCloseEvent* e)
+{
+    emit cancelEffects();
+    QDialog::closeEvent(e);
+}
+
 void DLG_BlurSettings::on_btn_ok_clicked()
 {
     emit confirmEffects();

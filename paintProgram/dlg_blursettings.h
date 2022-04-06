@@ -16,6 +16,7 @@ public:
     ~DLG_BlurSettings();
 
     void show();
+    void hide();
 
 signals:
     void onNormalBlur(const int difference, const int averageArea, const bool includeTransparent);
@@ -33,6 +34,8 @@ private slots:
 
 private:
     Ui::DLG_BlurSettings *ui;
+
+    void closeEvent(QCloseEvent *) override;
 
     void resetValues();
 };
