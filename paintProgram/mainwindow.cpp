@@ -345,6 +345,8 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
 
         const int titleBarHeight = 40;
         m_dlg_layers->move(geometry().right() - m_dlg_layers->width(), geometry().bottom() - m_dlg_layers->height() - titleBarHeight);
+
+        m_dlg_blurSettings->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_blurSettings->geometry().width()/2, geometry().top());
     }
 }
 
