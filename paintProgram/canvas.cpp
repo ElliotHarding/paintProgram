@@ -1475,6 +1475,12 @@ QPoint Canvas::getPanOffset()
     return QPoint(m_panOffsetX, m_panOffsetY);
 }
 
+Tool Canvas::currentTool()
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+    return m_tool;
+}
+
 //Requires m_canvasMutex to be locked!
 CanvasHistoryItem Canvas::getSnapshot()
 {
@@ -2978,7 +2984,7 @@ void PaintableClipboard::paintEvent(QPaintEvent *paintEvent)
     }
 
     //Draw nubbles that scale/rotate dimension of clipboard
-    if(m_pixels.size() > 0 && m_operationMode != RotateOperation)
+    if(m_pixels.size() > 0 && m_pParentCanvas->currentTool() == TOOL_DRAG)
     {
         QRectF translatedDimensions = m_dimensionsRect.translated((offsetX), (offsetY));
 

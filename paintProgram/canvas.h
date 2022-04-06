@@ -256,6 +256,7 @@ public:
     ///Stuff called by childen
     float getZoom();
     QPoint getPanOffset();
+    Tool currentTool();
 
 signals:
     void selectionAreaResize(const int x, const int y);
