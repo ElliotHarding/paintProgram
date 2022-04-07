@@ -100,6 +100,7 @@ private slots:
     void onInvert();
     void onEffectsSliders();
     void onShowBlurDialog();
+    void onShowColorMultipliersDialog();
     void onSketchAndOutline();
     void onBrightness(const int value);
     void onContrast(const int value);

@@ -142,6 +142,7 @@
     </widget>
     <addaction name="actionImageSettings"/>
     <addaction name="menuEffects"/>
+    <addaction name="actionMultipliers"/>
    </widget>
    <widget class="QMenu" name="menuTool_Bars">
     <property name="title">
@@ -262,6 +263,11 @@
   <action name="actionBlur">
    <property name="text">
     <string>Blur</string>
+   </property>
+  </action>
+  <action name="actionMultipliers">
+   <property name="text">
+    <string>Multipliers</string>
    </property>
   </action>
  </widget>

@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionInvert, SIGNAL(triggered()), this, SLOT(onInvert()));
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
     connect(ui->actionBlur, SIGNAL(triggered()), this, SLOT(onShowBlurDialog()));
+    connect(ui->actionMultipliers, SIGNAL(triggered()), this, SLOT(onShowColorMultipliersDialog()));
     connect(ui->actionSketch_Outline, SIGNAL(triggered()), this, SLOT(onSketchAndOutline()));
     connect(ui->action_showInfoDialog, SIGNAL(triggered()), this, SLOT(onShowInfoDialog()));
     connect(ui->action_showLayersDialog, SIGNAL(triggered()), this, SLOT(onShowLayersDialog()));
@@ -356,6 +357,8 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
         m_dlg_effectsSliders->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_effectsSliders->geometry().width()/2, geometry().top());
 
         m_dlg_sketch->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_sketch->geometry().width()/2, geometry().top());
+
+        m_dlg_colorMultipliers->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_colorMultipliers->geometry().width()/2, geometry().top());
     }
 }
 
@@ -519,6 +522,11 @@ void MainWindow::onEffectsSliders()
 void MainWindow::onShowBlurDialog()
 {
     m_dlg_blurSettings->show();
+}
+
+void MainWindow::onShowColorMultipliersDialog()
+{
+    m_dlg_colorMultipliers->show();
 }
 
 void MainWindow::onSketchAndOutline()
