@@ -1097,7 +1097,7 @@ QColor colorMultipliersPixel(const QColor& originalColor, const float& redXred, 
     return QColor(newR, newG, newB, newA);
 }
 
-void colorMultipliers(QImage& image, const QVector<QPoint>& pixelsList, const int redXred, const int redXgreen, const int& redXblue, const int& greenXred, const int& greenXgreen, const int& greenXblue, const int& blueXred, const int& blueXgreen, const int& blueXblue, const int& xTransparent)
+void colorMultipliers(QImage& image, const QVector<QPoint>& pixelsList, const float& redXred, const float& redXgreen, const float& redXblue, const float& greenXred, const float& greenXgreen, const float& greenXblue, const float& blueXred, const float& blueXgreen, const float& blueXblue, const float& xTransparent)
 {
     for(const QPoint& p : pixelsList)
     {
