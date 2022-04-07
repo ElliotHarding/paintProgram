@@ -143,7 +143,6 @@ void DLG_ColorMultipliers::on_spinBox_xAlpha_valueChanged(int value)
 void DLG_ColorMultipliers::on_checkBox_boom_toggled(bool checked)
 {
     ui->checkBox_sepia->setChecked(false);
-    ui->checkBox_boom->setChecked(checked);
     if(checked)
     {
         ui->spinBox_redXred->setValue(20);
@@ -167,7 +166,6 @@ void DLG_ColorMultipliers::on_checkBox_boom_toggled(bool checked)
 void DLG_ColorMultipliers::on_checkBox_sepia_toggled(bool checked)
 {
     ui->checkBox_boom->setChecked(false);
-    ui->checkBox_sepia->setChecked(checked);
     if(checked)
     {
         ui->spinBox_redXred->setValue(39);
