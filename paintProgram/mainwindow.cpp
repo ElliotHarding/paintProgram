@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_blurSettings = new DLG_BlurSettings(this);
 
+    m_dlg_colorMultipliers = new DLG_ColorMultipliers(this);
+
     m_dlg_sketch = new DLG_Sketch(this);
 
     m_dlg_layers = new DLG_Layers(this);
@@ -69,6 +71,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_blurSettings, SIGNAL(onNormalBlur(const int, const int, const bool)), this, SLOT(onNormalBlur(const int, const int, const bool)));
     connect(m_dlg_blurSettings, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_blurSettings, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
+    connect(m_dlg_colorMultipliers, SIGNAL(onColorMultipliers(const int, const int, const int, const int, const int, const int, const int, const int, const int, const int)), this, SLOT(onColorMultipliers(const int, const int, const int, const int, const int, const int, const int, const int, const int, const int)));
+    connect(m_dlg_colorMultipliers, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
+    connect(m_dlg_colorMultipliers, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
     connect(m_dlg_sketch, SIGNAL(onOutlineEffect(const int)), this, SLOT(onOutlineEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
@@ -622,6 +627,19 @@ void MainWindow::onNormalBlur(const int difference, const int averageArea, const
     else
     {
         qDebug() << "MainWindow::onNormalBlur - cant find canvas!";
+    }
+}
+
+void MainWindow::onColorMultipliers(const int redXred, const int redXgreen, const int redXblue, const int greenXred, const int greenXgreen, const int greenXblue, const int blueXred, const int blueXgreen, const int blueXblue, const int xTransparent)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onColorMultipliers(redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onColorMultipliers - cant find canvas!";
     }
 }
 

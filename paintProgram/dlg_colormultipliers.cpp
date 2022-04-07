@@ -51,6 +51,8 @@ void DLG_ColorMultipliers::reset()
     ui->spinBox_blueXgreen->setValue(0);
     ui->spinBox_blueXblue->setValue(100);
 
+    ui->spinBox_xAlpha->setValue(100);
+
     clearCheckBoxes();
 }
 
@@ -155,6 +157,8 @@ void DLG_ColorMultipliers::on_checkBox_sepia_stateChanged(int value)
         ui->spinBox_blueXgreen->setValue(53);
         ui->spinBox_blueXblue->setValue(13);
 
+        ui->spinBox_xAlpha->setValue(100);
+
         applyMultipliers();
     }
 }
@@ -175,6 +179,8 @@ void DLG_ColorMultipliers::on_checkBox_boom_stateChanged(int value)
         ui->spinBox_blueXred->setValue(20);
         ui->spinBox_blueXgreen->setValue(20);
         ui->spinBox_blueXblue->setValue(100);
+
+        ui->spinBox_xAlpha->setValue(100);
 
         applyMultipliers();
     }

@@ -1079,6 +1079,66 @@ void Canvas::onNormalBlur(const int& maxDifference, const int& averageArea, cons
     update();
 }
 
+int limitMax(const int& value, const int& max)
+{
+    if(value > max)
+    {
+        return max;
+    }
+    return value;
+}
+
+void colorMultipliers(QImage& image, const QVector<QPoint>& pixelsList, const int redXred, const int redXgreen, const int& redXblue, const int& greenXred, const int& greenXgreen, const int& greenXblue, const int& blueXred, const int& blueXgreen, const int& blueXblue, const int& xTransparent)
+{
+
+}
+
+void colorMultipliers(QImage& image, const int redXred, const int redXgreen, const int& redXblue, const int& greenXred, const int& greenXgreen, const int& greenXblue, const int& blueXred, const int& blueXgreen, const int& blueXblue, const int& xTransparent)
+{
+    for(int x = 0; x < image.width(); x++)
+    {
+        for(int y = 0; y < image.height(); y++)
+        {
+            const QColor originalColor = image.pixelColor(x, y);
+            const int newR = limitMax(originalColor.red() * redXred + originalColor.green() * redXgreen + originalColor.blue() * redXblue, 255);
+            const int newG =;
+            const int newB =;
+            const int newA = originalColor.alpha() * xTransparent/100;
+
+            image.setPixelColor(x, y, QColor(newR, newG, newB, newA));
+        }
+    }
+}
+
+void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const int redXblue, const int greenXred, const int greenXgreen, const int greenXblue, const int blueXred, const int blueXgreen, const int blueXblue, const int xTransparent)
+{
+    //check if were doing the whole image or just some selected pixels
+    if(m_pClipboardPixels->clipboardActive())
+    {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
+        colorMultipliers(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+    }
+    else
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+    }
+
+    //Record history is done in onConfirmEffects()
+
+    update();
+}
+
 void Canvas::onOutlineEffect(const int sensitivity)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);

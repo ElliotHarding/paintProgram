@@ -265,6 +265,10 @@ public:
     void onOutlineEffect(const int value);
     void onSketchEffect(const int value);
     void onNormalBlur(const int& difference, const int& averageArea, const bool& includeTransparent);
+    void onColorMultipliers(const int redXred, const int redXgreen, const int redXblue,
+                            const int greenXred, const int greenXgreen, const int greenXblue,
+                            const int blueXred, const int blueXgreen, const int blueXblue,
+                            const int xTransparent);
     void onConfirmEffects();
     void onCancelEffects();
 

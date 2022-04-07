@@ -18,6 +18,7 @@
 #include "dlg_layers.h"
 #include "dlg_message.h"
 #include "dlg_blursettings.h"
+#include "dlg_colormultipliers.h"
 
 #include "canvas.h"
 
@@ -108,6 +109,10 @@ private slots:
     void onOutlineEffect(const int value);
     void onSketchEffect(const int value);
     void onNormalBlur(const int difference, const int averageArea, const bool includeTransparent);
+    void onColorMultipliers(const int redXred, const int redXgreen, const int redXblue,
+                            const int greenXred, const int greenXgreen, const int greenXblue,
+                            const int blueXred, const int blueXgreen, const int blueXblue,
+                            const int xTransparent);
     void onConfirmEffects();
     void onCancelEffects();
 
@@ -138,6 +143,7 @@ private:
     DLG_Shapes* m_dlg_shapes = nullptr;
     DLG_Info* m_dlg_info = nullptr;
     DLG_EffectsSliders* m_dlg_effectsSliders = nullptr;
+    DLG_ColorMultipliers* m_dlg_colorMultipliers = nullptr;
     DLG_BlurSettings* m_dlg_blurSettings = nullptr;
     DLG_Sketch* m_dlg_sketch = nullptr;
     DLG_Layers* m_dlg_layers = nullptr;
