@@ -1208,11 +1208,74 @@ void Canvas::onHue(const int hue)
 
         setImageHue(m_canvasLayers[m_selectedLayer].m_image, hue);
     }
+
+    //Record history is done in onConfirmEffects()
+
+    update();
+}
+
+void setImageSaturation(QImage& image, const QVector<QPoint>& pixelsList, const int& saturation)
+{
+    int *h = 0, *s = 0, *v = 0;
+    for(const QPoint& p : pixelsList)
+    {
+        const QColor originalColor = image.pixelColor(p.x(), p.y());
+        originalColor.getHsv(h, s, v);
+        *s = saturation;
+        image.setPixelColor(p.x(), p.y(), QColor::fromHsv(*h, *s, *v));
+    }
+    delete h;
+    delete s;
+    delete v;
+}
+
+void setImageSaturation(QImage& image, const int& saturation)
+{
+    int *h = 0, *s = 0, *v = 0;
+    for(int x = 0; x < image.width(); x++)
+    {
+        for(int y = 0; y < image.height(); y++)
+        {
+            const QColor originalColor = image.pixelColor(x, y);
+            originalColor.getHsv(h, s, v);
+            *s = saturation;
+            image.setPixelColor(x, y, QColor::fromHsv(*h, *s, *v));
+        }
+    }
+    delete h;
+    delete s;
+    delete v;
 }
 
 void Canvas::onSaturation(const int saturation)
 {
     QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //check if were doing the whole image or just some selected pixels
+    if(m_pClipboardPixels->clipboardActive())
+    {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
+        setImageSaturation(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), saturation);
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        setImageSaturation(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), saturation);
+    }
+    else
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        setImageSaturation(m_canvasLayers[m_selectedLayer].m_image, saturation);
+    }
+
+    //Record history is done in onConfirmEffects()
+
+    update();
 }
 
 void Canvas::onOutlineEffect(const int sensitivity)
