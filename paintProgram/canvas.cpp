@@ -1088,24 +1088,30 @@ int limitMax(const int& value, const int& max)
     return value;
 }
 
-void colorMultipliers(QImage& image, const QVector<QPoint>& pixelsList, const int redXred, const int redXgreen, const int& redXblue, const int& greenXred, const int& greenXgreen, const int& greenXblue, const int& blueXred, const int& blueXgreen, const int& blueXblue, const int& xTransparent)
+QColor colorMultipliersPixel(const QColor& originalColor, const float& redXred, const float& redXgreen, const float& redXblue, const float& greenXred, const float& greenXgreen, const float& greenXblue, const float& blueXred, const float& blueXgreen, const float& blueXblue, const float& xTransparent)
 {
-
+    const int newR = limitMax(originalColor.red() * redXred + originalColor.green() * redXgreen + originalColor.blue() * redXblue, 255);
+    const int newG = limitMax(originalColor.red() * greenXred + originalColor.green() * greenXgreen + originalColor.blue() * greenXblue, 255);;
+    const int newB = limitMax(originalColor.red() * blueXred + originalColor.green() * blueXgreen + originalColor.blue() * blueXblue, 255);;
+    const int newA = originalColor.alpha() * xTransparent;
+    return QColor(newR, newG, newB, newA);
 }
 
-void colorMultipliers(QImage& image, const int redXred, const int redXgreen, const int& redXblue, const int& greenXred, const int& greenXgreen, const int& greenXblue, const int& blueXred, const int& blueXgreen, const int& blueXblue, const int& xTransparent)
+void colorMultipliers(QImage& image, const QVector<QPoint>& pixelsList, const int redXred, const int redXgreen, const int& redXblue, const int& greenXred, const int& greenXgreen, const int& greenXblue, const int& blueXred, const int& blueXgreen, const int& blueXblue, const int& xTransparent)
+{
+    for(const QPoint& p : pixelsList)
+    {
+        image.setPixelColor(p.x(), p.y(), colorMultipliersPixel(image.pixelColor(p.x(), p.y()), redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent));
+    }
+}
+
+void colorMultipliers(QImage& image, const float& redXred, const float& redXgreen, const float& redXblue, const float& greenXred, const float& greenXgreen, const float& greenXblue, const float& blueXred, const float& blueXgreen, const float& blueXblue, const float& xTransparent)
 {
     for(int x = 0; x < image.width(); x++)
     {
         for(int y = 0; y < image.height(); y++)
         {
-            const QColor originalColor = image.pixelColor(x, y);
-            const int newR = limitMax(originalColor.red() * redXred + originalColor.green() * redXgreen + originalColor.blue() * redXblue, 255);
-            const int newG =;
-            const int newB =;
-            const int newA = originalColor.alpha() * xTransparent/100;
-
-            image.setPixelColor(x, y, QColor(newR, newG, newB, newA));
+            image.setPixelColor(x, y, colorMultipliersPixel(image.pixelColor(x, y), redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent));
         }
     }
 }
@@ -1117,21 +1123,21 @@ void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const in
     {
         m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
 
-        colorMultipliers(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+        colorMultipliers(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), redXred/100, redXgreen/100, redXblue/100, greenXred/100, greenXgreen/100, greenXblue/100, blueXred/100, blueXgreen/100, blueXblue/100, xTransparent/100);
     }
     else if(m_pClipboardPixels->containsPixels())
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), redXred/100, redXgreen/100, redXblue/100, greenXred/100, greenXgreen/100, greenXblue/100, blueXred/100, blueXgreen/100, blueXblue/100, xTransparent/100);
     }
     else
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, redXred, redXgreen, redXblue, greenXred, greenXgreen, greenXblue, blueXred, blueXgreen, blueXblue, xTransparent);
+        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, redXred/100, redXgreen/100, redXblue/100, greenXred/100, greenXgreen/100, greenXblue/100, blueXred/100, blueXgreen/100, blueXblue/100, xTransparent/100);
     }
 
     //Record history is done in onConfirmEffects()
