@@ -104,9 +104,6 @@ private slots:
     void onSketchAndOutline();
     void onBrightness(const int value);
     void onContrast(const int value);
-    void onRedLimit(const int value);
-    void onBlueLimit(const int value);
-    void onGreenLimit(const int value);
     void onOutlineEffect(const int value);
     void onSketchEffect(const int value);
     void onNormalBlur(const int difference, const int averageArea, const bool includeTransparent);

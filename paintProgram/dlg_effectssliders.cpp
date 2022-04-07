@@ -21,12 +21,6 @@ void DLG_EffectsSliders::resetValues()
     ui->slider_brightness->setValue(0);
     ui->spinBox_contrast->setValue(0);
     ui->slider_contrast->setValue(0);
-    ui->spinBox_redLimit->setValue(255);
-    ui->slider_redLimit->setValue(255);
-    ui->spinBox_greenLimit->setValue(255);
-    ui->slider_greenLimit->setValue(255);
-    ui->spinBox_blueLimit->setValue(255);
-    ui->slider_blueLimit->setValue(255);
 }
 
 void DLG_EffectsSliders::closeEvent(QCloseEvent *e)
@@ -63,42 +57,6 @@ void DLG_EffectsSliders::on_spinBox_contrast_valueChanged(int value)
 {
     ui->slider_contrast->setValue(value);
     emit onContrast(value);
-}
-
-void DLG_EffectsSliders::on_slider_redLimit_valueChanged(int value)
-{
-    ui->spinBox_redLimit->setValue(value);
-    emit onRedLimit(value);
-}
-
-void DLG_EffectsSliders::on_spinBox_redLimit_valueChanged(int value)
-{
-    ui->slider_redLimit->setValue(value);
-    emit onRedLimit(value);
-}
-
-void DLG_EffectsSliders::on_slider_greenLimit_valueChanged(int value)
-{
-    ui->spinBox_greenLimit->setValue(value);
-    emit onGreenLimit(value);
-}
-
-void DLG_EffectsSliders::on_spinBox_greenLimit_valueChanged(int value)
-{
-    ui->slider_greenLimit->setValue(value);
-    emit onGreenLimit(value);
-}
-
-void DLG_EffectsSliders::on_slider_blueLimit_valueChanged(int value)
-{
-    ui->spinBox_blueLimit->setValue(value);
-    emit onBlueLimit(value);
-}
-
-void DLG_EffectsSliders::on_spinBox_blueLimit_valueChanged(int value)
-{
-    ui->slider_blueLimit->setValue(value);
-    emit onBlueLimit(value);
 }
 
 void DLG_EffectsSliders::on_btn_ok_clicked()
