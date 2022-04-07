@@ -15,6 +15,7 @@ SOURCES += \
     dlg_brushsettings.cpp \
     dlg_colormultipliers.cpp \
     dlg_effectssliders.cpp \
+    dlg_huesaturation.cpp \
     dlg_info.cpp \
     dlg_layers.cpp \
     dlg_message.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     dlg_brushsettings.h \
     dlg_colormultipliers.h \
     dlg_effectssliders.h \
+    dlg_huesaturation.h \
     dlg_info.h \
     dlg_layers.h \
     dlg_message.h \
@@ -53,6 +55,7 @@ FORMS += \
     dlg_brushsettings.ui \
     dlg_colormultipliers.ui \
     dlg_effectssliders.ui \
+    dlg_huesaturation.ui \
     dlg_info.ui \
     dlg_layers.ui \
     dlg_message.ui \
