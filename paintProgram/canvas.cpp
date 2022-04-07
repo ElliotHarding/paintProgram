@@ -1123,21 +1123,21 @@ void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const in
     {
         m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
 
-        colorMultipliers(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), redXred/100, redXgreen/100, redXblue/100, greenXred/100, greenXgreen/100, greenXblue/100, blueXred/100, blueXgreen/100, blueXblue/100, xTransparent/100);
+        colorMultipliers(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), (float)redXred/100, (float)redXgreen/100, (float)redXblue/100, (float)greenXred/100, (float)greenXgreen/100, (float)greenXblue/100, (float)blueXred/100, (float)blueXgreen/100, (float)blueXblue/100, (float)xTransparent/100);
     }
     else if(m_pClipboardPixels->containsPixels())
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), redXred/100, redXgreen/100, redXblue/100, greenXred/100, greenXgreen/100, greenXblue/100, blueXred/100, blueXgreen/100, blueXblue/100, xTransparent/100);
+        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), (float)redXred/100, (float)redXgreen/100, (float)redXblue/100, (float)greenXred/100, (float)greenXgreen/100, (float)greenXblue/100, (float)blueXred/100, (float)blueXgreen/100, (float)blueXblue/100, (float)xTransparent/100);
     }
     else
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, redXred/100, redXgreen/100, redXblue/100, greenXred/100, greenXgreen/100, greenXblue/100, blueXred/100, blueXgreen/100, blueXblue/100, xTransparent/100);
+        colorMultipliers(m_canvasLayers[m_selectedLayer].m_image, (float)redXred/100, (float)redXgreen/100, (float)redXblue/100, (float)greenXred/100, (float)greenXgreen/100, (float)greenXblue/100, (float)blueXred/100, (float)blueXgreen/100, (float)blueXblue/100, (float)xTransparent/100);
     }
 
     //Record history is done in onConfirmEffects()

@@ -140,33 +140,11 @@ void DLG_ColorMultipliers::on_spinBox_xAlpha_valueChanged(int value)
     applyMultipliers();
 }
 
-void DLG_ColorMultipliers::on_checkBox_sepia_stateChanged(int value)
-{
-    ui->checkBox_boom->setChecked(false);
-    if(value)
-    {
-        ui->spinBox_redXred->setValue(39);
-        ui->spinBox_redXgreen->setValue(76);
-        ui->spinBox_redXblue->setValue(18);
-
-        ui->spinBox_greenXred->setValue(34);
-        ui->spinBox_greenXgreen->setValue(68);
-        ui->spinBox_greenXblue->setValue(16);
-
-        ui->spinBox_blueXred->setValue(27);
-        ui->spinBox_blueXgreen->setValue(53);
-        ui->spinBox_blueXblue->setValue(13);
-
-        ui->spinBox_xAlpha->setValue(100);
-
-        applyMultipliers();
-    }
-}
-
-void DLG_ColorMultipliers::on_checkBox_boom_stateChanged(int value)
+void DLG_ColorMultipliers::on_checkBox_boom_toggled(bool checked)
 {
     ui->checkBox_sepia->setChecked(false);
-    if(value)
+    ui->checkBox_boom->setChecked(checked);
+    if(checked)
     {
         ui->spinBox_redXred->setValue(20);
         ui->spinBox_redXgreen->setValue(20);
@@ -179,6 +157,30 @@ void DLG_ColorMultipliers::on_checkBox_boom_stateChanged(int value)
         ui->spinBox_blueXred->setValue(20);
         ui->spinBox_blueXgreen->setValue(20);
         ui->spinBox_blueXblue->setValue(100);
+
+        ui->spinBox_xAlpha->setValue(100);
+
+        applyMultipliers();
+    }
+}
+
+void DLG_ColorMultipliers::on_checkBox_sepia_toggled(bool checked)
+{
+    ui->checkBox_boom->setChecked(false);
+    ui->checkBox_sepia->setChecked(checked);
+    if(checked)
+    {
+        ui->spinBox_redXred->setValue(39);
+        ui->spinBox_redXgreen->setValue(76);
+        ui->spinBox_redXblue->setValue(18);
+
+        ui->spinBox_greenXred->setValue(34);
+        ui->spinBox_greenXgreen->setValue(68);
+        ui->spinBox_greenXblue->setValue(16);
+
+        ui->spinBox_blueXred->setValue(27);
+        ui->spinBox_blueXgreen->setValue(53);
+        ui->spinBox_blueXblue->setValue(13);
 
         ui->spinBox_xAlpha->setValue(100);
 

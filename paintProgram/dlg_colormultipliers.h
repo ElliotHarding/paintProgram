@@ -40,8 +40,8 @@ private slots:
     void on_spinBox_blueXblue_valueChanged(int value);
     void on_spinBox_xAlpha_valueChanged(int value);
 
-    void on_checkBox_sepia_stateChanged(int value);
-    void on_checkBox_boom_stateChanged(int value);
+    void on_checkBox_boom_toggled(bool checked);
+    void on_checkBox_sepia_toggled(bool checked);
 
 private:
     Ui::DLG_ColorMultipliers *ui;
