@@ -269,6 +269,8 @@ public:
                             const int greenXred, const int greenXgreen, const int greenXblue,
                             const int blueXred, const int blueXgreen, const int blueXblue,
                             const int xTransparent);
+    void onHue(const int hue);
+    void onSaturation(const int saturation);
     void onConfirmEffects();
     void onCancelEffects();
 

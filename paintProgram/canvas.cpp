@@ -1045,6 +1045,7 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const int& maxDiff
 
 void Canvas::onNormalBlur(const int& maxDifference, const int& averageArea, const bool& includeTransparent)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
@@ -1118,6 +1119,8 @@ void colorMultipliers(QImage& image, const float& redXred, const float& redXgree
 
 void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const int redXblue, const int greenXred, const int greenXgreen, const int greenXblue, const int blueXred, const int blueXgreen, const int blueXblue, const int xTransparent)
 {
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -1143,6 +1146,73 @@ void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const in
     //Record history is done in onConfirmEffects()
 
     update();
+}
+
+//https://stackoverflow.com/questions/13806483/increase-or-decrease-color-saturation
+
+void setImageHue(QImage& image, const QVector<QPoint>& pixelsList, const int& hue)
+{
+    int *h = 0, *s = 0, *v = 0;
+    for(const QPoint& p : pixelsList)
+    {
+        const QColor originalColor = image.pixelColor(p.x(), p.y());
+        originalColor.getHsv(h, s, v);
+        *h = hue;
+        image.setPixelColor(p.x(), p.y(), QColor::fromHsv(*h, *s, *v));
+    }
+    delete h;
+    delete s;
+    delete v;
+}
+
+void setImageHue(QImage& image, const int& hue)
+{
+    int *h = 0, *s = 0, *v = 0;
+    for(int x = 0; x < image.width(); x++)
+    {
+        for(int y = 0; y < image.height(); y++)
+        {
+            const QColor originalColor = image.pixelColor(x, y);
+            originalColor.getHsv(h, s, v);
+            *h = hue;
+            image.setPixelColor(x, y, QColor::fromHsv(*h, *s, *v));
+        }
+    }
+    delete h;
+    delete s;
+    delete v;
+}
+
+void Canvas::onHue(const int hue)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //check if were doing the whole image or just some selected pixels
+    if(m_pClipboardPixels->clipboardActive())
+    {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
+        setImageHue(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), hue);
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        setImageHue(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), hue);
+    }
+    else
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        setImageHue(m_canvasLayers[m_selectedLayer].m_image, hue);
+    }
+}
+
+void Canvas::onSaturation(const int saturation)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 }
 
 void Canvas::onOutlineEffect(const int sensitivity)
