@@ -39,6 +39,8 @@ void DLG_ColorMultipliers::closeEvent(QCloseEvent *e)
 
 void DLG_ColorMultipliers::reset()
 {
+    blockSpinBoxSignals(true);
+
     ui->spinBox_redXred->setValue(100);
     ui->spinBox_redXgreen->setValue(0);
     ui->spinBox_redXblue->setValue(0);
@@ -53,6 +55,8 @@ void DLG_ColorMultipliers::reset()
 
     ui->spinBox_xAlpha->setValue(100);
 
+    blockSpinBoxSignals(false);
+
     clearCheckBoxes();
 }
 
@@ -60,6 +64,20 @@ void DLG_ColorMultipliers::clearCheckBoxes()
 {
     ui->checkBox_sepia->setChecked(false);
     ui->checkBox_boom->setChecked(false);
+}
+
+void DLG_ColorMultipliers::blockSpinBoxSignals(const bool block)
+{
+    ui->spinBox_redXred->blockSignals(block);
+    ui->spinBox_redXgreen->blockSignals(block);
+    ui->spinBox_redXblue->blockSignals(block);
+    ui->spinBox_greenXred->blockSignals(block);
+    ui->spinBox_greenXgreen->blockSignals(block);
+    ui->spinBox_greenXblue->blockSignals(block);
+    ui->spinBox_blueXred->blockSignals(block);
+    ui->spinBox_blueXgreen->blockSignals(block);
+    ui->spinBox_blueXblue->blockSignals(block);
+    ui->spinBox_xAlpha->blockSignals(block);
 }
 
 void DLG_ColorMultipliers::applyMultipliers()
@@ -145,6 +163,8 @@ void DLG_ColorMultipliers::on_checkBox_boom_toggled(bool checked)
     ui->checkBox_sepia->setChecked(false);
     if(checked)
     {
+        blockSpinBoxSignals(true);
+
         ui->spinBox_redXred->setValue(20);
         ui->spinBox_redXgreen->setValue(20);
         ui->spinBox_redXblue->setValue(100);
@@ -159,6 +179,8 @@ void DLG_ColorMultipliers::on_checkBox_boom_toggled(bool checked)
 
         ui->spinBox_xAlpha->setValue(100);
 
+        blockSpinBoxSignals(false);
+
         applyMultipliers();
     }
 }
@@ -168,6 +190,8 @@ void DLG_ColorMultipliers::on_checkBox_sepia_toggled(bool checked)
     ui->checkBox_boom->setChecked(false);
     if(checked)
     {
+        blockSpinBoxSignals(true);
+
         ui->spinBox_redXred->setValue(39);
         ui->spinBox_redXgreen->setValue(76);
         ui->spinBox_redXblue->setValue(18);
@@ -181,6 +205,8 @@ void DLG_ColorMultipliers::on_checkBox_sepia_toggled(bool checked)
         ui->spinBox_blueXblue->setValue(13);
 
         ui->spinBox_xAlpha->setValue(100);
+
+        blockSpinBoxSignals(false);
 
         applyMultipliers();
     }

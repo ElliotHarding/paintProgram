@@ -51,6 +51,8 @@ private:
     void reset();
     void clearCheckBoxes();
 
+    void blockSpinBoxSignals(const bool block);
+
     void applyMultipliers();
 };
 
