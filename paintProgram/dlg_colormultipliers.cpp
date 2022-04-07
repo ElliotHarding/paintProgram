@@ -74,3 +74,108 @@ void DLG_ColorMultipliers::on_spinBox_redXred_valueChanged(int value)
     clearCheckBoxes();
     applyMultipliers();
 }
+
+void DLG_ColorMultipliers::on_spinBox_redXgreen_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_redXblue_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_greenXred_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_greenXgreen_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_greenXblue_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_blueXred_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_blueXgreen_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_blueXblue_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_spinBox_xAlpha_valueChanged(int value)
+{
+    Q_UNUSED(value);
+    clearCheckBoxes();
+    applyMultipliers();
+}
+
+void DLG_ColorMultipliers::on_checkBox_sepia_stateChanged(int value)
+{
+    ui->checkBox_boom->setChecked(false);
+    if(value)
+    {
+        ui->spinBox_redXred->setValue(39);
+        ui->spinBox_redXgreen->setValue(76);
+        ui->spinBox_redXblue->setValue(18);
+
+        ui->spinBox_greenXred->setValue(34);
+        ui->spinBox_greenXgreen->setValue(68);
+        ui->spinBox_greenXblue->setValue(16);
+
+        ui->spinBox_blueXred->setValue(27);
+        ui->spinBox_blueXgreen->setValue(53);
+        ui->spinBox_blueXblue->setValue(13);
+
+        applyMultipliers();
+    }
+}
+
+void DLG_ColorMultipliers::on_checkBox_boom_stateChanged(int value)
+{
+    ui->checkBox_sepia->setChecked(false);
+    if(value)
+    {
+        ui->spinBox_redXred->setValue(20);
+        ui->spinBox_redXgreen->setValue(20);
+        ui->spinBox_redXblue->setValue(100);
+
+        ui->spinBox_greenXred->setValue(20);
+        ui->spinBox_greenXgreen->setValue(20);
+        ui->spinBox_greenXblue->setValue(100);
+
+        ui->spinBox_blueXred->setValue(20);
+        ui->spinBox_blueXgreen->setValue(20);
+        ui->spinBox_blueXblue->setValue(100);
+
+        applyMultipliers();
+    }
+}

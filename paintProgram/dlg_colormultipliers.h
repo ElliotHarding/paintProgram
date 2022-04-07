@@ -29,7 +29,19 @@ private slots:
     void on_btn_ok_clicked();
     void on_btn_cancel_clicked();
 
-    void on_spinBox_redXred_valueChanged(int arg1);
+    void on_spinBox_redXred_valueChanged(int value);
+    void on_spinBox_redXgreen_valueChanged(int value);
+    void on_spinBox_redXblue_valueChanged(int value);
+    void on_spinBox_greenXred_valueChanged(int value);
+    void on_spinBox_greenXgreen_valueChanged(int value);
+    void on_spinBox_greenXblue_valueChanged(int value);
+    void on_spinBox_blueXred_valueChanged(int value);
+    void on_spinBox_blueXgreen_valueChanged(int value);
+    void on_spinBox_blueXblue_valueChanged(int value);
+    void on_spinBox_xAlpha_valueChanged(int value);
+
+    void on_checkBox_sepia_stateChanged(int value);
+    void on_checkBox_boom_stateChanged(int value);
 
 private:
     Ui::DLG_ColorMultipliers *ui;
