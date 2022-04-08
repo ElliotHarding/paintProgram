@@ -1276,8 +1276,8 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
 
     for(const QPoint& p : pClipboard->m_pixels)
     {
-        const int x = p.x();
-        const int y = p.y();
+        int x = p.x();
+        int y = p.y();
 
         startX = x - borderEdges;
         endX = x + borderEdges;
@@ -1312,6 +1312,15 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         if(xInc || yInc)
         {
             pClipboard->updateDimensions(xInc, yInc, xOffset, yOffset);
+
+            QImage newResult = QImage(QSize(newResult.width() + xInc, newResult.height() + yInc), QImage::Format_ARGB32);
+            newResult.fill(Qt::transparent);
+
+            QPainter newClipboardPainter(&newResult);
+            newClipboardPainter.drawImage(result.rect().translated(xOffset, yOffset), result);
+            newClipboardPainter.end();
+
+            result = newResult;
         }
 
         if(xOffset || yOffset)
@@ -1320,6 +1329,8 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
             endX += xOffset;
             startY += yOffset;
             endY += yOffset;
+            x += xOffset;
+            y += yOffset;
         }
 
         foundUnselected = false;
@@ -1340,6 +1351,8 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
             result.setPixelColor(x, y, Qt::transparent);
         }
     }
+
+
 }
 
 QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPixels, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
@@ -2749,6 +2762,7 @@ void PaintableClipboard::updateDimensions(const int &xInc, const int &yInc, cons
 
     QPainter newClipboardPainter(&newClipboardImage);
     newClipboardPainter.drawImage(m_clipboardImage.rect().translated(xOffset, yOffset), m_clipboardImage);
+    newClipboardPainter.end();
 
     if(xOffset != 0 || yOffset != 0)
     {
