@@ -15,6 +15,7 @@
 
 #include "mainwindow.h"
 
+//Todo look at blurImage superPixel right is never hit?
 //Todo outer stroke. square and round edges option. thickness option.
 //Todo custom brush shape.
 //Todo select specific color. In selection. In layer.
@@ -1250,6 +1251,131 @@ void Canvas::onHueSaturation(const int &hue, const int &saturation)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
         setImageHueAndSaturation(m_canvasLayers[m_selectedLayer].m_image, hue, saturation);
+    }
+
+    //Record history is done in onConfirmEffects()
+
+    update();
+}
+
+//Returns if edge pixel in selectedPixels 2d array
+bool edgePixel(const int& x, const int&y, const QVector<QVector<bool>>& selectedPixels, const int& width, const int& height)
+{
+    if(x == 0 || !selectedPixels[x-1][y])
+    {
+        return true;
+    }
+    else if(x == width-1 || !selectedPixels[x+1][y])
+    {
+        return true;
+    }
+    else if(y == 0 || !selectedPixels[x][y-1])
+    {
+        return true;
+    }
+    else if(y == height-1 || !selectedPixels[x][y+1])
+    {
+        return true;
+    }
+    return false;
+}
+
+int limitMin(const int& value, const int& min)
+{
+    if(value < min)
+    {
+        return min;
+    }
+    return value;
+}
+
+QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
+{
+    QImage result = originalImage;
+
+    const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(pixelsList, originalImage.width(), originalImage.height());
+
+    int startX;
+    int endX;
+    int startY;
+    int endY;
+    int surroundX;
+    int surroundY;
+
+    int borderEdgesPositive = borderEdges >= 0 ? borderEdges : borderEdges * -1;
+
+    for(const QPoint& p : pixelsList)
+    {
+        const int x = p.x();
+        const int y = p.y();
+        //if(edgePixel(p.x(), p.y(), selectedPixels2d, originalImage.width(), originalImage.height()))
+        //{
+        //
+        //}
+
+        /*
+        if(x == 0 || !selectedPixels2d[x-1][y])
+        {
+
+        }
+        else if(x == originalImage.width()-1 || !selectedPixels2d[x+1][y])
+        {
+
+        }
+        else if(y == 0 || !selectedPixels2d[x][y-1])
+        {
+
+        }
+        else if(y == originalImage.height()-1 || !selectedPixels2d[x][y+1])
+        {
+
+        }*/
+
+        startX = limitMin(x - borderEdgesPositive, 0);
+        endX = limitMax(x + borderEdgesPositive, originalImage.width()-1);
+        startY = limitMin(y - borderEdgesPositive, 0);
+        endY = limitMax(y + borderEdgesPositive, originalImage.height()-1);
+
+        for(surroundX = startX; surroundX <= endX; surroundX++)
+        {
+            for(surroundY = startY; surroundY <= endY; surroundY++)
+            {
+                if(!selectedPixels2d[surroundX][surroundY])
+                {
+
+                }
+            }
+
+        }
+    }
+
+    return result;
+}
+
+void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
+{
+    QMutexLocker canvasMutexLocker(&m_canvasMutex);
+
+    //check if were doing the whole image or just some selected pixels
+    if(m_pClipboardPixels->clipboardActive())
+    {
+        m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
+
+        m_pClipboardPixels->m_clipboardImage = borderEdit(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), Qt::black, borderEdges, includeCorners, removeCenter);
+    }
+    else if(m_pClipboardPixels->containsPixels())
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        m_canvasLayers[m_selectedLayer].m_image = borderEdit(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), Qt::black, borderEdges, includeCorners, removeCenter);
+    }
+    else
+    {
+        //Get backup of canvas image before effects were applied (create backup if first effect)
+        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
+
+        //setImageHueAndSaturation(m_canvasLayers[m_selectedLayer].m_image, hue, saturation);
     }
 
     //Record history is done in onConfirmEffects()

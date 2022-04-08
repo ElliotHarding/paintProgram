@@ -267,6 +267,7 @@ public:
                             const int blueXred, const int blueXgreen, const int blueXblue,
                             const int xTransparent);
     void onHueSaturation(const int& hue, const int& saturation);
+    void onBorderEdit(const int& borderEdges, const bool& includeCorners, const bool& removeCenter);
     void onConfirmEffects();
     void onCancelEffects();
 
