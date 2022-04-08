@@ -15,7 +15,6 @@
 
 #include "mainwindow.h"
 
-//Todo look at blurImage superPixel right is never hit?
 //Todo outer stroke. square and round edges option. thickness option.
 //Todo custom brush shape.
 //Todo select specific color. In selection. In layer.
@@ -1278,15 +1277,6 @@ bool edgePixel(const int& x, const int&y, const QVector<QVector<bool>>& selected
         return true;
     }
     return false;
-}
-
-int limitMin(const int& value, const int& min)
-{
-    if(value < min)
-    {
-        return min;
-    }
-    return value;
 }
 
 QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
