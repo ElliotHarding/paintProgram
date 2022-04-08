@@ -30,6 +30,13 @@ const QColor TransparentGrey = QColor(190,190,190,255);
 const QColor TransparentWhite = QColor(255,255,255,255);
 const QColor SelectionBorderColor = Qt::blue;
 const QColor SelectionAreaColor = QColor(0,40,100,50);
+const int MinRgbValue = 0;
+const int MaxRgbValue = 255;
+const int MiddleRgbValue = 127;
+const int MaxSaturation = 255;
+const int MinSaturation = 0;
+const int MaxHue = 179;
+const int MinHue = 0;
 
 //Drawing
 const int SelectedPixelsOutlineFlashFrequency = 200;
@@ -690,7 +697,7 @@ void Canvas::onBlackAndWhite()
 
 QColor invertColor(const QColor col)
 {
-    return QColor(255 - col.red(), 255 - col.green(), 255 - col.blue(), col.alpha());
+    return QColor(Constants::MaxRgbValue - col.red(), Constants::MaxRgbValue - col.green(), Constants::MaxRgbValue - col.blue(), col.alpha());
 }
 
 void Canvas::onInvert() // todo make option to invert alpha aswell
@@ -855,8 +862,26 @@ QVector<QVector<bool>> listTo2dVector(const QVector<QPoint>& selectedPixels, con
      return selectedPixelsVector;
 }
 
+int limitMax(const int& value, const int& max)
+{
+    if(value > max)
+    {
+        return max;
+    }
+    return value;
+}
+
+int limitMin(const int& value, const int& min)
+{
+    if(value < min)
+    {
+        return min;
+    }
+    return value;
+}
+
 //Tries to set original to target. But limits the ammount original can change by maxMove (+/-)
-int limitChangeToTarget(const int& original, const int& target, const int& maxMove)
+int limitChangeToTarget(const int& original, const int& target, const int& maxMove, const int& absoluteMin, const int& absoluteMax)
 {
     const int difference = target - original;
 
@@ -864,22 +889,22 @@ int limitChangeToTarget(const int& original, const int& target, const int& maxMo
     {
         if(-difference > maxMove)
         {
-            return original - maxMove >= 0 ? original - maxMove : 0;
+            return limitMin(original - maxMove, absoluteMin);
         }
         else
         {
-            return original + difference >= 0 ? original + difference : 0;
+            return limitMin(original + difference, absoluteMin);
         }
     }
     else
     {
         if(difference > maxMove)
         {
-            return original + maxMove <= 255 ? original + maxMove : 255;
+            return limitMax(original + maxMove, absoluteMax);
         }
         else
         {
-            return original + difference <= 255 ? original + difference : 255;
+            return limitMax(original + difference, absoluteMax);
         }
     }
 }
@@ -888,6 +913,11 @@ QImage blurImage(QImage& originalImage,
                  const QVector<QVector<bool>>& pixelsArray, const QVector<QPoint>& pixelsList,
                  const int& blurValue, const int& maxDifference, const bool& includeTransparent)
 {
+    if(blurValue == 0 || maxDifference == 0)
+    {
+        return originalImage;
+    }
+
     QImage bluredImage = originalImage;
 
     //Data to be used in loop
@@ -955,10 +985,10 @@ QImage blurImage(QImage& originalImage,
             }
         }
 
-        int newR = limitChangeToTarget(originalColor.red(), r/neighborPixels, maxDifference);
-        int newG = limitChangeToTarget(originalColor.green(), g/neighborPixels, maxDifference);
-        int newB = limitChangeToTarget(originalColor.blue(), b/neighborPixels, maxDifference);
-        int newA = includeTransparent ? limitChangeToTarget(originalColor.alpha(), a/neighborPixels, maxDifference) : originalColor.alpha();
+        int newR = limitChangeToTarget(originalColor.red(), r/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue);
+        int newG = limitChangeToTarget(originalColor.green(), g/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue);
+        int newB = limitChangeToTarget(originalColor.blue(), b/neighborPixels, maxDifference,Constants::MinRgbValue, Constants::MaxRgbValue);
+        int newA = includeTransparent ? limitChangeToTarget(originalColor.alpha(), a/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue) : originalColor.alpha();
 
         //Average combined r,g,b values and set new pixel under operation
         bluredImage.setPixelColor(p.x(), p.y(), QColor(newR, newG, newB, newA));
@@ -969,6 +999,11 @@ QImage blurImage(QImage& originalImage,
 
 QImage blurImage(QImage& originalImage, const int& blurValue, const int& maxDifference, const bool& includeTransparent)
 {
+    if(blurValue == 0 || maxDifference == 0)
+    {
+        return originalImage;
+    }
+
     QImage bluredImage = originalImage;
 
     //Data to be used in loop
@@ -1036,10 +1071,10 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const int& maxDiff
                 }
             }
 
-            int newR = limitChangeToTarget(originalColor.red(), r/neighborPixels, maxDifference);
-            int newG = limitChangeToTarget(originalColor.green(), g/neighborPixels, maxDifference);
-            int newB = limitChangeToTarget(originalColor.blue(), b/neighborPixels, maxDifference);
-            int newA = includeTransparent ? limitChangeToTarget(originalColor.alpha(), a/neighborPixels, maxDifference) : originalColor.alpha();
+            int newR = limitChangeToTarget(originalColor.red(), r/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue);
+            int newG = limitChangeToTarget(originalColor.green(), g/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue);
+            int newB = limitChangeToTarget(originalColor.blue(), b/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue);
+            int newA = includeTransparent ? limitChangeToTarget(originalColor.alpha(), a/neighborPixels, maxDifference, Constants::MinRgbValue, Constants::MaxRgbValue) : originalColor.alpha();
 
             //Average combined r,g,b values and set new pixel under operation
             bluredImage.setPixelColor(x, y, QColor(newR, newG, newB, newA));
@@ -1086,20 +1121,11 @@ void Canvas::onNormalBlur(const int& maxDifference, const int& averageArea, cons
     update();
 }
 
-int limitMax(const int& value, const int& max)
-{
-    if(value > max)
-    {
-        return max;
-    }
-    return value;
-}
-
 QColor colorMultipliersPixel(const QColor& originalColor, const float& redXred, const float& redXgreen, const float& redXblue, const float& greenXred, const float& greenXgreen, const float& greenXblue, const float& blueXred, const float& blueXgreen, const float& blueXblue, const float& xTransparent)
 {
-    const int newR = limitMax(originalColor.red() * redXred + originalColor.green() * redXgreen + originalColor.blue() * redXblue, 255);
-    const int newG = limitMax(originalColor.red() * greenXred + originalColor.green() * greenXgreen + originalColor.blue() * greenXblue, 255);;
-    const int newB = limitMax(originalColor.red() * blueXred + originalColor.green() * blueXgreen + originalColor.blue() * blueXblue, 255);;
+    const int newR = limitMax(originalColor.red() * redXred + originalColor.green() * redXgreen + originalColor.blue() * redXblue, Constants::MaxRgbValue);
+    const int newG = limitMax(originalColor.red() * greenXred + originalColor.green() * greenXgreen + originalColor.blue() * greenXblue, Constants::MaxRgbValue);
+    const int newB = limitMax(originalColor.red() * blueXred + originalColor.green() * blueXgreen + originalColor.blue() * blueXblue, Constants::MaxRgbValue);
     const int newA = originalColor.alpha() * xTransparent;
     return QColor(newR, newG, newB, newA);
 }
@@ -1154,7 +1180,7 @@ void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const in
     update();
 }
 
-int keepInRange(const int& value, const int& max, const int& min)
+int limitRange(const int& value, const int& min, const int& max)
 {
     if(value > max)
     {
@@ -1178,7 +1204,7 @@ void setImageHueAndSaturation(QImage& image, const QVector<QPoint>& pixelsList, 
         if(originalColor.alpha() > 0)
         {
             originalColor.getHsv(&h, &s, &v);
-            image.setPixelColor(p.x(), p.y(), QColor::fromHsv(keepInRange(h + hue, 179, 0), keepInRange(s + saturation, 255, 0), v, originalColor.alpha()));
+            image.setPixelColor(p.x(), p.y(), QColor::fromHsv(limitRange(h + hue, Constants::MinHue, Constants::MaxHue), limitRange(s + saturation, Constants::MinSaturation, Constants::MaxSaturation), v, originalColor.alpha()));
         }
     }
 }
@@ -1194,7 +1220,7 @@ void setImageHueAndSaturation(QImage& image, const int& hue, const int& saturati
             if(originalColor.alpha() > 0)
             {
                 originalColor.getHsv(&h, &s, &v);
-                image.setPixelColor(x, y, QColor::fromHsv(keepInRange(h + hue, 179, 0), keepInRange(s + saturation, 255, 0), v, originalColor.alpha()));
+                image.setPixelColor(x, y, QColor::fromHsv(limitRange(h + hue, Constants::MinHue, Constants::MaxHue), limitRange(s + saturation, Constants::MinSaturation, Constants::MaxSaturation), v, originalColor.alpha()));
             }
         }
     }
@@ -1298,18 +1324,14 @@ void Canvas::onOutlineEffect(const int sensitivity)
     update();
 }
 
-int limitRange255(int num)
+int limitValidRgb(const int& num)
 {
-    if(num > 255)
-        num = 255;
-    if(num < 0)
-        num = 0;
-    return num;
+    return limitRange(num, Constants::MinRgbValue, Constants::MaxRgbValue);
 }
 
 QColor changeBrightness(QColor col, const int value)
 {
-    return QColor(limitRange255(col.red() + value), limitRange255(col.green() + value), limitRange255(col.blue() + value), col.alpha());
+    return QColor(limitValidRgb(col.red() + value), limitValidRgb(col.green() + value), limitValidRgb(col.blue() + value), col.alpha());
 }
 
 void Canvas::onBrightness(const int value)
@@ -1355,34 +1377,30 @@ void Canvas::onBrightness(const int value)
 }
 
 
-int changeContrastRGOB(int rgob, const int value) // rgob --> stands for red, green or blue
+int changeContrastRGOB(const int rgob, const int value) // rgob --> stands for red, green or blue
 {
-    //127.5 is middle of 0 and 255, dulling contrast(<0) moves towards 127, high contrast(>0) moves away.
+    //Constants::MiddleRgbValue is middle of Constants::MinRgbValue and Constants::MaxRgbValue, dulling contrast(<0) moves towards MiddleRgbValue, high contrast(>0) moves away.
 
-    if(rgob > 127)
+    if(rgob > Constants::MiddleRgbValue)
     {
-        if(value > 0)//Trying to move away from 127
+        if(value > 0)
         {
-            rgob = limitRange255(rgob + value);
+            return limitMax(rgob + value, Constants::MaxRgbValue);
         }
-        else if(value < 0)//Trying to get to 127
+        else if(value < 0)
         {
-            rgob += value; //wont go out of 0 255 range because rgob is bigger than 127 and subtracting something smaller or equal to 127
-            if(rgob < 127)
-                rgob = 127;
+            return limitMin(rgob + value, Constants::MiddleRgbValue);
         }
     }
-    else if(rgob < 127)//Less than 127
+    else if(rgob < Constants::MiddleRgbValue)
     {
-        if(value > 0)//Trying to move away from 127
+        if(value > 0)
         {
-            rgob = limitRange255(rgob - value);
+            return limitMin(rgob - value, Constants::MinRgbValue);
         }
-        else if(value < 0)//Trying to get to 127
+        else if(value < 0)
         {
-            rgob -= value;//wont go out of 0 255 range because rgob is smaller than 127 and adding something smaller or equal to 127 (adding because to negatives make positive)
-            if(rgob > 127)//if pass 127 go back to 127
-                rgob = 127;
+            return limitMax(rgob - value, Constants::MiddleRgbValue);
         }
     }
 
