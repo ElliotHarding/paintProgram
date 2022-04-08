@@ -1302,50 +1302,58 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
     int surroundX;
     int surroundY;
 
-    int borderEdgesPositive = borderEdges >= 0 ? borderEdges : borderEdges * -1;
+    int positiveBorderEdges = borderEdges >= 0 ? borderEdges : borderEdges * -1;
 
     for(const QPoint& p : pixelsList)
     {
         const int x = p.x();
         const int y = p.y();
-        //if(edgePixel(p.x(), p.y(), selectedPixels2d, originalImage.width(), originalImage.height()))
-        //{
-        //
-        //}
 
-        /*
-        if(x == 0 || !selectedPixels2d[x-1][y])
+        startX = limitMin(x - positiveBorderEdges, 0);
+        endX = limitMax(x + positiveBorderEdges, originalImage.width()-1);
+        startY = limitMin(y - positiveBorderEdges, 0);
+        endY = limitMax(y + positiveBorderEdges, originalImage.height()-1);
+
+        bool foundUnselected = false;
+        if(borderEdges <= 0)
         {
-
-        }
-        else if(x == originalImage.width()-1 || !selectedPixels2d[x+1][y])
-        {
-
-        }
-        else if(y == 0 || !selectedPixels2d[x][y-1])
-        {
-
-        }
-        else if(y == originalImage.height()-1 || !selectedPixels2d[x][y+1])
-        {
-
-        }*/
-
-        startX = limitMin(x - borderEdgesPositive, 0);
-        endX = limitMax(x + borderEdgesPositive, originalImage.width()-1);
-        startY = limitMin(y - borderEdgesPositive, 0);
-        endY = limitMax(y + borderEdgesPositive, originalImage.height()-1);
-
-        for(surroundX = startX; surroundX <= endX; surroundX++)
-        {
-            for(surroundY = startY; surroundY <= endY; surroundY++)
+            for(surroundX = startX; surroundX <= endX; surroundX++)
             {
-                if(!selectedPixels2d[surroundX][surroundY])
+                for(surroundY = startY; surroundY <= endY; surroundY++)
                 {
-
+                    if(!selectedPixels2d[surroundX][surroundY])
+                    {
+                        foundUnselected = true;
+                        break;
+                    }
                 }
+                if(foundUnselected)
+                    break;
             }
 
+            if(foundUnselected)
+            {
+                result.setPixelColor(x, y, borderColor);
+            }
+        }
+        else
+        {
+            for(surroundX = startX; surroundX <= endX; surroundX++)
+            {
+                for(surroundY = startY; surroundY <= endY; surroundY++)
+                {
+                    if(!selectedPixels2d[surroundX][surroundY])
+                    {
+                        result.setPixelColor(surroundX, surroundY, borderColor);
+                        foundUnselected = true;
+                    }
+                }
+            }
+        }
+
+        if(!foundUnselected && removeCenter)
+        {
+            result.setPixelColor(x, y, Qt::transparent);
         }
     }
 
