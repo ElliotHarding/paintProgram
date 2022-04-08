@@ -15,6 +15,12 @@
 
 #include "mainwindow.h"
 
+//Todo outer stroke. square and round edges option. thickness option.
+//Todo custom brush shape.
+//Todo select specific color. In selection. In layer.
+//Todo changeable font for text.
+//Todo check text can be upper or lower case.
+
 namespace Constants
 {
 
