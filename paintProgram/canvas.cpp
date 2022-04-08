@@ -1292,6 +1292,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         if(startX < 0)
         {
             xOffset = -startX;
+            xInc = xOffset;
         }
         else if(endX > pClipboard->m_clipboardImage.width()-1)
         {
@@ -1300,11 +1301,21 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         if(startY < 0)
         {
             yOffset = -startY;
+            yInc = yOffset;
         }
         else if(endY > pClipboard->m_clipboardImage.height()-1)
         {
             yInc = endY - pClipboard->m_clipboardImage.height()-1;
         }
+
+
+        if(xOffset)
+        {
+
+        }
+
+
+
 
         foundUnselected = false;
         for(surroundX = startX; surroundX <= endX; surroundX++)
