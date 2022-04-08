@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_colorMultipliers = new DLG_ColorMultipliers(this);
 
+    m_dlg_hueSaturation = new DLG_HueSaturation(this);
+
     m_dlg_sketch = new DLG_Sketch(this);
 
     m_dlg_layers = new DLG_Layers(this);
@@ -71,6 +73,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_colorMultipliers, SIGNAL(onColorMultipliers(const int, const int, const int, const int, const int, const int, const int, const int, const int, const int)), this, SLOT(onColorMultipliers(const int, const int, const int, const int, const int, const int, const int, const int, const int, const int)));
     connect(m_dlg_colorMultipliers, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_colorMultipliers, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
+    connect(m_dlg_hueSaturation, SIGNAL(onHueSaturation(const int, const int)), this, SLOT(onHueSaturation(const int, const int)));
+    connect(m_dlg_hueSaturation, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
+    connect(m_dlg_hueSaturation, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
     connect(m_dlg_sketch, SIGNAL(onOutlineEffect(const int)), this, SLOT(onOutlineEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
@@ -101,6 +106,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionEffectsSliders, SIGNAL(triggered()), this, SLOT(onEffectsSliders()));
     connect(ui->actionBlur, SIGNAL(triggered()), this, SLOT(onShowBlurDialog()));
     connect(ui->actionMultipliers, SIGNAL(triggered()), this, SLOT(onShowColorMultipliersDialog()));
+    connect(ui->actionHue_Saturation, SIGNAL(triggered()), this, SLOT(onShowHueSaturationDialog()));
     connect(ui->actionSketch_Outline, SIGNAL(triggered()), this, SLOT(onSketchAndOutline()));
     connect(ui->action_showInfoDialog, SIGNAL(triggered()), this, SLOT(onShowInfoDialog()));
     connect(ui->action_showLayersDialog, SIGNAL(triggered()), this, SLOT(onShowLayersDialog()));
@@ -356,6 +362,8 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
         m_dlg_sketch->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_sketch->geometry().width()/2, geometry().top());
 
         m_dlg_colorMultipliers->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_colorMultipliers->geometry().width()/2, geometry().top());
+
+        m_dlg_hueSaturation->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_hueSaturation->geometry().width()/2, geometry().top());
     }
 }
 
@@ -526,6 +534,11 @@ void MainWindow::onShowColorMultipliersDialog()
     m_dlg_colorMultipliers->show();
 }
 
+void MainWindow::onShowHueSaturationDialog()
+{
+    m_dlg_hueSaturation->show();
+}
+
 void MainWindow::onSketchAndOutline()
 {
     m_dlg_sketch->show();
@@ -606,6 +619,19 @@ void MainWindow::onColorMultipliers(const int redXred, const int redXgreen, cons
     else
     {
         qDebug() << "MainWindow::onColorMultipliers - cant find canvas!";
+    }
+}
+
+void MainWindow::onHueSaturation(const int hue, const int saturation)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onHueSaturation(hue, saturation);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onConfirmEffects - cant find canvas!";
     }
 }
 

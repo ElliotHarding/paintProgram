@@ -138,11 +138,18 @@
      <addaction name="actionInvert"/>
      <addaction name="actionSketch_Outline"/>
      <addaction name="actionBlur"/>
+     <addaction name="actionHue_Saturation"/>
+     <addaction name="actionMultipliers"/>
      <addaction name="actionEffectsSliders"/>
+    </widget>
+    <widget class="QMenu" name="menuType_Here">
+     <property name="title">
+      <string>Type Here</string>
+     </property>
     </widget>
     <addaction name="actionImageSettings"/>
     <addaction name="menuEffects"/>
-    <addaction name="actionMultipliers"/>
+    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuTool_Bars">
     <property name="title">
@@ -268,6 +275,11 @@
   <action name="actionMultipliers">
    <property name="text">
     <string>Multipliers</string>
+   </property>
+  </action>
+  <action name="actionHue_Saturation">
+   <property name="text">
+    <string>Hue &amp; Saturation</string>
    </property>
   </action>
  </widget>

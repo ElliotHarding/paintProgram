@@ -19,6 +19,7 @@
 #include "dlg_message.h"
 #include "dlg_blursettings.h"
 #include "dlg_colormultipliers.h"
+#include "dlg_huesaturation.h"
 
 #include "canvas.h"
 
@@ -101,6 +102,7 @@ private slots:
     void onEffectsSliders();
     void onShowBlurDialog();
     void onShowColorMultipliersDialog();
+    void onShowHueSaturationDialog();
     void onSketchAndOutline();
     void onBrightness(const int value);
     void onContrast(const int value);
@@ -111,6 +113,7 @@ private slots:
                             const int greenXred, const int greenXgreen, const int greenXblue,
                             const int blueXred, const int blueXgreen, const int blueXblue,
                             const int xTransparent);
+    void onHueSaturation(const int hue, const int saturation);
     void onConfirmEffects();
     void onCancelEffects();
 
@@ -142,6 +145,7 @@ private:
     DLG_Info* m_dlg_info = nullptr;
     DLG_EffectsSliders* m_dlg_effectsSliders = nullptr;
     DLG_ColorMultipliers* m_dlg_colorMultipliers = nullptr;
+    DLG_HueSaturation* m_dlg_hueSaturation = nullptr;
     DLG_BlurSettings* m_dlg_blurSettings = nullptr;
     DLG_Sketch* m_dlg_sketch = nullptr;
     DLG_Layers* m_dlg_layers = nullptr;
