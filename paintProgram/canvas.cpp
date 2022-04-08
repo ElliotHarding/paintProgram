@@ -926,9 +926,9 @@ QImage blurImage(QImage& originalImage,
         endX = p.x() + blurValue < originalImage.width() ? p.x() + blurValue : originalImage.width();
         startY = p.y() - blurValue >= 0 ? p.y() - blurValue : 0;
         endY = p.y() + blurValue < originalImage.height() ? p.y() + blurValue : originalImage.height();
-        for(int x = startX; x < endX; x++)
+        for(int x = startX; x <= endX; x++)
         {
-            for(int y = startY; y < endY; y++)
+            for(int y = startY; y <= endY; y++)
             {
                 if(pixelsArray[x][y])
                 {
@@ -1009,9 +1009,9 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const int& maxDiff
             endX = x + blurValue < originalImage.width() ? x + blurValue : originalImage.width();
             startY = y - blurValue >= 0 ? y - blurValue : 0;
             endY = y + blurValue < originalImage.height() ? y + blurValue : originalImage.height();
-            for(int x = startX; x < endX; x++)
+            for(int x = startX; x <= endX; x++)
             {
-                for(int y = startY; y < endY; y++)
+                for(int y = startY; y <= endY; y++)
                 {
                     neighbourColor = originalImage.pixelColor(x, y);
                     if(neighbourColor.alpha() != 0)
