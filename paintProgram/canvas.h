@@ -101,6 +101,9 @@ public:
     void addPixels(QImage& canvas, QRubberBand* newSelectionArea);
     void addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels);
 
+    ///Update dimensions
+    void updateDimensions(const int& xInc, const int& yInc, const int& xOffset, const int& yOffset);
+
     ///Dragging
     void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation);
     void checkRotating(QImage& canvasImage, QPoint mouseLocation);

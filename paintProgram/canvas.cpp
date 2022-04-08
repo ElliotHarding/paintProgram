@@ -1309,13 +1309,18 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         }
 
 
-        if(xOffset)
+        if(xInc || yInc)
         {
-
+            pClipboard->updateDimensions(xInc, yInc, xOffset, yOffset);
         }
 
-
-
+        if(xOffset || yOffset)
+        {
+            startX += xOffset;
+            endX += xOffset;
+            startY += yOffset;
+            endY += yOffset;
+        }
 
         foundUnselected = false;
         for(surroundX = startX; surroundX <= endX; surroundX++)
@@ -2735,6 +2740,14 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
 
     addImageToActiveClipboard(newPixelsImage);
+}
+
+void PaintableClipboard::updateDimensions(const int &xInc, const int &yInc, const int &xOffset, const int &yOffset)
+{
+    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width() + xInc, m_clipboardImage.height() + yInc), QImage::Format_ARGB32);
+
+    m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
+    m_clipboardImage.fill(Qt::transparent);
 }
 
 void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation, QPointF globalMouseLocation)
