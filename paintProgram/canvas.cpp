@@ -2745,9 +2745,28 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
 void PaintableClipboard::updateDimensions(const int &xInc, const int &yInc, const int &xOffset, const int &yOffset)
 {
     QImage newClipboardImage = QImage(QSize(m_clipboardImage.width() + xInc, m_clipboardImage.height() + yInc), QImage::Format_ARGB32);
+    newClipboardImage.fill(Qt::transparent);
 
-    m_clipboardImage = QImage(QSize(newWidth, newHeight), QImage::Format_ARGB32);
-    m_clipboardImage.fill(Qt::transparent);
+    QPainter newClipboardPainter(&newClipboardImage);
+    newClipboardPainter.drawImage(m_clipboardImage.rect().translated(xOffset, yOffset), m_clipboardImage);
+
+    if(xOffset != 0 || yOffset != 0)
+    {
+        m_dragX -= xOffset;
+        m_dragY -= yOffset;
+        for(QPoint& p : m_pixels)
+        {
+            p.setX(p.x() + xOffset);
+            p.setY(p.y() + yOffset);
+        }
+    }
+
+    m_clipboardImage = newClipboardImage;
+    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+
+    updatePixelBorders();
+    updateDimensionsRect();
+    update();
 }
 
 void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation, QPointF globalMouseLocation)
