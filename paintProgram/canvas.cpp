@@ -15,6 +15,7 @@
 
 #include "mainwindow.h"
 
+//Todo add thickness to sketch/outline
 //Todo outer stroke. square and round edges option. thickness option.
 //Todo custom brush shape.
 //Todo select specific color. In selection. In layer.
