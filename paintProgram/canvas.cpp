@@ -1377,14 +1377,14 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
     {
         m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
 
-        m_pClipboardPixels->m_clipboardImage = borderEdit(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), Qt::black, borderEdges, includeCorners, removeCenter);
+        m_pClipboardPixels->m_clipboardImage = borderEdit(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
     }
     else if(m_pClipboardPixels->containsPixels())
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        m_canvasLayers[m_selectedLayer].m_image = borderEdit(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), Qt::black, borderEdges, includeCorners, removeCenter);
+        m_canvasLayers[m_selectedLayer].m_image = borderEdit(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
     }
     else
     {
