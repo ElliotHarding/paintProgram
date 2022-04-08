@@ -1154,8 +1154,11 @@ void setImageHueAndSaturation(QImage& image, const QVector<QPoint>& pixelsList, 
     for(const QPoint& p : pixelsList)
     {
         const QColor originalColor = image.pixelColor(p.x(), p.y());
-        originalColor.getHsv(&h, &s, &v);
-        image.setPixelColor(p.x(), p.y(), QColor::fromHsv(hue, saturation, v));
+        if(originalColor.alpha() > 0)
+        {
+            originalColor.getHsv(&h, &s, &v);
+            image.setPixelColor(p.x(), p.y(), QColor::fromHsv(h + hue, s + saturation, v, originalColor.alpha()));
+        }
     }
 }
 
@@ -1167,8 +1170,11 @@ void setImageHueAndSaturation(QImage& image, const int& hue, const int& saturati
         for(int y = 0; y < image.height(); y++)
         {
             const QColor originalColor = image.pixelColor(x, y);
-            originalColor.getHsv(&h, &s, &v);
-            image.setPixelColor(x, y, QColor::fromHsv(hue, saturation, v));
+            if(originalColor.alpha() > 0)
+            {
+                originalColor.getHsv(&h, &s, &v);
+                image.setPixelColor(x, y, QColor::fromHsv(h + hue, s + saturation, v, originalColor.alpha()));
+            }
         }
     }
 }
