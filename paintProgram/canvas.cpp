@@ -1301,6 +1301,7 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
     int endY;
     int surroundX;
     int surroundY;
+    bool foundUnselected;
 
     int positiveBorderEdges = borderEdges >= 0 ? borderEdges : borderEdges * -1;
 
@@ -1314,7 +1315,9 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
         startY = limitMin(y - positiveBorderEdges, 0);
         endY = limitMax(y + positiveBorderEdges, originalImage.height()-1);
 
-        bool foundUnselected = false;
+        foundUnselected = false;
+
+        //If border is negative (inside bounds)
         if(borderEdges <= 0)
         {
             for(surroundX = startX; surroundX <= endX; surroundX++)
@@ -1335,7 +1338,13 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
             {
                 result.setPixelColor(x, y, borderColor);
             }
+            else if(removeCenter)
+            {
+                result.setPixelColor(x, y, Qt::transparent);
+            }
         }
+
+        //If positive border (outside bounds)
         else
         {
             for(surroundX = startX; surroundX <= endX; surroundX++)
@@ -1349,11 +1358,10 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
                     }
                 }
             }
-        }
-
-        if(!foundUnselected && removeCenter)
-        {
-            result.setPixelColor(x, y, Qt::transparent);
+            if(removeCenter)
+            {
+                result.setPixelColor(x, y, Qt::transparent);
+            }
         }
     }
 
