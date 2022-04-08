@@ -1279,59 +1279,49 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         const int x = p.x();
         const int y = p.y();
 
-        startX = limitMin(x - borderEdges, 0);
-        endX = limitMax(x + borderEdges, pClipboard->m_clipboardImage.width()-1);
-        startY = limitMin(y - borderEdges, 0);
-        endY = limitMax(y + borderEdges, pClipboard->m_clipboardImage.height()-1);
+        startX = x - borderEdges;
+        endX = x + borderEdges;
+        startY = y - borderEdges;
+        endY = y + borderEdges;
 
-        foundUnselected = false;
+        int xOffset = 0;
+        int yOffset = 0;
+        int xInc = 0;
+        int yInc = 0;
 
-        //If border is negative (inside bounds)
-        if(borderEdges <= 0)
+        if(startX < 0)
         {
-            for(surroundX = startX; surroundX <= endX; surroundX++)
-            {
-                for(surroundY = startY; surroundY <= endY; surroundY++)
-                {
-                    if(!selectedPixels2d[surroundX][surroundY])
-                    {
-                        foundUnselected = true;
-                        break;
-                    }
-                }
-                if(foundUnselected)
-                    break;
-            }
-
-            if(foundUnselected)
-            {
-                result.setPixelColor(x, y, borderColor);
-            }
-            else if(removeCenter)
-            {
-                result.setPixelColor(x, y, Qt::transparent);
-            }
+            xOffset = -startX;
+        }
+        else if(endX > pClipboard->m_clipboardImage.width()-1)
+        {
+            xInc = endX - pClipboard->m_clipboardImage.width()-1;
+        }
+        if(startY < 0)
+        {
+            yOffset = -startY;
+        }
+        else if(endY > pClipboard->m_clipboardImage.height()-1)
+        {
+            yInc = endY - pClipboard->m_clipboardImage.height()-1;
         }
 
-        //If positive border (outside bounds)
-        else
+        foundUnselected = false;
+        for(surroundX = startX; surroundX <= endX; surroundX++)
         {
-            for(surroundX = startX; surroundX <= endX; surroundX++)
+            for(surroundY = startY; surroundY <= endY; surroundY++)
             {
-                for(surroundY = startY; surroundY <= endY; surroundY++)
+                if(!selectedPixels2d[surroundX][surroundY])
                 {
-                    if(!selectedPixels2d[surroundX][surroundY])
-                    {
-                        result.setPixelColor(surroundX, surroundY, borderColor);
-                        newPixels.push_back(QPoint(surroundX, surroundY));
-                        foundUnselected = true;
-                    }
+                    result.setPixelColor(surroundX, surroundY, borderColor);
+                    newPixels.push_back(QPoint(surroundX, surroundY));
+                    foundUnselected = true;
                 }
             }
-            if(removeCenter)
-            {
-                result.setPixelColor(x, y, Qt::transparent);
-            }
+        }
+        if(removeCenter)
+        {
+            result.setPixelColor(x, y, Qt::transparent);
         }
     }
 }
