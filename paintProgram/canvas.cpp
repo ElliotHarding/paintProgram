@@ -1258,33 +1258,13 @@ void Canvas::onHueSaturation(const int &hue, const int &saturation)
     update();
 }
 
-//Returns if edge pixel in selectedPixels 2d array
-bool edgePixel(const int& x, const int&y, const QVector<QVector<bool>>& selectedPixels, const int& width, const int& height)
+void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
 {
-    if(x == 0 || !selectedPixels[x-1][y])
-    {
-        return true;
-    }
-    else if(x == width-1 || !selectedPixels[x+1][y])
-    {
-        return true;
-    }
-    else if(y == 0 || !selectedPixels[x][y-1])
-    {
-        return true;
-    }
-    else if(y == height-1 || !selectedPixels[x][y+1])
-    {
-        return true;
-    }
-    return false;
-}
+    QImage result = pClipboard->m_clipboardImage;
 
-QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
-{
-    QImage result = originalImage;
+    QVector<QPoint> newPixels;
 
-    const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(pixelsList, originalImage.width(), originalImage.height());
+    const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
 
     int startX;
     int endX;
@@ -1294,17 +1274,15 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
     int surroundY;
     bool foundUnselected;
 
-    int positiveBorderEdges = borderEdges >= 0 ? borderEdges : borderEdges * -1;
-
-    for(const QPoint& p : pixelsList)
+    for(const QPoint& p : pClipboard->m_pixels)
     {
         const int x = p.x();
         const int y = p.y();
 
-        startX = limitMin(x - positiveBorderEdges, 0);
-        endX = limitMax(x + positiveBorderEdges, originalImage.width()-1);
-        startY = limitMin(y - positiveBorderEdges, 0);
-        endY = limitMax(y + positiveBorderEdges, originalImage.height()-1);
+        startX = limitMin(x - borderEdges, 0);
+        endX = limitMax(x + borderEdges, pClipboard->m_clipboardImage.width()-1);
+        startY = limitMin(y - borderEdges, 0);
+        endY = limitMax(y + borderEdges, pClipboard->m_clipboardImage.height()-1);
 
         foundUnselected = false;
 
@@ -1345,6 +1323,7 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
                     if(!selectedPixels2d[surroundX][surroundY])
                     {
                         result.setPixelColor(surroundX, surroundY, borderColor);
+                        newPixels.push_back(QPoint(surroundX, surroundY));
                         foundUnselected = true;
                     }
                 }
@@ -1353,6 +1332,58 @@ QImage borderEdit(QImage& originalImage, const QVector<QPoint>& pixelsList, cons
             {
                 result.setPixelColor(x, y, Qt::transparent);
             }
+        }
+    }
+}
+
+QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPixels, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
+{
+    QImage result =originalImage;
+
+    QVector<QPoint> newPixels;
+
+    const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(selectedPixels, originalImage.width(), originalImage.height());
+
+    int startX;
+    int endX;
+    int startY;
+    int endY;
+    int surroundX;
+    int surroundY;
+    bool foundUnselected;
+
+    for(const QPoint& p : selectedPixels)
+    {
+        const int x = p.x();
+        const int y = p.y();
+
+        startX = limitMin(x - borderEdges, 0);
+        endX = limitMax(x + borderEdges, originalImage.width()-1);
+        startY = limitMin(y - borderEdges, 0);
+        endY = limitMax(y + borderEdges, originalImage.height()-1);
+
+        foundUnselected = false;
+        for(surroundX = startX; surroundX <= endX; surroundX++)
+        {
+            for(surroundY = startY; surroundY <= endY; surroundY++)
+            {
+                if(!selectedPixels2d[surroundX][surroundY])
+                {
+                    foundUnselected = true;
+                    break;
+                }
+            }
+            if(foundUnselected)
+                break;
+        }
+
+        if(foundUnselected)
+        {
+            result.setPixelColor(x, y, borderColor);
+        }
+        else if(removeCenter)
+        {
+            result.setPixelColor(x, y, Qt::transparent);
         }
     }
 
@@ -1368,21 +1399,33 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
     {
         m_pClipboardPixels->setClipboard(getClipboardBeforeEffects());
 
-        m_pClipboardPixels->m_clipboardImage = borderEdit(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
+        if(borderEdges < 0)
+        {
+            m_pClipboardPixels->m_clipboardImage = borderEditInside(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+        }
+        else if(borderEdges > 0)
+        {
+            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+        }
     }
     else if(m_pClipboardPixels->containsPixels())
     {
         //Get backup of canvas image before effects were applied (create backup if first effect)
         m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
 
-        m_canvasLayers[m_selectedLayer].m_image = borderEdit(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
+        if(borderEdges < 0)
+        {
+            m_canvasLayers[m_selectedLayer].m_image = borderEditInside(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+        }
+        else if(borderEdges > 0)
+        {
+            m_pClipboardPixels->generateClipboardSteal(m_canvasLayers[m_selectedLayer].m_image);
+            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+        }
     }
     else
     {
-        //Get backup of canvas image before effects were applied (create backup if first effect)
-        m_canvasLayers[m_selectedLayer].m_image = getCanvasImageBeforeEffects(); //Assumes there is a selected layer
-
-        //setImageHueAndSaturation(m_canvasLayers[m_selectedLayer].m_image, hue, saturation);
+        //todo message user that selection required for this... or implement something...
     }
 
     //Record history is done in onConfirmEffects()
@@ -2322,6 +2365,9 @@ void PaintableClipboard::generateClipboardSteal(QImage &canvas)
     }
 
     m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+
+    //I guess it should also reset things like m_dragX but currently when this function is used m_dragX and alike are set to defaults
+
     updateDimensionsRect();
     update();
 }
