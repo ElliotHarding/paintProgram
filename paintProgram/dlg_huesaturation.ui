@@ -61,10 +61,10 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>0</number>
+    <number>-255</number>
    </property>
    <property name="maximum">
-    <number>200</number>
+    <number>255</number>
    </property>
   </widget>
   <widget class="QLabel" name="lbl_hue">
@@ -90,10 +90,10 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>0</number>
+    <number>-255</number>
    </property>
    <property name="maximum">
-    <number>200</number>
+    <number>255</number>
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>

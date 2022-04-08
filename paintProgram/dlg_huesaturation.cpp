@@ -73,6 +73,6 @@ void DLG_HueSaturation::reset()
 {
     ui->spinBox_hue->setValue(0);
     ui->slider_hue->setValue(0);
-    ui->spinBox_saturation->setValue(100);
-    ui->slider_saturation->setValue(100);
+    ui->spinBox_saturation->setValue(0);
+    ui->slider_saturation->setValue(0);
 }
