@@ -142,14 +142,9 @@
      <addaction name="actionMultipliers"/>
      <addaction name="actionEffectsSliders"/>
     </widget>
-    <widget class="QMenu" name="menuType_Here">
-     <property name="title">
-      <string>Type Here</string>
-     </property>
-    </widget>
     <addaction name="actionImageSettings"/>
     <addaction name="menuEffects"/>
-    <addaction name="menuType_Here"/>
+    <addaction name="actionBorder_Edit"/>
    </widget>
    <widget class="QMenu" name="menuTool_Bars">
     <property name="title">
@@ -280,6 +275,11 @@
   <action name="actionHue_Saturation">
    <property name="text">
     <string>Hue and Saturation</string>
+   </property>
+  </action>
+  <action name="actionBorder_Edit">
+   <property name="text">
+    <string>Border Edit</string>
    </property>
   </action>
  </widget>

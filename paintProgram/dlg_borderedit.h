@@ -15,6 +15,8 @@ public:
     explicit DLG_BorderEdit(QWidget *parent = nullptr);
     ~DLG_BorderEdit();
 
+    void show();
+
 signals:
     void onBorderEdit(const int borderEdges, const bool includeCorners, const bool removeCenter);
 

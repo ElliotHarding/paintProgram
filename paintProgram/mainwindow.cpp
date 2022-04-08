@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dlg_hueSaturation = new DLG_HueSaturation(this);
 
+    m_dlg_borderEdit = new DLG_BorderEdit(this);
+
     m_dlg_sketch = new DLG_Sketch(this);
 
     m_dlg_layers = new DLG_Layers(this);
@@ -76,6 +78,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_dlg_hueSaturation, SIGNAL(onHueSaturation(const int, const int)), this, SLOT(onHueSaturation(const int, const int)));
     connect(m_dlg_hueSaturation, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
     connect(m_dlg_hueSaturation, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
+    connect(m_dlg_borderEdit, SIGNAL(onBorderEdit(const int, const bool, const bool)), this, SLOT(onBorderEdit(const int, const bool, const bool)));
+    connect(m_dlg_borderEdit, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
+    connect(m_dlg_borderEdit, SIGNAL(cancelEffects()), this, SLOT(onCancelEffects()));
     connect(m_dlg_sketch, SIGNAL(onOutlineEffect(const int)), this, SLOT(onOutlineEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(onSketchEffect(const int)), this, SLOT(onSketchEffect(const int)));
     connect(m_dlg_sketch, SIGNAL(confirmEffects()), this, SLOT(onConfirmEffects()));
@@ -107,6 +112,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionBlur, SIGNAL(triggered()), this, SLOT(onShowBlurDialog()));
     connect(ui->actionMultipliers, SIGNAL(triggered()), this, SLOT(onShowColorMultipliersDialog()));
     connect(ui->actionHue_Saturation, SIGNAL(triggered()), this, SLOT(onShowHueSaturationDialog()));
+    connect(ui->actionBorder_Edit, SIGNAL(triggered()), this, SLOT(onShowBorderEditDialog()));
     connect(ui->actionSketch_Outline, SIGNAL(triggered()), this, SLOT(onSketchAndOutline()));
     connect(ui->action_showInfoDialog, SIGNAL(triggered()), this, SLOT(onShowInfoDialog()));
     connect(ui->action_showLayersDialog, SIGNAL(triggered()), this, SLOT(onShowLayersDialog()));
@@ -364,6 +370,8 @@ void MainWindow::repositionDialogs() //todo ~ do this based of percentages that 
         m_dlg_colorMultipliers->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_colorMultipliers->geometry().width()/2, geometry().top());
 
         m_dlg_hueSaturation->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_hueSaturation->geometry().width()/2, geometry().top());
+
+        m_dlg_borderEdit->move(geometry().center().x() - (geometry().center().x() - geometry().left())/2 - m_dlg_borderEdit->geometry().width()/2, geometry().top());
     }
 }
 
@@ -539,6 +547,11 @@ void MainWindow::onShowHueSaturationDialog()
     m_dlg_hueSaturation->show();
 }
 
+void MainWindow::onShowBorderEditDialog()
+{
+    m_dlg_borderEdit->show();
+}
+
 void MainWindow::onSketchAndOutline()
 {
     m_dlg_sketch->show();
@@ -628,6 +641,19 @@ void MainWindow::onHueSaturation(const int hue, const int saturation)
     if(c)
     {
         c->onHueSaturation(hue, saturation);
+    }
+    else
+    {
+        qDebug() << "MainWindow::onConfirmEffects - cant find canvas!";
+    }
+}
+
+void MainWindow::onBorderEdit(const int borderEdges, const bool includeCorners, const bool removeCenter)
+{
+    Canvas* c = dynamic_cast<Canvas*>(ui->c_tabWidget->currentWidget());
+    if(c)
+    {
+        c->onBorderEdit(borderEdges, includeCorners, removeCenter);
     }
     else
     {
