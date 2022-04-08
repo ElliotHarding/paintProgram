@@ -274,12 +274,12 @@
   </action>
   <action name="actionMultipliers">
    <property name="text">
-    <string>Multipliers</string>
+    <string>Multipliers, Sepia, Boom</string>
    </property>
   </action>
   <action name="actionHue_Saturation">
    <property name="text">
-    <string>Hue &amp; Saturation</string>
+    <string>Hue and Saturation</string>
    </property>
   </action>
  </widget>

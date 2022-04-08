@@ -1148,6 +1148,21 @@ void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const in
     update();
 }
 
+int keepInRange(const int& value, const int& max, const int& min)
+{
+    if(value > max)
+    {
+        return max;
+    }
+
+    if(value < min)
+    {
+        return min;
+    }
+
+    return value;
+}
+
 void setImageHueAndSaturation(QImage& image, const QVector<QPoint>& pixelsList, const int& hue, const int& saturation)
 {
     int h,s,v;
@@ -1157,7 +1172,7 @@ void setImageHueAndSaturation(QImage& image, const QVector<QPoint>& pixelsList, 
         if(originalColor.alpha() > 0)
         {
             originalColor.getHsv(&h, &s, &v);
-            image.setPixelColor(p.x(), p.y(), QColor::fromHsv(h + hue, s + saturation, v, originalColor.alpha()));
+            image.setPixelColor(p.x(), p.y(), QColor::fromHsv(keepInRange(h + hue, 179, 0), keepInRange(s + saturation, 255, 0), v, originalColor.alpha()));
         }
     }
 }
@@ -1173,7 +1188,7 @@ void setImageHueAndSaturation(QImage& image, const int& hue, const int& saturati
             if(originalColor.alpha() > 0)
             {
                 originalColor.getHsv(&h, &s, &v);
-                image.setPixelColor(x, y, QColor::fromHsv(h + hue, s + saturation, v, originalColor.alpha()));
+                image.setPixelColor(x, y, QColor::fromHsv(keepInRange(h + hue, 179, 0), keepInRange(s + saturation, 255, 0), v, originalColor.alpha()));
             }
         }
     }

@@ -6,6 +6,7 @@ DLG_ColorMultipliers::DLG_ColorMultipliers(QWidget *parent) :
     ui(new Ui::DLG_ColorMultipliers)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 }
 
 DLG_ColorMultipliers::~DLG_ColorMultipliers()

@@ -6,6 +6,7 @@ DLG_HueSaturation::DLG_HueSaturation(QWidget *parent) :
     ui(new Ui::DLG_HueSaturation)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 }
 
 DLG_HueSaturation::~DLG_HueSaturation()

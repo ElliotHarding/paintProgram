@@ -7,7 +7,6 @@ DLG_BlurSettings::DLG_BlurSettings(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    resetValues();
 }
 
 DLG_BlurSettings::~DLG_BlurSettings()
