@@ -12,6 +12,7 @@ CONFIG += resources_big
 SOURCES += \
     canvas.cpp \
     dlg_blursettings.cpp \
+    dlg_borderedit.cpp \
     dlg_brushsettings.cpp \
     dlg_colormultipliers.cpp \
     dlg_effectssliders.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     canvas.h \
     canvaslayer.h \
     dlg_blursettings.h \
+    dlg_borderedit.h \
     dlg_brushsettings.h \
     dlg_colormultipliers.h \
     dlg_effectssliders.h \
@@ -52,6 +54,7 @@ HEADERS += \
 
 FORMS += \
     dlg_blursettings.ui \
+    dlg_borderedit.ui \
     dlg_brushsettings.ui \
     dlg_colormultipliers.ui \
     dlg_effectssliders.ui \
