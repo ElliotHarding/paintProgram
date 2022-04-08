@@ -6,6 +6,7 @@ DLG_BorderEdit::DLG_BorderEdit(QWidget *parent) :
     ui(new Ui::DLG_BorderEdit)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 }
 
 DLG_BorderEdit::~DLG_BorderEdit()
@@ -28,11 +29,13 @@ void DLG_BorderEdit::closeEvent(QCloseEvent* e)
 void DLG_BorderEdit::on_btn_ok_clicked()
 {
     emit confirmEffects();
+    hide();
 }
 
 void DLG_BorderEdit::on_btn_cancel_clicked()
 {
     emit cancelEffects();
+    hide();
 }
 
 void DLG_BorderEdit::on_spinBox_borderThickness_valueChanged(int value)
