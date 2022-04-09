@@ -1262,8 +1262,6 @@ QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPi
 {
     QImage result =originalImage;
 
-    QVector<QPoint> newPixels;
-
     const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(selectedPixels, originalImage.width(), originalImage.height());
 
     int startX;
@@ -1324,6 +1322,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
         if(borderEdges < 0)
         {
             m_pClipboardPixels->m_clipboardImage = borderEditInside(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+            m_pClipboardPixels->update();
         }
         else if(borderEdges > 0)
         {
