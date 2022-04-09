@@ -1303,7 +1303,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         }
         else if(endX > pClipboard->m_clipboardImage.width()-1)
         {
-            xInc = endX - pClipboard->m_clipboardImage.width()-1;
+            xInc = endX - pClipboard->m_clipboardImage.width();
         }
         if(startY < 0)
         {
@@ -1312,7 +1312,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         }
         else if(endY > pClipboard->m_clipboardImage.height()-1)
         {
-            yInc = endY - pClipboard->m_clipboardImage.height()-1;
+            yInc = endY - pClipboard->m_clipboardImage.height();
         }
 
 
