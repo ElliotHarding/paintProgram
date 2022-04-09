@@ -1329,7 +1329,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
 
             result = newResult;
 
-            selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width()+1, pClipboard->m_clipboardImage.height()+1);
+            selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
 
             for(QPoint& p : newPixels)
             {
