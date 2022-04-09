@@ -100,10 +100,9 @@ public:
     ///Adding pixels
     void addPixels(QImage& canvas, QRubberBand* newSelectionArea);
     void addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels);
-    void addPixelsToActiveClipboard(const QVector<QPoint>& newDragOffsetPixels);
 
-    ///Update dimensions
-    void updateDimensions(const int& xInc, const int& yInc, const int& xOffset, const int& yOffset);
+    ///Add border
+    void addBorder(const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter);
 
     ///Dragging
     void checkDragging(QImage& canvasImage, QPoint mouseLocation, QPointF globalMouseLocation);
@@ -132,6 +131,7 @@ private:
     void addImageToActiveClipboard(QImage& newPixelsImage);
     bool isHighlighted(const int& x, const int& y);
     QVector<QPoint> getPixelsOffset();
+    void ensureSpaceAroundPixels(const int& space);
 
     ///Pixels borders
     QList<QPair<QPoint, QPoint>> m_pixelBorders;

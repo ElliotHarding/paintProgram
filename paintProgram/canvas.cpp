@@ -1258,123 +1258,6 @@ void Canvas::onHueSaturation(const int &hue, const int &saturation)
     update();
 }
 
-void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
-{
-    QImage result = pClipboard->m_clipboardImage;
-
-    QVector<QPoint> newPixels;
-
-    QVector<QVector<bool>> selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
-
-    int x;
-    int y;
-    int startX;
-    int endX;
-    int startY;
-    int endY;
-    int surroundX;
-    int surroundY;
-    int xOffset;
-    int yOffset;
-    int xInc;
-    int yInc;
-
-    for(const QPoint& p : pClipboard->m_pixels)
-    {
-        x = p.x();
-        y = p.y();
-
-        startX = x - borderEdges;
-        endX = x + borderEdges;
-        startY = y - borderEdges;
-        endY = y + borderEdges;
-
-        xOffset = 0;
-        yOffset = 0;
-        xInc = 0;
-        yInc = 0;
-
-        //else if instead of if. diff could be smaller than borderEdges
-
-        if(startX < 0)
-        {
-            xOffset = -startX;
-            xInc = xOffset;
-        }
-        else if(endX > pClipboard->m_clipboardImage.width()-1)
-        {
-            xInc = endX - pClipboard->m_clipboardImage.width()+1;
-        }
-        if(startY < 0)
-        {
-            yOffset = -startY;
-            yInc = yOffset;
-        }
-        else if(endY > pClipboard->m_clipboardImage.height()-1)
-        {
-            yInc = endY - pClipboard->m_clipboardImage.height()+1;
-        }
-
-
-        if(xInc > 0 || yInc > 0)
-        {
-            pClipboard->updateDimensions(xInc, yInc, xOffset, yOffset);
-
-            QImage newResult = QImage(QSize(result.width() + xInc, result.height() + yInc), QImage::Format_ARGB32);
-            newResult.fill(Qt::transparent);
-
-            QPainter newClipboardPainter(&newResult);
-            newClipboardPainter.drawImage(result.rect().translated(xOffset, yOffset), result, result.rect());
-            newClipboardPainter.end();
-
-            result = newResult;
-
-            selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
-        }
-
-        if(xOffset > 0 || yOffset > 0)
-        {
-            for(QPoint& p : newPixels)
-            {
-                p.setX(p.x() + xOffset);
-                p.setY(p.y() + yOffset);
-            }
-
-            startX += xOffset;
-            endX += xOffset;
-            startY += yOffset;
-            endY += yOffset;
-            x += xOffset;
-            y += yOffset;
-        }
-
-        for(surroundX = startX; surroundX <= endX; surroundX++)
-        {
-            for(surroundY = startY; surroundY <= endY; surroundY++)
-            {
-                if(!selectedPixels2d[surroundX][surroundY])
-                {
-                    result.setPixelColor(surroundX, surroundY, borderColor);
-                    newPixels.push_back(QPoint(surroundX, surroundY));
-                }
-            }
-        }
-        if(removeCenter)
-        {
-            result.setPixelColor(x, y, Qt::transparent);
-        }
-    }
-
-    //remove duplicates
-    newPixels.erase(std::unique(newPixels.begin(), newPixels.end()), newPixels.end());
-
-    pClipboard->addPixelsToActiveClipboard(newPixels);
-
-    pClipboard->m_clipboardImage = result;
-
-    pClipboard->update();
-}
-
 QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPixels, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
 {
     QImage result =originalImage;
@@ -1444,7 +1327,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
         }
         else if(borderEdges > 0)
         {
-            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
+            m_pClipboardPixels->addBorder(m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
         }
     }
     else if(m_pClipboardPixels->containsPixels())
@@ -1459,7 +1342,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
         else if(borderEdges > 0)
         {
             m_pClipboardPixels->generateClipboardSteal(m_canvasLayers[m_selectedLayer].m_image);
-            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
+            m_pClipboardPixels->addBorder(m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
         }
     }
     else
@@ -2775,49 +2658,120 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
     addImageToActiveClipboard(newPixelsImage);
 }
 
-//Assumes input is already offset by m_dragX & m_dragY
-//Assumes input dosent contain duplicates
-void PaintableClipboard::addPixelsToActiveClipboard(const QVector<QPoint>& newDragOffsetPixels)
+void PaintableClipboard::addBorder(const QColor &borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
 {
-    for(const QPoint& p : newDragOffsetPixels)
+    ensureSpaceAroundPixels(borderEdges);
+
+    QImage result = m_clipboardImage;
+
+    QVector<QVector<bool>> selectedPixels2d = listTo2dVector(m_pixels, m_clipboardImage.width(), m_clipboardImage.height());
+    QVector<QPoint> newPixels;
+
+    int x;
+    int y;
+    int startX;
+    int endX;
+    int startY;
+    int endY;
+    int surroundX;
+    int surroundY;
+
+    for(const QPoint& p : m_pixels)
+    {
+        x = p.x();
+        y = p.y();
+
+        startX = x - borderEdges;
+        endX = x + borderEdges;
+        startY = y - borderEdges;
+        endY = y + borderEdges;
+
+        for(surroundX = startX; surroundX <= endX; surroundX++)
+        {
+            for(surroundY = startY; surroundY <= endY; surroundY++)
+            {
+                if(!selectedPixels2d[surroundX][surroundY])
+                {
+                    result.setPixelColor(surroundX, surroundY, borderColor);
+                    newPixels.push_back(QPoint(surroundX, surroundY));
+                }
+            }
+        }
+        if(removeCenter)
+        {
+            result.setPixelColor(x, y, Qt::transparent);
+        }
+    }
+
+    //Add new pixels
+    newPixels.erase(std::unique(newPixels.begin(), newPixels.end()), newPixels.end());
+    for(const QPoint& p : newPixels)
     {
         m_pixels.push_back(p);
     }
-
-    //Remove duplicates
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
+
+    m_clipboardImage = result;
 
     updatePixelBorders();
     updateDimensionsRect();
     update();
 }
 
-void PaintableClipboard::updateDimensions(const int &xInc, const int &yInc, const int &xOffset, const int &yOffset)
+void PaintableClipboard::ensureSpaceAroundPixels(const int &space)
 {
-    QImage newClipboardImage = QImage(QSize(m_clipboardImage.width() + xInc, m_clipboardImage.height() + yInc), QImage::Format_ARGB32);
-    newClipboardImage.fill(Qt::transparent);
+    QRect pixelDimensions;
+    pixelDimensions.setLeft(m_dimensionsRect.left() - space);
+    pixelDimensions.setRight(m_dimensionsRect.right() + space);
+    pixelDimensions.setTop(m_dimensionsRect.top() - space);
+    pixelDimensions.setBottom(m_dimensionsRect.bottom() + space);
 
-    QPainter newClipboardPainter(&newClipboardImage);
-    newClipboardPainter.drawImage(m_clipboardImage.rect().translated(xOffset, yOffset), m_clipboardImage);
-    newClipboardPainter.end();
-
-    if(xOffset != 0 || yOffset != 0)
+    int xOffset = 0;
+    int yOffset = 0;
+    int xInc = 0;
+    int yInc = 0;
+    if(pixelDimensions.left() < 0)
     {
-        m_dragX -= xOffset;
-        m_dragY -= yOffset;
-        for(QPoint& p : m_pixels)
-        {
-            p.setX(p.x() + xOffset);
-            p.setY(p.y() + yOffset);
-        }
+        xOffset = -pixelDimensions.left();
+        xInc = xOffset;
+    }
+    if(pixelDimensions.right() > m_clipboardImage.width()-1)
+    {
+        xInc += pixelDimensions.right() - m_clipboardImage.width()+1;
+    }
+    if(pixelDimensions.top() < 0)
+    {
+        yOffset = -pixelDimensions.top();
+        yInc = yOffset;
+    }
+    if(pixelDimensions.bottom() > m_clipboardImage.height()-1)
+    {
+        yInc += pixelDimensions.bottom() - m_clipboardImage.height()+1;
     }
 
-    m_clipboardImage = newClipboardImage;
-    m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+    if(xInc > 0 || yInc > 0)
+    {
+        QImage newClipboardImage = QImage(QSize(m_clipboardImage.width() + xInc, m_clipboardImage.height() + yInc), QImage::Format_ARGB32);
+        newClipboardImage.fill(Qt::transparent);
 
-    updatePixelBorders();
-    updateDimensionsRect();
-    update();
+        QPainter newClipboardPainter(&newClipboardImage);
+        newClipboardPainter.drawImage(m_clipboardImage.rect().translated(xOffset, yOffset), m_clipboardImage);
+        newClipboardPainter.end();
+
+        if(xOffset != 0 || yOffset != 0)
+        {
+            m_dragX -= xOffset;
+            m_dragY -= yOffset;
+            for(QPoint& p : m_pixels)
+            {
+                p.setX(p.x() + xOffset);
+                p.setY(p.y() + yOffset);
+            }
+        }
+
+        m_clipboardImage = newClipboardImage;
+        m_backgroundImage = genTransparentPixelsBackground(m_clipboardImage.width(), m_clipboardImage.height());
+    }
 }
 
 void PaintableClipboard::checkDragging(QImage &canvasImage, QPoint mouseLocation, QPointF globalMouseLocation)
