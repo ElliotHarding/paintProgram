@@ -1258,9 +1258,9 @@ void Canvas::onHueSaturation(const int &hue, const int &saturation)
     update();
 }
 
-QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPixels, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
+void addInsideBorder(QImage& originalImage, const QVector<QPoint>& selectedPixels, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
 {
-    QImage result =originalImage;
+    QImage result = originalImage;
 
     const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(selectedPixels, originalImage.width(), originalImage.height());
 
@@ -1277,10 +1277,30 @@ QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPi
         const int x = p.x();
         const int y = p.y();
 
-        startX = limitMin(x - borderEdges, 0);
-        endX = limitMax(x + borderEdges, originalImage.width()-1);
-        startY = limitMin(y - borderEdges, 0);
-        endY = limitMax(y + borderEdges, originalImage.height()-1);
+        startX = x - borderEdges;
+        if(startX < 0)
+        {
+            result.setPixelColor(x, y, borderColor);
+            continue;
+        }
+        endX = x + borderEdges;
+        if(endX > originalImage.width()-1)
+        {
+            result.setPixelColor(x, y, borderColor);
+            continue;
+        }
+        startY = y - borderEdges;
+        if(startY < 0)
+        {
+            result.setPixelColor(x, y, borderColor);
+            continue;
+        }
+        endY = y + borderEdges;
+        if(endY > originalImage.height()-1)
+        {
+            result.setPixelColor(x, y, borderColor);
+            continue;
+        }
 
         foundUnselected = false;
         for(surroundX = startX; surroundX <= endX; surroundX++)
@@ -1307,7 +1327,7 @@ QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPi
         }
     }
 
-    return result;
+    originalImage = result;
 }
 
 void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
@@ -1321,7 +1341,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
 
         if(borderEdges < 0)
         {
-            m_pClipboardPixels->m_clipboardImage = borderEditInside(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+            addInsideBorder(m_pClipboardPixels->m_clipboardImage, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
             m_pClipboardPixels->update();
         }
         else if(borderEdges > 0)
@@ -1336,7 +1356,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
 
         if(borderEdges < 0)
         {
-            m_canvasLayers[m_selectedLayer].m_image = borderEditInside(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+            addInsideBorder(m_canvasLayers[m_selectedLayer].m_image, m_pClipboardPixels->getPixels(), m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
         }
         else if(borderEdges > 0)
         {
@@ -1346,7 +1366,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
     }
     else
     {
-        //todo message user that selection required for this... or implement something...
+        //Todo - notify user no selection was made
     }
 
     //Record history is done in onConfirmEffects()
