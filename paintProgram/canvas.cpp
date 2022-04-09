@@ -1272,7 +1272,6 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
     int endY;
     int surroundX;
     int surroundY;
-    bool foundUnselected;
 
     for(const QPoint& p : pClipboard->m_pixels)
     {
@@ -1313,7 +1312,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         {
             pClipboard->updateDimensions(xInc, yInc, xOffset, yOffset);
 
-            QImage newResult = QImage(QSize(newResult.width() + xInc, newResult.height() + yInc), QImage::Format_ARGB32);
+            QImage newResult = QImage(QSize(result.width() + xInc, result.height() + yInc), QImage::Format_ARGB32);
             newResult.fill(Qt::transparent);
 
             QPainter newClipboardPainter(&newResult);
@@ -1333,7 +1332,6 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
             y += yOffset;
         }
 
-        foundUnselected = false;
         for(surroundX = startX; surroundX <= endX; surroundX++)
         {
             for(surroundY = startY; surroundY <= endY; surroundY++)
@@ -1342,7 +1340,6 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
                 {
                     result.setPixelColor(surroundX, surroundY, borderColor);
                     newPixels.push_back(QPoint(surroundX, surroundY));
-                    foundUnselected = true;
                 }
             }
         }
@@ -1352,7 +1349,19 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         }
     }
 
+    //remove duplicates
+    newPixels.erase(std::unique(newPixels.begin(), newPixels.end()), newPixels.end());
 
+    for(const QPoint& p : newPixels)
+    {
+        pClipboard->m_pixels.push_back(p);
+    }
+
+    pClipboard->m_pixels.erase(std::unique(pClipboard->m_pixels.begin(), pClipboard->m_pixels.end()), pClipboard->m_pixels.end());
+
+    pClipboard->m_clipboardImage = result;
+
+    pClipboard->update();
 }
 
 QImage borderEditInside(QImage& originalImage, const QVector<QPoint>& selectedPixels, const QColor& borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
