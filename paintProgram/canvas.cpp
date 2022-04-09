@@ -2695,6 +2695,11 @@ void PaintableClipboard::addBorder(const QColor &borderColor, const int &borderE
     int surroundX;
     int surroundY;
 
+    for(int expandCount = 0; expandCount < borderEdges; expandCount++)
+    {
+
+    }
+
     for(const QPoint& p : m_pixels)
     {
         x = p.x();
@@ -2736,6 +2741,68 @@ void PaintableClipboard::addBorder(const QColor &borderColor, const int &borderE
     updateDimensionsRect();
     update();
 }
+
+/*
+void PaintableClipboard::addBorder(const QColor &borderColor, const int &borderEdges, const bool &includeCorners, const bool &removeCenter)
+{
+    ensureSpaceAroundPixels(borderEdges);
+
+    QImage result = m_clipboardImage;
+
+    QVector<QVector<bool>> selectedPixels2d = listTo2dVector(m_pixels, m_clipboardImage.width(), m_clipboardImage.height());
+    QVector<QPoint> newPixels;
+
+    int x;
+    int y;
+    int startX;
+    int endX;
+    int startY;
+    int endY;
+    int surroundX;
+    int surroundY;
+
+    for(const QPoint& p : m_pixels)
+    {
+        x = p.x();
+        y = p.y();
+
+        startX = x - borderEdges;
+        endX = x + borderEdges;
+        startY = y - borderEdges;
+        endY = y + borderEdges;
+
+        for(surroundX = startX; surroundX <= endX; surroundX++)
+        {
+            for(surroundY = startY; surroundY <= endY; surroundY++)
+            {
+                if(!selectedPixels2d[surroundX][surroundY])
+                {
+                    result.setPixelColor(surroundX, surroundY, borderColor);
+                    newPixels.push_back(QPoint(surroundX, surroundY));
+                }
+            }
+        }
+        if(removeCenter)
+        {
+            result.setPixelColor(x, y, Qt::transparent);
+        }
+    }
+
+    //Add new pixels
+    newPixels.erase(std::unique(newPixels.begin(), newPixels.end()), newPixels.end());
+    for(const QPoint& p : newPixels)
+    {
+        m_pixels.push_back(p);
+    }
+    m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
+
+    m_clipboardImage = result;
+
+    updatePixelBorders();
+    updateDimensionsRect();
+    update();
+}
+*/
 
 void PaintableClipboard::ensureSpaceAroundPixels(const int &space)
 {
