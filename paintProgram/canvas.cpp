@@ -1368,12 +1368,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
     //remove duplicates
     newPixels.erase(std::unique(newPixels.begin(), newPixels.end()), newPixels.end());
 
-    for(const QPoint& p : newPixels)
-    {
-        pClipboard->m_pixels.push_back(p);
-    }
-
-    pClipboard->m_pixels.erase(std::unique(pClipboard->m_pixels.begin(), pClipboard->m_pixels.end()), pClipboard->m_pixels.end());
+    pClipboard->addPixelsToActiveClipboard(newPixels);
 
     pClipboard->m_clipboardImage = result;
 
@@ -2778,6 +2773,23 @@ void PaintableClipboard::addPixels(QImage& canvas, QVector<QVector<bool>>& selec
     m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
 
     addImageToActiveClipboard(newPixelsImage);
+}
+
+//Assumes input is already offset by m_dragX & m_dragY
+//Assumes input dosent contain duplicates
+void PaintableClipboard::addPixelsToActiveClipboard(const QVector<QPoint>& newDragOffsetPixels)
+{
+    for(const QPoint& p : newDragOffsetPixels)
+    {
+        m_pixels.push_back(p);
+    }
+
+    //Remove duplicates
+    m_pixels.erase(std::unique(m_pixels.begin(), m_pixels.end()), m_pixels.end());
+
+    updatePixelBorders();
+    updateDimensionsRect();
+    update();
 }
 
 void PaintableClipboard::updateDimensions(const int &xInc, const int &yInc, const int &xOffset, const int &yOffset)

@@ -100,6 +100,7 @@ public:
     ///Adding pixels
     void addPixels(QImage& canvas, QRubberBand* newSelectionArea);
     void addPixels(QImage& canvas, QVector<QVector<bool>>& selectedPixels);
+    void addPixelsToActiveClipboard(const QVector<QPoint>& newDragOffsetPixels);
 
     ///Update dimensions
     void updateDimensions(const int& xInc, const int& yInc, const int& xOffset, const int& yOffset);
