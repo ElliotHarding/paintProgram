@@ -1298,21 +1298,21 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
 
         if(startX < 0)
         {
-            xOffset = -startX + 1;
-            xInc = xOffset + 1;
+            xOffset = -startX;
+            xInc = xOffset;
         }
         else if(endX > pClipboard->m_clipboardImage.width()-1)
         {
-            xInc = endX - pClipboard->m_clipboardImage.width();
+            xInc = endX - pClipboard->m_clipboardImage.width()-1;
         }
         if(startY < 0)
         {
-            yOffset = -startY + 1;
-            yInc = yOffset + 1;
+            yOffset = -startY;
+            yInc = yOffset;
         }
         else if(endY > pClipboard->m_clipboardImage.height()-1)
         {
-            yInc = endY - pClipboard->m_clipboardImage.height();
+            yInc = endY - pClipboard->m_clipboardImage.height()-1;
         }
 
 
@@ -1330,6 +1330,12 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
             result = newResult;
 
             selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width()+1, pClipboard->m_clipboardImage.height()+1);
+
+            for(QPoint& p : newPixels)
+            {
+                p.setX(p.x() + xOffset);
+                p.setY(p.y() + yOffset);
+            }
         }
 
         if(xOffset > 0 || yOffset > 0)
