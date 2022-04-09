@@ -1264,29 +1264,37 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
 
     QVector<QPoint> newPixels;
 
-    const QVector<QVector<bool>> selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
+    QVector<QVector<bool>> selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
 
+    int x;
+    int y;
     int startX;
     int endX;
     int startY;
     int endY;
     int surroundX;
     int surroundY;
+    int xOffset;
+    int yOffset;
+    int xInc;
+    int yInc;
 
     for(const QPoint& p : pClipboard->m_pixels)
     {
-        int x = p.x();
-        int y = p.y();
+        x = p.x();
+        y = p.y();
 
         startX = x - borderEdges;
         endX = x + borderEdges;
         startY = y - borderEdges;
         endY = y + borderEdges;
 
-        int xOffset = 0;
-        int yOffset = 0;
-        int xInc = 0;
-        int yInc = 0;
+        xOffset = 0;
+        yOffset = 0;
+        xInc = 0;
+        yInc = 0;
+
+        //else if instead of if. diff could be smaller than borderEdges
 
         if(startX < 0)
         {
@@ -1308,7 +1316,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
         }
 
 
-        if(xInc || yInc)
+        if(xInc > 0 || yInc > 0)
         {
             pClipboard->updateDimensions(xInc, yInc, xOffset, yOffset);
 
@@ -1320,6 +1328,8 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
             newClipboardPainter.end();
 
             result = newResult;
+
+            selectedPixels2d = listTo2dVector(pClipboard->m_pixels, pClipboard->m_clipboardImage.width(), pClipboard->m_clipboardImage.height());
         }
 
         if(xOffset || yOffset)
