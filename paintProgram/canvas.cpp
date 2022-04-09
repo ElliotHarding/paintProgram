@@ -1433,7 +1433,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
         }
         else if(borderEdges > 0)
         {
-            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
         }
     }
     else if(m_pClipboardPixels->containsPixels())
@@ -1448,7 +1448,7 @@ void Canvas::onBorderEdit(const int &borderEdges, const bool &includeCorners, co
         else if(borderEdges > 0)
         {
             m_pClipboardPixels->generateClipboardSteal(m_canvasLayers[m_selectedLayer].m_image);
-            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), -borderEdges, includeCorners, removeCenter);
+            borderEditOutside(m_pClipboardPixels, m_pParent->getSelectedColor(), borderEdges, includeCorners, removeCenter);
         }
     }
     else
