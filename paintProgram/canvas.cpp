@@ -1324,7 +1324,7 @@ void borderEditOutside(PaintableClipboard* pClipboard, const QColor& borderColor
             newResult.fill(Qt::transparent);
 
             QPainter newClipboardPainter(&newResult);
-            newClipboardPainter.drawImage(result.rect().translated(xOffset, yOffset), result);
+            newClipboardPainter.drawImage(result.rect().translated(xOffset, yOffset), result, result.rect());
             newClipboardPainter.end();
 
             result = newResult;
