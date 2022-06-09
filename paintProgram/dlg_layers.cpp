@@ -21,6 +21,7 @@ DLG_Layers::~DLG_Layers()
 
 void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
 {
+    //Todo - may not need to disconnect now that there is no mutex. Comment below outdated
     //Dont want the clearing of the layers to signal the canvas of a selected row change since canvas is calling setLayers with its mutex locked.
     disconnect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 
@@ -35,6 +36,7 @@ void DLG_Layers::setLayers(QList<CanvasLayerInfo> layerInfo, uint selectedLayer)
     ui->listWidget_layers->setCurrentRow(selectedLayer);
     drawLayerSelections(selectedLayer);
 
+    //Todo - see above. May not need disconnection and reconnection
     //Reconnet current row changed signal and slot
     connect(ui->listWidget_layers, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 }

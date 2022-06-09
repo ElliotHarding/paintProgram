@@ -3,7 +3,6 @@
 
 #include <QTabWidget>
 #include <QRubberBand>
-#include <QMutex>
 #include <vector>
 #include <QPainter>
 #include <QTimer>
@@ -18,7 +17,7 @@ class MainWindow;
 class PaintableClipboard;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// PaintableClipboard
+/// Clipboard
 ///
 ///Clipboard (Image + Pixel info) used for copying/cutting/pasting
 class Clipboard
@@ -299,11 +298,10 @@ private:
     QList<CanvasLayer> m_canvasLayers;
     uint m_selectedLayer;
     QImage m_canvasBackgroundImage;    
-    QMutex m_canvasMutex;
     QImage m_beforeEffectsImage;
-    QImage getCanvasImageBeforeEffects();//Requires m_canvasMutex to be locked!
+    QImage getCanvasImageBeforeEffects();
     Clipboard m_beforeEffectsClipboard;
-    Clipboard getClipboardBeforeEffects();//Requires m_canvasMutex to be locked!
+    Clipboard getClipboardBeforeEffects();
 
     ///Drawing text
     QString m_textToDraw = "";
@@ -330,7 +328,7 @@ private:
 
     ///Undo/redo
     CanvasHistory m_canvasHistory;
-    CanvasHistoryItem getSnapshot();//Requires m_canvasMutex to be locked!
+    CanvasHistoryItem getSnapshot();
 
     ///Geometry
     uint m_canvasWidth;

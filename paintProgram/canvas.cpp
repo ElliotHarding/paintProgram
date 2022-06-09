@@ -191,8 +191,6 @@ Canvas::~Canvas()
 
 void Canvas::onAddedToTab()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     updateCenter();
 
     const float x = float(geometry().width()) / float(m_canvasWidth);
@@ -212,20 +210,16 @@ void Canvas::onAddedToTab()
 
 int Canvas::width()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     return m_canvasWidth;
 }
 
 int Canvas::height()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     return m_canvasHeight;
 }
 
 void Canvas::onUpdateText()
 {
-    m_canvasMutex.lock();
-
     QFontMetrics fontMetrics(m_pParent->getTextFont());
 
     const int textWidth = fontMetrics.horizontalAdvance(m_textToDraw);
@@ -240,14 +234,10 @@ void Canvas::onUpdateText()
     textPainter.drawText(m_textDrawLocation, m_textToDraw);
 
     m_pClipboardPixels->setImage(textImage);
-
-    m_canvasMutex.unlock();
 }
 
 void Canvas::onWriteText(QString letter)
 {
-    m_canvasMutex.lock();
-
     if(letter == "\010")//backspace
     {
         m_textToDraw.chop(1);
@@ -256,8 +246,6 @@ void Canvas::onWriteText(QString letter)
     {
         m_textToDraw += letter;
     }
-
-    m_canvasMutex.unlock();
 
     onUpdateText();
 }
@@ -296,8 +284,6 @@ bool Canvas::save(QString path)
 
 void Canvas::onLayerAdded()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     CanvasLayer canvasLayer;
     canvasLayer.m_image = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
     canvasLayer.m_image.fill(Qt::transparent);
@@ -308,28 +294,24 @@ void Canvas::onLayerAdded()
 
 void Canvas::onLayerDeleted(const uint index)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers.removeAt(index);
     m_canvasHistory.recordHistory(getSnapshot());
 }
 
 void Canvas::onLayerEnabledChanged(const uint index, const bool enabled)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers[index].m_info.m_enabled = enabled; //Assumes there is a layer at index
     m_canvasHistory.recordHistory(getSnapshot());
 }
 
 void Canvas::onLayerTextChanged(const uint index, QString text)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_canvasLayers[index].m_info.m_name = text; //Assumes there is a layer at index
     m_canvasHistory.recordHistory(getSnapshot());
 }
 
 void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndexB)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(layerIndexA < (uint)m_canvasLayers.count() && layerIndexB < (uint)m_canvasLayers.count() && m_selectedLayer == layerIndexA)
     {
         //Paint layer b onto layer a
@@ -359,7 +341,6 @@ void Canvas::onLayerMergeRequested(const uint layerIndexA, const uint layerIndex
 
 void Canvas::onLayerMoveUp(const uint index)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if(index > 0 && (int)index < m_canvasLayers.size())
     {
         //Move up
@@ -381,7 +362,6 @@ void Canvas::onLayerMoveUp(const uint index)
 
 void Canvas::onLayerMoveDown(const uint index)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     if((int)index < m_canvasLayers.size() - 1)
     {
         //Move down
@@ -403,14 +383,10 @@ void Canvas::onLayerMoveDown(const uint index)
 
 void Canvas::onSelectedLayerChanged(const uint index)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //Reset effects incase in the middle of effects when switched layer
     if(m_beforeEffectsImage != QImage() || m_beforeEffectsClipboard.m_clipboardImage != QImage())
     {
-        canvasMutexLocker.unlock();
         onCancelEffects();
-        canvasMutexLocker.relock();
     }
 
     m_selectedLayer = index;
@@ -418,8 +394,6 @@ void Canvas::onSelectedLayerChanged(const uint index)
 
 void Canvas::onLoadLayer(CanvasLayer canvasLayer)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //Take canvasLayer's image and map it to an image with m_canvasWidth, m_canvasHeight dimensions
     QImage newLayerImage = QImage(QSize(m_canvasWidth, m_canvasHeight), QImage::Format_ARGB32);
     newLayerImage.fill(Qt::transparent);
@@ -441,8 +415,6 @@ void Canvas::onLoadLayer(CanvasLayer canvasLayer)
 
 void Canvas::onUpdateSettings(int width, int height, QString name)
 {
-    m_canvasMutex.lock();
-
     m_canvasWidth = width;
     m_canvasHeight = height;
 
@@ -468,8 +440,6 @@ void Canvas::onUpdateSettings(int width, int height, QString name)
 
     emit canvasSizeChange(width, height);
 
-    m_canvasMutex.unlock();
-
     if(m_savePath != "")
     {
         QFileInfo info(m_savePath);
@@ -480,8 +450,6 @@ void Canvas::onUpdateSettings(int width, int height, QString name)
 
 void Canvas::onCurrentToolUpdated(const Tool t)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(m_tool == TOOL_TEXT && t != TOOL_TEXT)
         m_textToDraw = "";
 
@@ -490,8 +458,6 @@ void Canvas::onCurrentToolUpdated(const Tool t)
 
 void Canvas::onDeleteKeyPressed()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(m_pClipboardPixels->clipboardActive())
     {
         m_pClipboardPixels->reset();
@@ -508,16 +474,12 @@ void Canvas::onDeleteKeyPressed()
 
         m_canvasHistory.recordHistory(getSnapshot());
 
-        canvasMutexLocker.unlock();
-
         update();
     }
 }
 
 void Canvas::onCopyKeysPressed()
 {
-    m_canvasMutex.lock();
-
     //IF were dragging
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -537,14 +499,10 @@ void Canvas::onCopyKeysPressed()
 
         QGuiApplication::clipboard()->setImage(clipboardImage);
     }
-
-    m_canvasMutex.unlock();
 }
 
 void Canvas::onCutKeysPressed()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     QImage clipboardImage;
 
     //What if already dragging something around?
@@ -581,15 +539,11 @@ void Canvas::onCutKeysPressed()
 
     QGuiApplication::clipboard()->setImage(clipboardImage);
 
-    canvasMutexLocker.unlock();
-
     update();
 }
 
 void Canvas::onPasteKeysPressed()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(m_pClipboardPixels->clipboardActive())
     {
         //Dump clipboard
@@ -602,14 +556,10 @@ void Canvas::onPasteKeysPressed()
     m_pClipboardPixels->setImage(clipboardImage);
 
     m_canvasHistory.recordHistory(getSnapshot());
-
-    canvasMutexLocker.unlock();
 }
 
 void Canvas::onUndoPressed()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     CanvasHistoryItem snapShot;
     if(m_canvasHistory.undoHistory(snapShot))
     {
@@ -630,8 +580,6 @@ void Canvas::onUndoPressed()
 
 void Canvas::onRedoPressed()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     CanvasHistoryItem snapShot;
     if(m_canvasHistory.redoHistory(snapShot))
     {
@@ -663,8 +611,6 @@ QColor greyScaleColor(const QColor col)
 
 void Canvas::onBlackAndWhite()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -702,8 +648,6 @@ QColor invertColor(const QColor col)
 
 void Canvas::onInvert() // todo make option to invert alpha aswell
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -781,8 +725,6 @@ bool checkCreateSketchOnPixel(QImage& original, QImage& sketch, const int& x, co
 
 void Canvas::onSketchEffect(const int sensitivity)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(sensitivity == 0)
     {
         update();
@@ -1086,8 +1028,6 @@ QImage blurImage(QImage& originalImage, const int& blurValue, const int& maxDiff
 
 void Canvas::onNormalBlur(const int& maxDifference, const int& averageArea, const bool& includeTransparent)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -1151,8 +1091,6 @@ void colorMultipliers(QImage& image, const float& redXred, const float& redXgree
 
 void Canvas::onColorMultipliers(const int redXred, const int redXgreen, const int redXblue, const int greenXred, const int greenXgreen, const int greenXblue, const int blueXred, const int blueXgreen, const int blueXblue, const int xTransparent)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -1228,8 +1166,6 @@ void setImageHueAndSaturation(QImage& image, const int& hue, const int& saturati
 
 void Canvas::onHueSaturation(const int &hue, const int &saturation)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -1259,8 +1195,6 @@ void Canvas::onHueSaturation(const int &hue, const int &saturation)
 
 void Canvas::onOutlineEffect(const int sensitivity)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(sensitivity == 0)
     {
         update();
@@ -1336,8 +1270,6 @@ QColor changeBrightness(QColor col, const int value)
 
 void Canvas::onBrightness(const int value)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -1414,8 +1346,6 @@ QColor changeContrast(QColor col, const int value)
 
 void Canvas::onContrast(const int value)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     //check if were doing the whole image or just some selected pixels
     if(m_pClipboardPixels->clipboardActive())
     {
@@ -1456,7 +1386,6 @@ void Canvas::onContrast(const int value)
 
 void Canvas::onConfirmEffects()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_beforeEffectsImage = QImage();
     m_beforeEffectsClipboard.m_clipboardImage = QImage();
     m_beforeEffectsClipboard.m_pixels.clear();
@@ -1465,8 +1394,6 @@ void Canvas::onConfirmEffects()
 
 void Canvas::onCancelEffects()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(m_beforeEffectsImage != QImage())
     {
         m_canvasLayers[m_selectedLayer].m_image = m_beforeEffectsImage;
@@ -1482,17 +1409,14 @@ void Canvas::onCancelEffects()
 
 QImage Canvas::getImageCopy()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     return m_canvasLayers[m_selectedLayer].m_image;
 }
 
 Tool Canvas::currentTool()
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     return m_tool;
 }
 
-//Requires m_canvasMutex to be locked!
 CanvasHistoryItem Canvas::getSnapshot()
 {
     CanvasHistoryItem canvasHistoryItem;
@@ -1504,8 +1428,6 @@ CanvasHistoryItem Canvas::getSnapshot()
 void Canvas::resizeEvent(QResizeEvent *event)
 {
     QTabWidget::resizeEvent(event);
-
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
 
     updateCenter();
 
@@ -1521,12 +1443,8 @@ void Canvas::resizeEvent(QResizeEvent *event)
     update();
 }
 
-void Canvas::paintEvent(QPaintEvent *paintEvent)
+void Canvas::paintEvent(QPaintEvent*)
 {
-    Q_UNUSED(paintEvent);
-
-    m_canvasMutex.lock();
-
     //Setup painter
     QPainter painter(this);
 
@@ -1558,14 +1476,10 @@ void Canvas::paintEvent(QPaintEvent *paintEvent)
     //Draw border
     painter.setPen(QPen(Constants::ImageBorderColor, 1/m_zoomFactor));
     painter.drawRect(QRect(0, 0, m_canvasWidth, m_canvasHeight).translated(m_panOffsetX, m_panOffsetY));
-
-    m_canvasMutex.unlock();
 }
 
 void Canvas::wheelEvent(QWheelEvent* event)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     const int direction = event->angleDelta().y() > 0 ? 1 : -1;
 
     const int xFromCenter = event->position().x() - m_center.x();
@@ -1599,11 +1513,7 @@ void Canvas::onParentMouseScroll(QWheelEvent* event)
 
 void Canvas::showEvent(QShowEvent *)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     m_pParent->setLayers(getLayerInfoList(m_canvasLayers), m_selectedLayer);
-
-    canvasMutexLocker.unlock();
 
     emit canvasSizeChange(m_canvasWidth, m_canvasHeight);
     emit selectionAreaResize(0,0);
@@ -1736,8 +1646,6 @@ void floodFillOnSimilar(QImage &image, QColor newColor, int startX, int startY, 
 
 void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     if(mouseEvent->button() == Qt::MiddleButton)
     {
         m_bMiddleMouseDown = true;
@@ -1827,11 +1735,7 @@ void Canvas::mousePressEvent(QMouseEvent *mouseEvent)
     {
         m_textDrawLocation = mouseLocation;
 
-        canvasMutexLocker.unlock();
-
         onUpdateText();
-
-        canvasMutexLocker.relock();
     }
     else if(m_tool == TOOL_SHAPE)
     {
@@ -1843,7 +1747,6 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 {
     Q_UNUSED(releaseEvent);
 
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
     m_bMouseDown = false;
 
     if(m_bMiddleMouseDown)
@@ -1891,18 +1794,12 @@ void Canvas::mouseReleaseEvent(QMouseEvent *releaseEvent)
 
 void Canvas::onParentMouseMove(QMouseEvent *event)
 {
-    m_canvasMutex.lock();
-
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
     emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
-
-    m_canvasMutex.unlock();
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent *event)
 {
-    QMutexLocker canvasMutexLocker(&m_canvasMutex);
-
     QPoint mouseLocation = getPositionRelativeCenterdAndZoomedCanvas(event->pos(), m_center, m_zoomFactor, m_panOffsetX, m_panOffsetY);
     emit mousePositionChange(mouseLocation.x(), mouseLocation.y());
 
@@ -2065,7 +1962,6 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-//Requires m_canvasMutex to be locked!
 QImage Canvas::getCanvasImageBeforeEffects()
 {
     if(m_beforeEffectsImage == QImage())
@@ -2075,7 +1971,6 @@ QImage Canvas::getCanvasImageBeforeEffects()
     return m_beforeEffectsImage;
 }
 
-//Requires m_canvasMutex to be locked!
 Clipboard Canvas::getClipboardBeforeEffects()
 {
     if(m_beforeEffectsClipboard.m_clipboardImage == QImage())
